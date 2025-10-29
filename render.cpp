@@ -1,8 +1,10 @@
 #include <wnd.h>
 #include <device.h>
 #include <mesh.h>
+#include <writer.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
+
 using DirectX::XMVectorSet;
 
 void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_sig){
@@ -14,7 +16,7 @@ void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_
 
     array<XMMATRIX, 3> transform = {DirectX::XMMatrixIdentity(), // world transform
                                     DirectX::XMMatrixLookAtLH(XMVectorSet(0., 0., -5., 0.),
-                                                                  XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f ),
+                                                                  XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f ),
                                                                   XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f )),
                                     DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, (float)WIDTH/HEIGHT, 0.01, 100.)};
 
@@ -23,6 +25,8 @@ void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_
     viewport->x_pos = 0;
     viewport->y_pos = 0;
     viewport->z_pos = 0;
+
+    Writer writer(device);
 
     while(!*kill_sig){
         device->pContext->ClearDepthStencilView(device->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
@@ -35,10 +39,10 @@ void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_
             nmesh = nmesh->next;
         }
 
-        time = (float)(GetTickCount64() - timeMSBase)/1000;
-        device->pSwapChain->Present(0,0);
+        writer.frameTime();
 
-        Sleep(5);
+        time = (float)(GetTickCount64() - timeMSBase)/1000;
+        device->pSwapChain->Present(1,0);
     }
     
     return;
