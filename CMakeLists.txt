@@ -20,7 +20,8 @@ find_package(tinyobjloader)
 add_executable(main WIN32 main.cpp render.cpp device.cpp wnd.cpp shader.cpp writer.cpp mesh.cpp)
 
 target_include_directories(main PUBLIC ${CMAKE_SOURCE_DIR}
-                                PUBLIC "C:/Users/yasha/Documents/Projects/tinyobjloader")
+                                PUBLIC "C:/Users/yasha/Documents/Projects/tinyobjloader"
+                                PUBLIC "C:/Users/yasha/Documents/Projects/stb")
 
 target_link_libraries(main  PUBLIC d3d11
                             PUBLIC d2d1

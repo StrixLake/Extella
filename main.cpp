@@ -4,6 +4,11 @@
 #include <mesh.h>
 #include <shader.h>
 #include <thread>
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image.h>
+#include <stb_image_write.h>
+
 using std::thread;
 
 class Cow : Mesh{
@@ -14,9 +19,12 @@ public:
 
         D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                             0, 0, 
+                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
+                                            {"COLOR", 0, DXGI_FORMAT_R32G32_FLOAT,
+                                            1, 0, 
                                             D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
-        shader->device->pDevice->CreateInputLayout(layout, 1, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
+        shader->device->pDevice->CreateInputLayout(layout, 2, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
                                                    shader->shaderBlob[cowVertex]->GetBufferSize(), &pLayout);
 
         D3D11_BUFFER_DESC cBuffer = {};
@@ -25,9 +33,52 @@ public:
         cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
         shader->device->pDevice->CreateBuffer(&cBuffer, NULL, &transformBuffer);
         
+        int x, y, z;
+        uint8_t* image1 = stbi_load("mesh/spot_.png", &x, &y, &z, 3);
+        uint8_t* image = (uint8_t*) malloc(x*y*4);
+        uint8_t* imaget = image;
+        for (int i = 0; i < x*y*3; i += 3){
+            memcpy(imaget, image1, 3);
+            imaget[3] = 255;
+            imaget += 4;
+            image1 += 3;
+        }
+
+        stbi_write_bmp("sample.bmp", x, y, 4, image);
+        
+
+        D3D11_SAMPLER_DESC sampDesc = {};
+        sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+        sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+        sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+        sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+        sampDesc.MinLOD = 0;
+        sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+        device->pDevice->CreateSamplerState( &sampDesc, &pSampler );
+
+        D3D11_TEXTURE2D_DESC desc = {};
+        desc.Width = x;
+        desc.Height = y;
+        desc.MipLevels = 1;
+        desc.ArraySize = 1;
+        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.SampleDesc = {1,0};
+        D3D11_SUBRESOURCE_DATA init;
+        init.pSysMem = image;
+        init.SysMemPitch = 40;
+        device->pDevice->CreateTexture2D(&desc, &init, &pTexture);
+        device->pDevice->CreateShaderResourceView(pTexture, NULL, &pTextureView);
+        
+        
         return;
     }
 
+    ID3D11SamplerState *pSampler;
+    ID3D11Texture2D *pTexture;
+    ID3D11ShaderResourceView *pTextureView;
     ID3D11Buffer *transformBuffer;
     ID3D11InputLayout* pLayout;
 
@@ -46,6 +97,8 @@ public:
         UINT offset = 0;
         UINT stride = sizeof(DirectX::XMFLOAT3);
         device->pContext->IASetVertexBuffers(0, 1, &pVertices, &stride, &offset);
+        stride = sizeof(DirectX::XMFLOAT2);
+        device->pContext->IASetVertexBuffers(1, 1, &pTexCoords, &stride, &offset);
         //device->pContext->IASetVertexBuffers(1, 1, &pNormals, &stride, &offset);
 
         device->pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
@@ -55,6 +108,9 @@ public:
 
         device->pContext->VSSetConstantBuffers(0, 1, &transformBuffer);
 
+        device->pContext->PSSetSamplers(0, 1, &pSampler);
+        device->pContext->PSSetShaderResources(0, 1, &pTextureView);
+
         device->pContext->DrawIndexed(triangleCount*3, 0, 0);
     }
 
@@ -63,6 +119,9 @@ public:
         transformBuffer->Release();
         shaders->vertexShaders[cowVertex]->Release();
         shaders->pixelShaders[cowPixel]->Release();
+        pSampler->Release();
+        pTexture->Release();
+        pTextureView->Release();
     }
 
 };

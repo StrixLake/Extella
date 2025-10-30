@@ -166,7 +166,7 @@ void objMeshFactory(Mesh* mesh, const char* filename){
     // need to copy vector<index_t> to another
     // vector for indices of vertices
     vector<int> index;
-    for (tinyobj::index_t i : shapes[0].mesh.indices){
+    for (tinyobj::index_t i : shape.mesh.indices){
         index.push_back(i.vertex_index);
     }
 
@@ -193,6 +193,27 @@ void objMeshFactory(Mesh* mesh, const char* filename){
     InitData3.pSysMem = index.data();
 
     mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pIndices);
+
+
+    // also need to allocate the texcoords
+    vector<float> texcoords;
+    for(tinyobj::index_t i : shape.mesh.indices){
+        float f1 = attribute.texcoords[i.texcoord_index];
+        float f2 = attribute.texcoords[i.texcoord_index +1];
+        texcoords.push_back(f1);
+        texcoords.push_back(f2);
+    }
+
+    // init textcord buffer
+    D3D11_BUFFER_DESC desc4 = {};
+    desc4.Usage = D3D11_USAGE_DEFAULT;
+    desc4.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc4.ByteWidth = texcoords.size()*sizeof(float);
+    
+    D3D11_SUBRESOURCE_DATA InitData4;
+    InitData4.pSysMem = texcoords.data();
+
+    mesh->device->pDevice->CreateBuffer(&desc4, &InitData4, &mesh->pTexCoords);
 
 
     return;
