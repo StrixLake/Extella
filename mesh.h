@@ -21,6 +21,7 @@ public:
     ID3D11Buffer* pVertices = NULL;
     ID3D11Buffer* pNormals = NULL;
     ID3D11Buffer* pIndices = NULL;
+    ID3D11Buffer* pTexCoords = NULL;
     Shader* shaders;
     DXDevice* device;
 

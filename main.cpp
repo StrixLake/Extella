@@ -14,12 +14,9 @@ public:
 
         D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                             0, 0, 
-                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-                                            1, 0,
                                             D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
-        shader->device->pDevice->CreateInputLayout(layout, 2, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
+        shader->device->pDevice->CreateInputLayout(layout, 1, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
                                                    shader->shaderBlob[cowVertex]->GetBufferSize(), &pLayout);
 
         D3D11_BUFFER_DESC cBuffer = {};
@@ -49,7 +46,7 @@ public:
         UINT offset = 0;
         UINT stride = sizeof(DirectX::XMFLOAT3);
         device->pContext->IASetVertexBuffers(0, 1, &pVertices, &stride, &offset);
-        device->pContext->IASetVertexBuffers(1, 1, &pNormals, &stride, &offset);
+        //device->pContext->IASetVertexBuffers(1, 1, &pNormals, &stride, &offset);
 
         device->pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
 

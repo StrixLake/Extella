@@ -109,9 +109,6 @@ void stlMeshFactory(Mesh* mesh, const char* filename, Shader* shader){
     vector<Float3> normal;
     vector<uint32_t> index;
 
-    vector<int> deb;
-    for (int i = 0; i < 100; ++i) deb.push_back(i);
-
     load_stl(vertex, index, normal, filename);
     mesh->triangleCount = index.size()/3;
     
@@ -148,25 +145,56 @@ void stlMeshFactory(Mesh* mesh, const char* filename, Shader* shader){
 
     mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pIndices);
     
-    mesh->device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
     
     return;
 }
 
 
-void objMeshFactory(const char* filename){
+void objMeshFactory(Mesh* mesh, const char* filename){
     string inputfile(filename);
     tinyobj::ObjReaderConfig config;
+    config.vertex_color = false;
 
     tinyobj::ObjReader reader;
-    bool notfail = reader.ParseFromString(inputfile, "", config);
-    if (notfail){
-        if (reader.Error().empty()) {
-            inputfile = reader.Error();
-        }
-    }
+    bool notfail = reader.ParseFromFile(inputfile, config);
+
+    vector<tinyobj::shape_t> shapes = reader.GetShapes();
+    tinyobj::shape_t shape = shapes[0];
 
     tinyobj::attrib_t attribute = reader.GetAttrib();
+
+    // need to copy vector<index_t> to another
+    // vector for indices of vertices
+    vector<int> index;
+    for (tinyobj::index_t i : shapes[0].mesh.indices){
+        index.push_back(i.vertex_index);
+    }
+
+    mesh->triangleCount = index.size() / 3;
+
+    // init vertex buffer
+    D3D11_BUFFER_DESC desc = {};
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc.ByteWidth = attribute.vertices.size()*sizeof(float);
+    
+    D3D11_SUBRESOURCE_DATA InitData;
+    InitData.pSysMem = attribute.vertices.data();
+
+    mesh->device->pDevice->CreateBuffer(&desc, &InitData, &mesh->pVertices);
+
+    // init index buffer
+    D3D11_BUFFER_DESC desc3 = {};
+    desc3.Usage = D3D11_USAGE_DEFAULT;
+    desc3.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    desc3.ByteWidth = index.size()*sizeof(int);
+    
+    D3D11_SUBRESOURCE_DATA InitData3;
+    InitData3.pSysMem = index.data();
+
+    mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pIndices);
+
+
     return;
 
 }
@@ -179,8 +207,12 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type){
             stlMeshFactory(this, filename, shader);
             break;
         case obj:
-            objMeshFactory(filename);
+            objMeshFactory(this, filename);
+            break;
     }
+
+    this->device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+
     return;
 }
 
@@ -188,5 +220,6 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type){
 Mesh::~Mesh(){
     pVertices->Release();
     if (pNormals != NULL) pNormals->Release();
+    if (pTexCoords != NULL) pTexCoords->Release();
     pIndices->Release();
 }
