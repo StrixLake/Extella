@@ -13,15 +13,21 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 endif()
 
+list(APPEND CMAKE_PREFIX_PATH "C:/Users/yasha/Documents/Projects/tinyobjloader/build")
+
+find_package(tinyobjloader)
+
 add_executable(main WIN32 main.cpp render.cpp device.cpp wnd.cpp shader.cpp writer.cpp mesh.cpp)
 
-target_include_directories(main PUBLIC ${CMAKE_SOURCE_DIR})
+target_include_directories(main PUBLIC ${CMAKE_SOURCE_DIR}
+                                PUBLIC "C:/Users/yasha/Documents/Projects/tinyobjloader")
 
 target_link_libraries(main  PUBLIC d3d11
                             PUBLIC d2d1
                             PUBLIC dxgi
                             PUBLIC dwrite
-                            PUBLIC d3dcompiler)
+                            PUBLIC d3dcompiler
+                            PUBLIC tinyobjloader)
 
 add_custom_command(TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:main>/shaders"

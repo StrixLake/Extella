@@ -1,7 +1,11 @@
+#define TINYOBJLOADER_IMPLEMENTATION
 #include <mesh.h>
 #include <fstream>
+#include <string>
+#include <tiny_obj_loader.h>
 using std::vector;
 using std::ifstream;
+using std::string;
 
 // have to use a temp struct
 // because XMFLOAT3 cannot be used 
@@ -99,10 +103,7 @@ void load_stl(vector<Float3> &vertex, vector<uint32_t> &index, vector<Float3> &n
 }
 
 
-
-Mesh::Mesh(const char* filename, Shader* shader){
-    this->shaders = shader;
-    this->device = shader->device;
+void stlMeshFactory(Mesh* mesh, const char* filename, Shader* shader){
     
     vector<Float3> vertex;
     vector<Float3> normal;
@@ -112,7 +113,7 @@ Mesh::Mesh(const char* filename, Shader* shader){
     for (int i = 0; i < 100; ++i) deb.push_back(i);
 
     load_stl(vertex, index, normal, filename);
-    triangleCount = index.size()/3;
+    mesh->triangleCount = index.size()/3;
     
     // init vertex buffer
     D3D11_BUFFER_DESC desc = {};
@@ -123,7 +124,7 @@ Mesh::Mesh(const char* filename, Shader* shader){
     D3D11_SUBRESOURCE_DATA InitData;
     InitData.pSysMem = vertex.data();
 
-    device->pDevice->CreateBuffer(&desc, &InitData, &this->pVertices);
+    mesh->device->pDevice->CreateBuffer(&desc, &InitData, &mesh->pVertices);
     
     // init normals buffer
     D3D11_BUFFER_DESC desc2 = {};
@@ -134,7 +135,7 @@ Mesh::Mesh(const char* filename, Shader* shader){
     D3D11_SUBRESOURCE_DATA InitData2;
     InitData2.pSysMem = normal.data();
 
-    device->pDevice->CreateBuffer(&desc2, &InitData2, &this->pNormals);
+    mesh->device->pDevice->CreateBuffer(&desc2, &InitData2, &mesh->pNormals);
     
     // init index buffer
     D3D11_BUFFER_DESC desc3 = {};
@@ -145,15 +146,47 @@ Mesh::Mesh(const char* filename, Shader* shader){
     D3D11_SUBRESOURCE_DATA InitData3;
     InitData3.pSysMem = index.data();
 
-    device->pDevice->CreateBuffer(&desc3, &InitData3, &this->pIndices);
+    mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pIndices);
     
-    device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+    mesh->device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
     
     return;
 }
 
+
+void objMeshFactory(const char* filename){
+    string inputfile(filename);
+    tinyobj::ObjReaderConfig config;
+
+    tinyobj::ObjReader reader;
+    bool notfail = reader.ParseFromString(inputfile, "", config);
+    if (notfail){
+        if (reader.Error().empty()) {
+            inputfile = reader.Error();
+        }
+    }
+
+    tinyobj::attrib_t attribute = reader.GetAttrib();
+    return;
+
+}
+
+Mesh::Mesh(const char* filename, Shader* shader, FileType type){
+    this->shaders = shader;
+    this->device = shader->device;
+    switch (type) {
+        case stl:
+            stlMeshFactory(this, filename, shader);
+            break;
+        case obj:
+            objMeshFactory(filename);
+    }
+    return;
+}
+
+
 Mesh::~Mesh(){
     pVertices->Release();
-    pNormals->Release();
+    if (pNormals != NULL) pNormals->Release();
     pIndices->Release();
 }

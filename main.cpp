@@ -8,7 +8,7 @@ using std::thread;
 
 class Cow : Mesh{
 public:
-    Cow(const char* filename, Shader* shader) : Mesh(filename, shader){
+    Cow(const char* filename, Shader* shader) : Mesh(filename, shader, obj){
         this->shaders->createShader(L"shaders/vshader.cso", vertex, cowVertex);
         this->shaders->createShader(L"shaders/pshader.cso", pixel, cowPixel);
 
@@ -85,7 +85,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PWSTR pCmdLine,
 
     Shader shaders(&device);
 
-    Cow spot("mesh/spot.stl", &shaders);
+    Cow spot("mesh/spot_.obj", &shaders);
 
     ShowWindow(window.hwnd, nCmdShow);
 

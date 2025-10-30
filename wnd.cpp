@@ -35,7 +35,9 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         case WM_DESTROY:
         case WM_QUIT:
             PostQuitMessage(0);
+        default:
+           return DefWindowProc(hwnd, uMsg, wParam, lParam); 
     }
 
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    return 0;
 }
