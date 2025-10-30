@@ -30,11 +30,11 @@ Writer::Writer(DXDevice* device){
     IDWriteFactory *pDFactory;
     DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown**)&pDFactory);
 
-    pDFactory->CreateTextFormat(L"Gabriola", NULL, 
+    pDFactory->CreateTextFormat(L"Ariel", NULL, 
                                 DWRITE_FONT_WEIGHT_REGULAR,
                                 DWRITE_FONT_STYLE_NORMAL,
                                 DWRITE_FONT_STRETCH_NORMAL,
-                                30.f, 
+                                18.f, 
                                 L"en-us",
                                 &this->pFormat);
 
@@ -43,6 +43,7 @@ Writer::Writer(DXDevice* device){
     pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::GhostWhite), &this->pBrush);
 
     QueryPerformanceCounter(&performanceCount);
+    QueryPerformanceCounter(&delay);
     QueryPerformanceFrequency(&frequency);
 
     
@@ -54,13 +55,19 @@ void Writer::frameTime(){
 
     LARGE_INTEGER now;
     QueryPerformanceCounter(&now);
-    double time_elapsed = (double)(now.QuadPart - performanceCount.QuadPart) / frequency.QuadPart;
+    double time_elapsed = 1000* (double)(now.QuadPart - performanceCount.QuadPart) / frequency.QuadPart;
+    double time_delay = 1000* (double)(now.QuadPart - delay.QuadPart) / frequency.QuadPart;
+    
+    if (time_delay > 100){ 
+        last_frame_time = time_elapsed;
+        delay = now;
+    }
 
     wchar_t time[9] = L"";
     time[7] = L'm';
     time[8] = L's';
 
-    swprintf(time, 7, L"%f", time_elapsed);
+    swprintf(time, 7, L"%f", last_frame_time);
     
     pRenderTarget->BeginDraw();
 

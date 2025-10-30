@@ -11,7 +11,9 @@ public:
     void fps();
     void frameTime();
     LARGE_INTEGER performanceCount;
+    LARGE_INTEGER delay;
     LARGE_INTEGER frequency;
+    double last_frame_time = 0;
 
     ID2D1RenderTarget *pRenderTarget;
     ID2D1SolidColorBrush *pBrush;
