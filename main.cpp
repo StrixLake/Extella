@@ -7,7 +7,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image.h>
-#include <stb_image_write.h>
 
 using std::thread;
 
@@ -20,8 +19,8 @@ public:
         D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                             0, 0, 
                                             D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                            {"COLOR", 0, DXGI_FORMAT_R32G32_FLOAT,
-                                            1, 0, 
+                                            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+                                            0, 12, 
                                             D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
         shader->device->pDevice->CreateInputLayout(layout, 2, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
@@ -34,17 +33,22 @@ public:
         shader->device->pDevice->CreateBuffer(&cBuffer, NULL, &transformBuffer);
         
         int x, y, z;
-        uint8_t* image1 = stbi_load("mesh/spot_.png", &x, &y, &z, 3);
+        uint8_t* image2 = stbi_load("mesh/spot_.png", &x, &y, &z, 3);
         uint8_t* image = (uint8_t*) malloc(x*y*4);
+        uint8_t* image1 = (uint8_t*) malloc(x*y*4);
         uint8_t* imaget = image;
         for (int i = 0; i < x*y*3; i += 3){
-            memcpy(imaget, image1, 3);
+            memcpy(imaget, image2, 3);
             imaget[3] = 255;
             imaget += 4;
-            image1 += 3;
+            image2 += 3;
         }
-
-        stbi_write_bmp("sample.bmp", x, y, 4, image);
+        image1 += (x*y*4 -1);
+        for(int i = 0; i < y; ++i){
+            image1 -= x*4;
+            memcpy(image1, image, x*4);
+            image += x*4;
+        }
         
 
         D3D11_SAMPLER_DESC sampDesc = {};
@@ -67,8 +71,8 @@ public:
         desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         desc.SampleDesc = {1,0};
         D3D11_SUBRESOURCE_DATA init;
-        init.pSysMem = image;
-        init.SysMemPitch = 40;
+        init.pSysMem = image1;
+        init.SysMemPitch = x*4;
         device->pDevice->CreateTexture2D(&desc, &init, &pTexture);
         device->pDevice->CreateShaderResourceView(pTexture, NULL, &pTextureView);
         
@@ -95,10 +99,10 @@ public:
         shaders->device->pContext->IASetInputLayout(pLayout);
 
         UINT offset = 0;
-        UINT stride = sizeof(DirectX::XMFLOAT3);
+        UINT stride = sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT2);
         device->pContext->IASetVertexBuffers(0, 1, &pVertices, &stride, &offset);
         stride = sizeof(DirectX::XMFLOAT2);
-        device->pContext->IASetVertexBuffers(1, 1, &pTexCoords, &stride, &offset);
+        //device->pContext->IASetVertexBuffers(1, 1, &pTexCoords, &stride, &offset);
         //device->pContext->IASetVertexBuffers(1, 1, &pNormals, &stride, &offset);
 
         device->pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);

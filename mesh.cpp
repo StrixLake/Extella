@@ -37,7 +37,37 @@ struct Float3{
     }
 };
 
+struct Float2{
+    float x;
+    float y;
+
+    bool operator==(const Float2& other) const noexcept {
+        return x == other.x && y == other.y;
+    }
+};
+
+struct VertexTex{
+    Float3 vertex;
+    Float2 TexCord;
+
+    bool operator==(const VertexTex& other) const noexcept {
+        return vertex == other.vertex && TexCord == other.TexCord;
+    }
+};
+
 namespace std {
+    template<>
+    struct hash<Float2> {
+        std::size_t operator()(const Float2& f) const noexcept {
+            std::size_t hx = std::hash<float>{}(f.x);
+            std::size_t hy = std::hash<float>{}(f.y);
+
+            std::size_t seed = hx;
+            seed ^= 3*hy << 3;
+            return seed;
+        }
+        
+    };
     template<>
     struct hash<Float3> {
         std::size_t operator()(const Float3& f) const noexcept {
@@ -48,6 +78,19 @@ namespace std {
             std::size_t seed = hx;
             seed ^= hy << 1;
             seed ^= hz << 3;
+            return seed;
+        }
+        
+    };
+    template<>
+    struct hash<VertexTex> {
+        std::size_t operator()(const VertexTex& f) const noexcept {
+            std::size_t hx = std::hash<Float3>{}(f.vertex);
+            std::size_t hy = std::hash<Float2>{}(f.TexCord);
+            
+
+            std::size_t seed = hx;
+            seed ^= 2*hy << 2;
             return seed;
         }
         
@@ -150,6 +193,8 @@ void stlMeshFactory(Mesh* mesh, const char* filename, Shader* shader){
 }
 
 
+
+
 void objMeshFactory(Mesh* mesh, const char* filename){
     string inputfile(filename);
     tinyobj::ObjReaderConfig config;
@@ -172,14 +217,45 @@ void objMeshFactory(Mesh* mesh, const char* filename){
 
     mesh->triangleCount = index.size() / 3;
 
+    // i don't know what to call it
+    unordered_map<VertexTex, int> superIndexMap;
+    vector<int> superIndex;
+    vector<VertexTex> vertexTexPair;
+    // put each vertex, texture pair in the vector and
+    // in the subsequent loop, check if that pair already
+    // is in there, if so put the index of it in index array
+    for(tinyobj::index_t ind: shape.mesh.indices){
+        VertexTex pair = {{attribute.vertices[ind.vertex_index*3 ], attribute.vertices[ind.vertex_index*3 +1], 
+                          attribute.vertices[ind.vertex_index*3 +2]}
+                          ,{attribute.texcoords[ind.texcoord_index*2], attribute.texcoords[ind.texcoord_index*2+1]}};
+
+        if(superIndexMap.find(pair) == superIndexMap.end()){
+            vertexTexPair.push_back(pair);
+            superIndexMap[pair] = vertexTexPair.size() -1;
+            superIndex.push_back(superIndexMap[pair]);
+        }
+        else{
+            superIndex.push_back(superIndexMap[pair]);
+        }
+    }
+
+    int max = 0;
+    for (tinyobj::index_t ind: shape.mesh.indices){
+        if (ind.vertex_index >= max){
+            max = ind.vertex_index;
+        }
+    }
+
+    
+
     // init vertex buffer
     D3D11_BUFFER_DESC desc = {};
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc.ByteWidth = attribute.vertices.size()*sizeof(float);
+    desc.ByteWidth = vertexTexPair.size()*sizeof(VertexTex);
     
     D3D11_SUBRESOURCE_DATA InitData;
-    InitData.pSysMem = attribute.vertices.data();
+    InitData.pSysMem = vertexTexPair.data();
 
     mesh->device->pDevice->CreateBuffer(&desc, &InitData, &mesh->pVertices);
 
@@ -187,33 +263,12 @@ void objMeshFactory(Mesh* mesh, const char* filename){
     D3D11_BUFFER_DESC desc3 = {};
     desc3.Usage = D3D11_USAGE_DEFAULT;
     desc3.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    desc3.ByteWidth = index.size()*sizeof(int);
+    desc3.ByteWidth = superIndex.size()*sizeof(int);
     
     D3D11_SUBRESOURCE_DATA InitData3;
-    InitData3.pSysMem = index.data();
+    InitData3.pSysMem = superIndex.data();
 
     mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pIndices);
-
-
-    // also need to allocate the texcoords
-    vector<float> texcoords;
-    for(tinyobj::index_t i : shape.mesh.indices){
-        float f1 = attribute.texcoords[i.texcoord_index];
-        float f2 = attribute.texcoords[i.texcoord_index +1];
-        texcoords.push_back(f1);
-        texcoords.push_back(f2);
-    }
-
-    // init textcord buffer
-    D3D11_BUFFER_DESC desc4 = {};
-    desc4.Usage = D3D11_USAGE_DEFAULT;
-    desc4.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc4.ByteWidth = texcoords.size()*sizeof(float);
-    
-    D3D11_SUBRESOURCE_DATA InitData4;
-    InitData4.pSysMem = texcoords.data();
-
-    mesh->device->pDevice->CreateBuffer(&desc4, &InitData4, &mesh->pTexCoords);
 
 
     return;
