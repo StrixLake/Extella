@@ -2,49 +2,13 @@
 #include <mesh.h>
 #include <fstream>
 #include <string>
+#include <vectors.h>
 #include <tiny_obj_loader.h>
 using std::vector;
 using std::ifstream;
 using std::string;
+using int3 = DirectX::XMINT3;
 
-// have to use a temp struct
-// because XMFLOAT3 cannot be used 
-// inside unordered_map
-struct Float3{
-    float x;
-    float y;
-    float z;
-
-    bool operator==(const Float3& other) const noexcept {
-        return x == other.x && y == other.y && z == other.z;
-    }
-
-    Float3 operator/(int other){
-        this->x /= other;
-        this->y /= other;
-        this->z /= other;
-        return *this;
-    }
-
-    Float3 operator+(const Float3& other){
-        Float3 self = {this->x + other.x, this->y + other.y,this->z + other.z,};
-        return self;
-    }
-
-    Float3 operator*(int other){
-        Float3 self = {this->x*other, this->y*other, this->z*other};
-        return self;
-    }
-};
-
-struct Float2{
-    float x;
-    float y;
-
-    bool operator==(const Float2& other) const noexcept {
-        return x == other.x && y == other.y;
-    }
-};
 
 struct VertexTex{
     Float3 vertex;
@@ -55,33 +19,7 @@ struct VertexTex{
     }
 };
 
-namespace std {
-    template<>
-    struct hash<Float2> {
-        std::size_t operator()(const Float2& f) const noexcept {
-            std::size_t hx = std::hash<float>{}(f.x);
-            std::size_t hy = std::hash<float>{}(f.y);
-
-            std::size_t seed = hx;
-            seed ^= 3*hy << 3;
-            return seed;
-        }
-        
-    };
-    template<>
-    struct hash<Float3> {
-        std::size_t operator()(const Float3& f) const noexcept {
-            std::size_t hx = std::hash<float>{}(f.x);
-            std::size_t hy = std::hash<float>{}(f.y);
-            std::size_t hz = std::hash<float>{}(f.z);
-
-            std::size_t seed = hx;
-            seed ^= hy << 1;
-            seed ^= hz << 3;
-            return seed;
-        }
-        
-    };
+namespace std{
     template<>
     struct hash<VertexTex> {
         std::size_t operator()(const VertexTex& f) const noexcept {
@@ -146,7 +84,7 @@ void load_stl(vector<Float3> &vertex, vector<uint32_t> &index, vector<Float3> &n
 }
 
 
-void stlMeshFactory(Mesh* mesh, const char* filename, Shader* shader){
+void stlMeshFactory(Mesh* mesh, const char* filename){
     
     vector<Float3> vertex;
     vector<Float3> normal;
@@ -201,7 +139,7 @@ void objMeshFactory(Mesh* mesh, const char* filename){
     config.vertex_color = false;
 
     tinyobj::ObjReader reader;
-    bool notfail = reader.ParseFromFile(inputfile, config);
+    reader.ParseFromFile(inputfile, config);
 
     vector<tinyobj::shape_t> shapes = reader.GetShapes();
     tinyobj::shape_t shape = shapes[0];
@@ -225,9 +163,9 @@ void objMeshFactory(Mesh* mesh, const char* filename){
     // in the subsequent loop, check if that pair already
     // is in there, if so put the index of it in index array
     for(tinyobj::index_t ind: shape.mesh.indices){
-        VertexTex pair = {{attribute.vertices[ind.vertex_index*3 ], attribute.vertices[ind.vertex_index*3 +1], 
-                          attribute.vertices[ind.vertex_index*3 +2]}
-                          ,{attribute.texcoords[ind.texcoord_index*2], attribute.texcoords[ind.texcoord_index*2+1]}};
+        VertexTex pair = {/*vertex = */{/*x = */attribute.vertices[ind.vertex_index*3 ], /*y = */attribute.vertices[ind.vertex_index*3 +1], 
+                          /*z  =*/attribute.vertices[ind.vertex_index*3 +2]}
+                          ,/*texcord = */{/*x = */attribute.texcoords[ind.texcoord_index*2], /*y = */attribute.texcoords[ind.texcoord_index*2+1]}};
 
         if(superIndexMap.find(pair) == superIndexMap.end()){
             vertexTexPair.push_back(pair);
@@ -239,14 +177,51 @@ void objMeshFactory(Mesh* mesh, const char* filename){
         }
     }
 
-    int max = 0;
-    for (tinyobj::index_t ind: shape.mesh.indices){
-        if (ind.vertex_index >= max){
-            max = ind.vertex_index;
+    // calculate the normal for each triangle
+    // assuming the index buffer gives triangle vertices in clock wise order
+    vector<Float3> normals;
+    normals.resize(vertexTexPair.size());
+    unordered_map<Float3, Norm> vertNorm; // per vertex normal average
+    for(int i = 0; i < superIndex.size() /3; i++){
+        int3 triangle = {/*x*/superIndex[i*3], /*y*/superIndex[i*3+1], /*z*/superIndex[i*3+2]};
+        Float3 edge1 = vertexTexPair[triangle.y].vertex - vertexTexPair[triangle.x].vertex;
+        Float3 edge2 = vertexTexPair[triangle.z].vertex - vertexTexPair[triangle.x].vertex;
+        Float3 normal = Float3::normalize(Float3::cross(edge1, edge2));
+        
+        if(vertNorm.find(vertexTexPair[triangle.x].vertex) == vertNorm.end()){
+            vertNorm[vertexTexPair[triangle.x].vertex] = {/*normal*/ normal, /*count*/ 1};
+            normals[triangle.x] = normal;
+        }
+        else{
+            Norm runningNormal = vertNorm[vertexTexPair[triangle.x].vertex];
+            runningNormal.normal = (runningNormal.normal*runningNormal.count + normal)/(runningNormal.count+1);
+            runningNormal.count += 1;
+            vertNorm[vertexTexPair[triangle.x].vertex] = runningNormal;
+            normals[triangle.x] = runningNormal.normal;
+        }
+        if(vertNorm.find(vertexTexPair[triangle.y].vertex) == vertNorm.end()){
+            vertNorm[vertexTexPair[triangle.y].vertex] = {/*normal*/ normal, /*count*/ 1};
+            normals[triangle.y] = normal;
+        }
+        else{
+            Norm runningNormal = vertNorm[vertexTexPair[triangle.y].vertex];
+            runningNormal.normal = (runningNormal.normal*runningNormal.count + normal)/(runningNormal.count+1);
+            runningNormal.count += 1;
+            vertNorm[vertexTexPair[triangle.y].vertex] = runningNormal;
+            normals[triangle.y] = runningNormal.normal;
+        }
+        if(vertNorm.find(vertexTexPair[triangle.z].vertex) == vertNorm.end()){
+            vertNorm[vertexTexPair[triangle.z].vertex] = {/*normal*/ normal, /*count*/ 1};
+            normals[triangle.z] = normal;
+        }
+        else{
+            Norm runningNormal = vertNorm[vertexTexPair[triangle.z].vertex];
+            runningNormal.normal = (runningNormal.normal*runningNormal.count + normal)/(runningNormal.count+1);
+            runningNormal.count += 1;
+            vertNorm[vertexTexPair[triangle.z].vertex] = runningNormal;
+            normals[triangle.z] = runningNormal.normal;
         }
     }
-
-    
 
     // init vertex buffer
     D3D11_BUFFER_DESC desc = {};
@@ -260,15 +235,26 @@ void objMeshFactory(Mesh* mesh, const char* filename){
     mesh->device->pDevice->CreateBuffer(&desc, &InitData, &mesh->pVertices);
 
     // init index buffer
+    D3D11_BUFFER_DESC desc2 = {};
+    desc2.Usage = D3D11_USAGE_DEFAULT;
+    desc2.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    desc2.ByteWidth = superIndex.size()*sizeof(int);
+    
+    D3D11_SUBRESOURCE_DATA InitData2;
+    InitData2.pSysMem = superIndex.data();
+
+    mesh->device->pDevice->CreateBuffer(&desc2, &InitData2, &mesh->pIndices);
+    
+    // init normal buffer
     D3D11_BUFFER_DESC desc3 = {};
     desc3.Usage = D3D11_USAGE_DEFAULT;
-    desc3.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    desc3.ByteWidth = superIndex.size()*sizeof(int);
+    desc3.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc3.ByteWidth = normals.size()*sizeof(Float3);
     
     D3D11_SUBRESOURCE_DATA InitData3;
-    InitData3.pSysMem = superIndex.data();
+    InitData3.pSysMem = normals.data();
 
-    mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pIndices);
+    mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pNormals);
 
 
     return;
@@ -280,7 +266,7 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type){
     this->device = shader->device;
     switch (type) {
         case stl:
-            stlMeshFactory(this, filename, shader);
+            stlMeshFactory(this, filename);
             break;
         case obj:
             objMeshFactory(this, filename);

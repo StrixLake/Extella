@@ -5,7 +5,6 @@
 #include <shader.h>
 #include <thread>
 #define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image.h>
 
 using std::thread;
@@ -21,9 +20,10 @@ public:
                                             D3D11_INPUT_PER_VERTEX_DATA, 0},
                                             {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
                                             0, 12, 
-                                            D3D11_INPUT_PER_VERTEX_DATA, 0}};
+                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
+                                            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
-        shader->device->pDevice->CreateInputLayout(layout, 2, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
+        shader->device->pDevice->CreateInputLayout(layout, 3, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
                                                    shader->shaderBlob[cowVertex]->GetBufferSize(), &pLayout);
 
         D3D11_BUFFER_DESC cBuffer = {};
@@ -52,7 +52,7 @@ public:
         
 
         D3D11_SAMPLER_DESC sampDesc = {};
-        sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
         sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
         sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
         sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -101,9 +101,8 @@ public:
         UINT offset = 0;
         UINT stride = sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT2);
         device->pContext->IASetVertexBuffers(0, 1, &pVertices, &stride, &offset);
-        stride = sizeof(DirectX::XMFLOAT2);
-        //device->pContext->IASetVertexBuffers(1, 1, &pTexCoords, &stride, &offset);
-        //device->pContext->IASetVertexBuffers(1, 1, &pNormals, &stride, &offset);
+        stride = sizeof(DirectX::XMFLOAT3);
+        device->pContext->IASetVertexBuffers(1, 1, &pNormals, &stride, &offset);
 
         device->pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
 
