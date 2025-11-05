@@ -29,7 +29,7 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 
     if (uMsg == WM_NCCREATE) SetState(hwnd, lParam);
 
-    Window *window = (Window*)GetWindowLongPtr(hwnd, -21);
+    //Window *window = (Window*)GetWindowLongPtr(hwnd, -21);
 
     switch(uMsg){
         case WM_DESTROY:

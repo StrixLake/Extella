@@ -1,13 +1,14 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #include <Windows.h>
 #include <wnd.h>
 #include <device.h>
 #include <mesh.h>
 #include <shader.h>
 #include <thread>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 using std::thread;
+
+
 
 class Cow : Mesh{
 public:
@@ -21,7 +22,8 @@ public:
                                             {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
                                             0, 12, 
                                             D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
+                                            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+                                                 1, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
         shader->device->pDevice->CreateInputLayout(layout, 3, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
                                                    shader->shaderBlob[cowVertex]->GetBufferSize(), &pLayout);

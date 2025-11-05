@@ -78,7 +78,11 @@ void DXDevice::CreateViews(){
     ID3D11Texture2D* pRender;
     pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pRender);
 
-    pDevice->CreateRenderTargetView(pRender, 0, &pRenderView);
+    D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+    rtvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+    rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+    pDevice->CreateRenderTargetView(pRender, &rtvDesc, &pRenderView);
     pRender->Release();
 
     // create depth buffer
