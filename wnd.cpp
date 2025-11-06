@@ -32,6 +32,25 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     Window *window = (Window*)GetWindowLongPtr(hwnd, -21);
 
     switch(uMsg){
+        case WM_LBUTTONDOWN:
+            window->isClicked = true;
+            break;
+        case WM_LBUTTONUP:
+            window->isClicked = false;
+            break;
+        case WM_KEYDOWN:
+            #define MOVE 0.2
+            if( wParam == 0x57) /*W*/  window->camera->z_sp = -1*MOVE;
+            if( wParam == 0x41) /*A*/  window->camera->x_sp = MOVE;
+            if( wParam == 0x53) /*S*/  window->camera->z_sp = MOVE;
+            if( wParam == 0x44) /*D*/  window->camera->x_sp = -1*MOVE;
+            break;
+        case WM_KEYUP:
+            if( wParam == 0x57) /*W*/  window->camera->z_sp = 0;
+            if( wParam == 0x41) /*A*/  window->camera->x_sp = 0;
+            if( wParam == 0x53) /*S*/  window->camera->z_sp = 0;
+            if( wParam == 0x44) /*D*/  window->camera->x_sp = 0;
+            break;
         case WM_DESTROY:
         case WM_QUIT:
             PostQuitMessage(0);

@@ -9,7 +9,7 @@ endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     MESSAGE("MSVC")
-    add_compile_options(/EHsc /W4)
+    add_compile_options(/EHsc /W4 /wd4267 /wd4244 /wd4305 /wd4100)
 
 endif()
 

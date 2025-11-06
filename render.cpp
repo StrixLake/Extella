@@ -17,18 +17,22 @@ void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_
     array<XMMATRIX, 3> transform = {DirectX::XMMatrixIdentity(), // world transform
                                     DirectX::XMMatrixLookAtLH(XMVectorSet(0., 0., -5., 0.),
                                                                   XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f ),
-                                                                  XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f )),
-                                    DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, (float)WIDTH/HEIGHT, 0.01, 100.)};
+                                                                  XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f )), // camera matrix
+                                    DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, 
+                                                                          (float)WIDTH/HEIGHT, 0.01, 100.)}; // perspective matrix
 
-    viewport->horizontalAngle = 0;
-    viewport->verticalAngle = 0;
-    viewport->x_pos = 0;
-    viewport->y_pos = 0;
-    viewport->z_pos = 0;
 
     Writer writer(device);
 
     while(!*kill_sig){
+
+        transform[1] *= DirectX::XMMatrixRotationY(viewport->horizontalAngle);
+        transform[1] *= DirectX::XMMatrixRotationX(viewport->verticalAngle);
+
+        transform[1] *= DirectX::XMMatrixTranslation(viewport->x_sp, viewport->y_sp, viewport->z_sp);
+
+
+
         device->pContext->ClearDepthStencilView(device->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
         device->pContext->ClearRenderTargetView(device->pRenderView, color);
 

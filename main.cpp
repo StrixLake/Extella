@@ -72,6 +72,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PWSTR pCmdLine,
     Window window(hInstance);
 
     Viewport viewport;
+    viewport = 0;
 
     window.camera = &viewport;
 

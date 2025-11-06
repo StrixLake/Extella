@@ -6,9 +6,18 @@
 using std::atomic;
 
 struct Viewport{
+
     atomic<float> verticalAngle;
     atomic<float> horizontalAngle;
-    atomic<float> x_pos, y_pos, z_pos;
+    atomic<float> x_sp, y_sp, z_sp;
+
+    void operator=(float value){
+        this->horizontalAngle = 0;
+        this->verticalAngle = 0;
+        this->x_sp = 0;
+        this->y_sp = 0;
+        this->z_sp = 0;
+    }
 };
 
 void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_sig);
@@ -19,17 +28,12 @@ public:
 
     static LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    void OnClick();
-    void OnMove();
-
     HINSTANCE handle;
     HWND hwnd;
 
     Viewport* camera;
 
-    struct mouse{
-        bool isClicked = false;
-        int xprev;
-        int yprev;
-    };
+    bool isClicked = false;
+    int xprev;
+    int yprev;
 };
