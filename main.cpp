@@ -71,10 +71,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PWSTR pCmdLine,
     
     Window window(hInstance);
 
-    Viewport viewport;
-    viewport = 0;
+    InputState input;
+    input = 0;
 
-    window.camera = &viewport;
+    window.camera = &input;
 
     DXDevice device;
     device.CreateSwap(window.hwnd);
@@ -91,7 +91,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PWSTR pCmdLine,
 
     atomic<int> kill_sig;
     kill_sig = 0;
-    thread renderThread(render, &viewport, &device, (Mesh*)&spot, &kill_sig);
+    thread renderThread(render, &input, &device, (Mesh*)&spot, &kill_sig);
 
     
     while(GetMessage(&msg, NULL, 0, 0)){

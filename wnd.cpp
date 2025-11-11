@@ -39,17 +39,20 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             window->isClicked = false;
             break;
         case WM_KEYDOWN:
-            #define MOVE 0.01
-            if( wParam == 0x57) /*W*/  window->camera->z_sp = -1*MOVE;
-            if( wParam == 0x41) /*A*/  window->camera->x_sp = MOVE;
-            if( wParam == 0x53) /*S*/  window->camera->z_sp = MOVE;
-            if( wParam == 0x44) /*D*/  window->camera->x_sp = -1*MOVE;
+            if( wParam == 0x57) /*W*/  window->camera->key_w = 1;
+            else if( wParam == 0x41) /*A*/  window->camera->key_a = 1;
+            else if( wParam == 0x53) /*S*/  window->camera->key_s = 1;
+            else if( wParam == 0x44) /*D*/  window->camera->key_d = 1;
+            else if( wParam == 0x45) /*E*/  window->camera->key_e = 1;
+            else if( wParam == 0x51) /*Q*/  window->camera->key_q = 1;
             break;
         case WM_KEYUP:
-            if( wParam == 0x57) /*W*/  window->camera->z_sp = 0;
-            if( wParam == 0x41) /*A*/  window->camera->x_sp = 0;
-            if( wParam == 0x53) /*S*/  window->camera->z_sp = 0;
-            if( wParam == 0x44) /*D*/  window->camera->x_sp = 0;
+            if( wParam == 0x57) /*W*/  window->camera->key_w = 0;
+            else if( wParam == 0x41) /*A*/  window->camera->key_a = 0;
+            else if( wParam == 0x53) /*S*/  window->camera->key_s = 0;
+            else if( wParam == 0x44) /*D*/  window->camera->key_d = 0;
+            else if( wParam == 0x45) /*D*/  window->camera->key_e = 0;
+            else if( wParam == 0x51) /*D*/  window->camera->key_q = 0;
             break;
         case WM_DESTROY:
         case WM_QUIT:

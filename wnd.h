@@ -5,18 +5,24 @@
 #include <mesh.h>
 using std::atomic;
 
+// carries the input state of the keyboard and mouse
+// and records the keys pressed
 struct InputState{
 
     atomic<float> verticalAngle;
-    atomic<float> horizontalAngle;
-    atomic<float> x_sp, y_sp, z_sp;
+    atomic<float> horizontalAngle; 
+    atomic<int8_t> key_w, key_a, key_s, key_d;
+    atomic<int8_t> key_q, key_e;
 
     void operator=(float value){
         this->horizontalAngle = value;
         this->verticalAngle = value;
-        this->x_sp = value;
-        this->y_sp = value;
-        this->z_sp = value;
+        this->key_w = (int8_t)value;
+        this->key_a = (int8_t)value;
+        this->key_s = (int8_t)value;
+        this->key_d = (int8_t)value;
+        this->key_q = (int8_t)value;
+        this->key_e = (int8_t)value;
     }
 };
 

@@ -4,6 +4,7 @@
 #include <writer.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
+#define MOVE 0.01
 
 using DirectX::XMVectorSet;
 
@@ -25,11 +26,12 @@ void render(InputState* input, DXDevice* device, Mesh* mesh, atomic<int>* kill_s
     Writer writer(device);
 
     while(!*kill_sig){
-
+        
+        float distance = MOVE*writer.last_frame_time;
         transform[1] *= DirectX::XMMatrixRotationY(input->horizontalAngle);
         transform[1] *= DirectX::XMMatrixRotationX(input->verticalAngle);
 
-        transform[1] *= DirectX::XMMatrixTranslation(input->x_sp*writer.last_frame_time, input->y_sp*writer.last_frame_time, input->z_sp*writer.last_frame_time);
+        transform[1] *= DirectX::XMMatrixTranslation((input->key_a-input->key_d)*distance, (input->key_q-input->key_e)*distance, (input->key_s-input->key_w)*distance);
         
 
         device->pContext->ClearDepthStencilView(device->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
