@@ -7,7 +7,7 @@
 
 using DirectX::XMVectorSet;
 
-void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_sig){
+void render(InputState* input, DXDevice* device, Mesh* mesh, atomic<int>* kill_sig){
 
     auto color = DirectX::Colors::Black;
 
@@ -26,12 +26,11 @@ void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_
 
     while(!*kill_sig){
 
-        transform[1] *= DirectX::XMMatrixRotationY(viewport->horizontalAngle);
-        transform[1] *= DirectX::XMMatrixRotationX(viewport->verticalAngle);
+        transform[1] *= DirectX::XMMatrixRotationY(input->horizontalAngle);
+        transform[1] *= DirectX::XMMatrixRotationX(input->verticalAngle);
 
-        transform[1] *= DirectX::XMMatrixTranslation(viewport->x_sp, viewport->y_sp, viewport->z_sp);
-
-
+        transform[1] *= DirectX::XMMatrixTranslation(input->x_sp*writer.last_frame_time, input->y_sp*writer.last_frame_time, input->z_sp*writer.last_frame_time);
+        
 
         device->pContext->ClearDepthStencilView(device->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
         device->pContext->ClearRenderTargetView(device->pRenderView, color);

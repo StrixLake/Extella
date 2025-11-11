@@ -39,7 +39,7 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             window->isClicked = false;
             break;
         case WM_KEYDOWN:
-            #define MOVE 0.2
+            #define MOVE 0.01
             if( wParam == 0x57) /*W*/  window->camera->z_sp = -1*MOVE;
             if( wParam == 0x41) /*A*/  window->camera->x_sp = MOVE;
             if( wParam == 0x53) /*S*/  window->camera->z_sp = MOVE;

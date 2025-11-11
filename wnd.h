@@ -5,22 +5,22 @@
 #include <mesh.h>
 using std::atomic;
 
-struct Viewport{
+struct InputState{
 
     atomic<float> verticalAngle;
     atomic<float> horizontalAngle;
     atomic<float> x_sp, y_sp, z_sp;
 
     void operator=(float value){
-        this->horizontalAngle = 0;
-        this->verticalAngle = 0;
-        this->x_sp = 0;
-        this->y_sp = 0;
-        this->z_sp = 0;
+        this->horizontalAngle = value;
+        this->verticalAngle = value;
+        this->x_sp = value;
+        this->y_sp = value;
+        this->z_sp = value;
     }
 };
 
-void render(Viewport* viewport, DXDevice* device, Mesh* mesh, atomic<int>* kill_sig);
+void render(InputState* input, DXDevice* device, Mesh* mesh, atomic<int>* kill_sig);
 
 class Window{
 public:
@@ -31,7 +31,7 @@ public:
     HINSTANCE handle;
     HWND hwnd;
 
-    Viewport* camera;
+    InputState* camera;
 
     bool isClicked = false;
     int xprev;
