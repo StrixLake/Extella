@@ -30,6 +30,8 @@ void render(InputState* input, DXDevice* device, Mesh* mesh, atomic<int>* kill_s
         float distance = MOVE*writer.last_frame_time;
         transform[1] *= DirectX::XMMatrixRotationY(input->horizontalAngle);
         transform[1] *= DirectX::XMMatrixRotationX(input->verticalAngle);
+        input->horizontalAngle = 0;
+        input->verticalAngle = 0;
 
         transform[1] *= DirectX::XMMatrixTranslation((input->key_a-input->key_d)*distance, (input->key_q-input->key_e)*distance, (input->key_s-input->key_w)*distance);
         

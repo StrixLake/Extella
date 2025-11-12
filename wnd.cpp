@@ -34,10 +34,23 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     switch(uMsg){
         case WM_LBUTTONDOWN:
             window->isClicked = true;
+            window->xprev = *(short*)&lParam;
+            window->yprev = *((short*)&lParam +1);
             break;
-        case WM_LBUTTONUP:
+            case WM_LBUTTONUP:
             window->isClicked = false;
             break;
+            case WM_MOUSEMOVE:{
+                short xprev = *(short*)&lParam;
+                short yprev = *((short*)&lParam +1);
+                if(window->isClicked){
+                    window->camera->horizontalAngle = -tan(float(xprev - window->xprev)/300);
+                    window->camera->verticalAngle = -tan(float(yprev - window->yprev)/300);
+                    window->xprev = xprev;
+                    window->yprev = yprev;
+                }
+            break;
+            }
         case WM_KEYDOWN:
             if( wParam == 0x57) /*W*/  window->camera->key_w = 1;
             else if( wParam == 0x41) /*A*/  window->camera->key_a = 1;
