@@ -1,87 +1,8 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <mesh.h>
-#include <fstream>
-#include <string>
 #include <vectors.h>
-#include <tiny_obj_loader.h>
-using std::vector;
-using std::ifstream;
-using std::string;
+#include <objLoader.h>
 using int3 = DirectX::XMINT3;
-
-
-struct VertexTex{
-    Float3 vertex;
-    Float2 TexCord;
-
-    bool operator==(const VertexTex& other) const noexcept {
-        return vertex == other.vertex && TexCord == other.TexCord;
-    }
-};
-
-namespace std{
-    template<>
-    struct hash<VertexTex> {
-        std::size_t operator()(const VertexTex& f) const noexcept {
-            std::size_t hx = std::hash<Float3>{}(f.vertex);
-            std::size_t hy = std::hash<Float2>{}(f.TexCord);
-            
-
-            std::size_t seed = hx;
-            seed ^= 2*hy << 2;
-            return seed;
-        }
-        
-    };
-}
-
-void load_stl(vector<Float3> &vertex, vector<uint32_t> &index, vector<Float3> &normal, const char* filename){
-    // read the stl file
-    std::ifstream vertexData(filename, std::ios::binary);
-    vertexData.seekg(80);
-    char num[4];
-    vertexData.read(num, 4);
-    int triangleCount = *(int*)num;
-
-    unordered_map<Float3, uint32_t> vertex_; // hold the index of the vertex in the vector
-    unordered_map<Float3, uint32_t> normals_; // hold the number of normals of that vertex
-    
-    for (int i = 0; i < triangleCount; ++i){
-        Float3 triangle[4];
-        vertexData.read((char*)&triangle, sizeof(triangle));
-        vertexData.ignore(2);
-
-        // all 3 vertex of the triangle assume the name
-        // normal as its plane
-        // if a vertex is not already in the vertex vector
-        // then push_back it into the vector and 
-        // make a key:value pair of the vertex and its
-        // intex (its position in the vector) in the unordered_map
-        // and also add the index in the index vector
-        // the map can be used to check if the vertex is already
-        // in the vector and if it is then take its position 
-        // the in vector (from the map)
-        // and put it in the index vector
-        // the normal is averaged
-
-        for(int j = 0; j < 3; ++j){
-            if(vertex_.find(triangle[j+1]) == vertex_.end()){
-                vertex.push_back(triangle[j+1]);
-                vertex_[triangle[j+1]] = vertex.size() -1;
-                index.push_back(vertex_[triangle[j+1]]);
-                
-                normal.push_back(triangle[0]);
-                normals_[triangle[0]]++;
-            }
-            else{
-                index.push_back(vertex_[triangle[j+1]]);
-                normal[vertex_[triangle[j+1]]] = (triangle[0] + normal[vertex_[triangle[j+1]]]*normals_[triangle[0]])/(normals_[triangle[0]] +1);
-                normals_[triangle[0]]++;
-            }
-        }
-    }
-    return;
-}
 
 
 void stlMeshFactory(Mesh* mesh, const char* filename){
@@ -131,6 +52,67 @@ void stlMeshFactory(Mesh* mesh, const char* filename){
 }
 
 
+void objMeshFactory2(Mesh* mesh, const char* filename){
+    
+    vector<Float3> vertex;
+    vector<Float3> normals;
+    vector<Float2> texCoords;
+    vector<int32_t> index;
+
+    load_obj(vertex, index, normals, texCoords, filename);
+    mesh->triangleCount = index.size() / 3;
+
+    // init index buffer
+    D3D11_BUFFER_DESC indexDesc = {};
+    indexDesc.Usage = D3D11_USAGE_DEFAULT;
+    indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    indexDesc.ByteWidth = index.size()*sizeof(int32_t);
+
+    D3D11_SUBRESOURCE_DATA indexData = {};
+    indexData.pSysMem = index.data();
+
+    mesh->device->pDevice->CreateBuffer(&indexDesc, &indexData, &mesh->pIndices);
+    
+    
+    // init vertex buffer
+    D3D11_BUFFER_DESC vertexDesc = {};
+    vertexDesc.Usage = D3D11_USAGE_DEFAULT;
+    vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vertexDesc.ByteWidth = vertex.size()*sizeof(Float3);
+
+    D3D11_SUBRESOURCE_DATA vertexData = {};
+    vertexData.pSysMem = vertex.data();
+
+    mesh->device->pDevice->CreateBuffer(&vertexDesc, &vertexData, &mesh->pVertices);
+    
+    if (normals.size() != 0){
+    // init normal buffer
+    D3D11_BUFFER_DESC normalDesc = {};
+    normalDesc.Usage = D3D11_USAGE_DEFAULT;
+    normalDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    normalDesc.ByteWidth = normals.size()*sizeof(Float3);
+
+    D3D11_SUBRESOURCE_DATA normalData = {};
+    normalData.pSysMem = normals.data();
+
+    mesh->device->pDevice->CreateBuffer(&normalDesc, &normalData, &mesh->pNormals);
+    }
+    
+    if (texCoords.size() != 0){
+        // init texCoords buffer if present in the obj file
+        D3D11_BUFFER_DESC tcDesc = {};
+        tcDesc.Usage = D3D11_USAGE_DEFAULT;
+        tcDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        tcDesc.ByteWidth = texCoords.size()*sizeof(Float2);
+    
+        D3D11_SUBRESOURCE_DATA tcData = {};
+        tcData.pSysMem = texCoords.data();
+    
+        mesh->device->pDevice->CreateBuffer(&tcDesc, &tcData, &mesh->pTexCoords);
+    }
+
+    return;
+}
 
 
 void objMeshFactory(Mesh* mesh, const char* filename){
@@ -156,14 +138,14 @@ void objMeshFactory(Mesh* mesh, const char* filename){
     mesh->triangleCount = index.size() / 3;
 
     // i don't know what to call it
-    unordered_map<VertexTex, int> superIndexMap;
+    unordered_map<Float5, int> superIndexMap;
     vector<int> superIndex;
-    vector<VertexTex> vertexTexPair;
+    vector<Float5> vertexTexPair;
     // put each vertex, texture pair in the vector and
     // in the subsequent loop, check if that pair already
     // is in there, if so put the index of it in index array
     for(tinyobj::index_t ind: shape.mesh.indices){
-        VertexTex pair = {/*vertex = */{/*x = */attribute.vertices[ind.vertex_index*3 ], /*y = */attribute.vertices[ind.vertex_index*3 +1], 
+        Float5 pair = {/*vertex = */{/*x = */attribute.vertices[ind.vertex_index*3 ], /*y = */attribute.vertices[ind.vertex_index*3 +1], 
                           /*z  =*/attribute.vertices[ind.vertex_index*3 +2]}
                           ,/*texcord = */{/*x = */attribute.texcoords[ind.texcoord_index*2], /*y = */attribute.texcoords[ind.texcoord_index*2+1]}};
 
@@ -227,7 +209,7 @@ void objMeshFactory(Mesh* mesh, const char* filename){
     D3D11_BUFFER_DESC desc = {};
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc.ByteWidth = vertexTexPair.size()*sizeof(VertexTex);
+    desc.ByteWidth = vertexTexPair.size()*sizeof(Float5);
     
     D3D11_SUBRESOURCE_DATA InitData;
     InitData.pSysMem = vertexTexPair.data();
@@ -269,7 +251,7 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type){
             stlMeshFactory(this, filename);
             break;
         case obj:
-            objMeshFactory(this, filename);
+            objMeshFactory2(this, filename);
             break;
     }
 
@@ -281,7 +263,7 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type){
 
 Mesh::~Mesh(){
     pVertices->Release();
-    if (pNormals != NULL) pNormals->Release();
+    pNormals->Release();
     if (pTexCoords != NULL) pTexCoords->Release();
     pIndices->Release();
 }

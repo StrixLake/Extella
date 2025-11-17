@@ -1,5 +1,6 @@
-#include <unordered_map>
 #pragma once
+#include <unordered_map> // IWYU pragma: keep
+using std::unordered_map;
 
 
 // have to use a temp struct
@@ -68,6 +69,41 @@ struct Norm{
     int count;
 };
 
+struct Float5{
+    Float3 vertex;
+    Float2 TexCord;
+
+    bool operator==(const Float5& other) const noexcept {
+        return vertex == other.vertex && TexCord == other.TexCord;
+    }
+};
+
+struct Float6{
+    Float3 vertex;
+    Float3 normal;
+    
+    bool operator==(const Float6& other) const noexcept {
+        return vertex == other.vertex && normal == other.normal;
+    }
+};
+
+struct Float8{
+    Float3 vertex;
+    Float3 normal;
+    Float2 TexCord;
+    
+    bool operator==(const Float8& other) const noexcept {
+        return vertex == other.vertex && normal == other.normal && TexCord == other.TexCord;
+    }
+};
+
+struct Vertex{
+    Float3 vertex;
+
+    bool operator==(const Vertex& other) const{
+        return this->vertex == other.vertex;
+    }
+};
 
 namespace std {
     template<>
@@ -77,11 +113,11 @@ namespace std {
             std::size_t hy = std::hash<float>{}(f.y);
 
             std::size_t seed = hx;
-            seed ^= 3*hy << 3;
+            seed ^= hy << 3;
             return seed;
         }
-        
     };
+    
     template<>
     struct hash<Float3> {
         std::size_t operator()(const Float3 &f) const noexcept {
@@ -94,6 +130,53 @@ namespace std {
             seed ^= hz << 3;
             return seed;
         }
-        
     };
+
+    template<>
+    struct hash<Vertex>{
+        std::size_t operator()(const Vertex &f) const noexcept {
+            return std::hash<Float3>{}(f.vertex);
+        }
+    };
+
+    template<>
+    struct hash<Float5> {
+        std::size_t operator()(const Float5& f) const noexcept {
+            std::size_t hx = std::hash<Float3>{}(f.vertex);
+            std::size_t hy = std::hash<Float2>{}(f.TexCord);
+            
+
+            std::size_t seed = hx;
+            seed ^= hy << 2;
+            return seed;
+        }    
+    };
+
+    template<>
+    struct hash<Float6> {
+        std::size_t operator()(const Float6& f) const noexcept {
+            std::size_t hx = std::hash<Float3>{}(f.vertex);
+            std::size_t hy = std::hash<Float3>{}(f.normal);
+            
+
+            std::size_t seed = hx;
+            seed ^= hy << 4;
+            return seed;
+        }    
+    };
+
+    template<>
+    struct hash<Float8> {
+        std::size_t operator()(const Float8& f) const noexcept {
+            std::size_t hx = std::hash<Float3>{}(f.vertex);
+            std::size_t hy = std::hash<Float3>{}(f.normal);
+            std::size_t hz = std::hash<Float2>{}(f.TexCord);
+
+            std::size_t seed = hx;
+            seed ^= hy << 2;
+            seed ^= hz << 4;
+            return seed;
+        }    
+    };
+
 }

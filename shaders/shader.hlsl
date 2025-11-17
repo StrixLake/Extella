@@ -39,5 +39,5 @@ float4 PS(VS_OUTPUT input) : SV_Target
 {   
     float3 o = normalize(float3(-1,1,-1));
     float b = dot(o,input.norm);
-    return image.Sample( samLinear, input.uv )*b;
+    return image.Sample( samLinear, input.uv );
 }
