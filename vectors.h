@@ -64,10 +64,6 @@ struct Float2{
     }
 };
 
-struct Norm{
-    Float3 normal;
-    int count;
-};
 
 struct Float5{
     Float3 vertex;

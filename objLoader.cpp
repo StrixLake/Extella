@@ -1,4 +1,5 @@
 #include <objLoader.h>
+using std::is_same_v;
 
 
 void load_stl(vector<Float3> &vertex, vector<uint32_t> &index, vector<Float3> &normal, const char* filename){
@@ -50,6 +51,9 @@ void load_stl(vector<Float3> &vertex, vector<uint32_t> &index, vector<Float3> &n
 }
 
 
+// instead of writing 4 code paths to handle each case of normal or texcoord being present or not
+// i wrote a single template function to handle all 4 cases since they all share the
+// same interface with unordered_map
 template<typename T>
 void parseIndex(tinyobj::mesh_t &mesh, tinyobj::attrib_t &attribute, vector<Float3> &vertices, vector<int32_t> &index, vector<Float3> &normals, vector<Float2> &TexCoords){
     
@@ -62,33 +66,24 @@ void parseIndex(tinyobj::mesh_t &mesh, tinyobj::attrib_t &attribute, vector<Floa
                     attribute.vertices[3*triangle.vertex_index+1],
                     attribute.vertices[3*triangle.vertex_index+2]};
 
-        if constexpr(std::is_same_v<T, Float5>) {
+        if constexpr(is_same_v<T, Float5> || is_same_v<T, Float8>) {
             node.TexCord = {attribute.texcoords[2*triangle.texcoord_index],
                             attribute.texcoords[2*triangle.texcoord_index+1]};
         }
-        else if constexpr(std::is_same_v<T, Float6>) {
+        else if constexpr(is_same_v<T, Float6> || is_same_v<T, Float8>) {
             node.normal = {attribute.normals[3*triangle.normal_index],
                             attribute.normals[3*triangle.normal_index+1],
                             attribute.normals[3*triangle.normal_index+2]};
-        }
-        else if constexpr(std::is_same_v<T, Float8>) {
-            node.normal = {attribute.normals[3*triangle.normal_index],
-                            attribute.normals[3*triangle.normal_index+1],
-                            attribute.normals[3*triangle.normal_index+2]};
-            node.TexCord = {attribute.texcoords[2*triangle.texcoord_index],
-                            attribute.texcoords[2*triangle.texcoord_index+1]};
         }
 
         if(vertex_.find(node) == vertex_.end()){
-            vertices.push_back(node.vertex);
-            if constexpr (std::is_same_v<T, Float5>) TexCoords.push_back(node.TexCord);
-            
-            else if constexpr (std::is_same_v<T, Float6>) normals.push_back(node.normal);
 
-            else if constexpr (std::is_same_v<T, Float8>) {
-                normals.push_back(node.normal);
-                TexCoords.push_back(node.TexCord);
-            }
+            vertices.push_back(node.vertex);
+
+            if constexpr (is_same_v<T, Float5> || is_same_v<T, Float8>) TexCoords.push_back(node.TexCord);
+            
+            else if constexpr (is_same_v<T, Float6> || is_same_v<T, Float8>) normals.push_back(node.normal);
+
             vertex_[node] = vertices.size() -1;
             index.push_back(vertex_[node]);
         }
@@ -99,7 +94,41 @@ void parseIndex(tinyobj::mesh_t &mesh, tinyobj::attrib_t &attribute, vector<Floa
     }
 }
 
-void interpolateNormals();
+void generateNormals(vector<Float3> &vertices, vector<int32_t> &index, vector<Float3> &normals){
+    struct NormalCountPair{
+        Float3 normal;
+        int count;
+    };
+    
+    normals.resize(vertices.size());
+    unordered_map<Float3, NormalCountPair> vertex_Map;
+
+    // iterate through all the triangles in the index
+    for (size_t i = 0; i < index.size()/3; i++){
+        
+        Float3 edge1 = vertices[index[3*i +1]] - vertices[index[3*i]];
+        Float3 edge2 = vertices[index[3*i +2]] - vertices[index[3*i]];
+        Float3 faceNormal = Float3::normalize(Float3::cross(edge1, edge2));
+
+        for (size_t j = 0; j < 3; ++j){
+            Float3 vertex = vertices[index[3*i +j]];
+
+            if(vertex_Map.find(vertex) == vertex_Map.end()){
+                vertex_Map[vertex] = {faceNormal, 1};
+                normals[index[3*i +j]] = faceNormal;
+            }
+            else{
+                NormalCountPair VertexNormal = vertex_Map[vertex];
+                VertexNormal.normal = Float3::normalize((VertexNormal.normal*VertexNormal.count + faceNormal)/(VertexNormal.count +1));
+                VertexNormal.count += 1;
+                vertex_Map[vertex] = VertexNormal;
+                normals[index[3*i +j]] = VertexNormal.normal;
+            }   
+        }
+    }
+
+    return;
+}
 
 
 void load_obj(vector<Float3> &vertex, vector<int32_t> &index, vector<Float3> &normals, vector<Float2> &TexCoords, const char* filename){
@@ -139,6 +168,8 @@ void load_obj(vector<Float3> &vertex, vector<int32_t> &index, vector<Float3> &no
         else{
             parseIndex<Vertex>(mesh, attribute, vertex, index, normals, TexCoords);
         }
+
+        generateNormals(vertex, index, normals);
     }
 
     return;

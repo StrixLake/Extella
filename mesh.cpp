@@ -159,12 +159,16 @@ void objMeshFactory(Mesh* mesh, const char* filename){
         }
     }
 
+    struct Norm{
+        Float3 normal;
+        int count;
+    };
     // calculate the normal for each triangle
     // assuming the index buffer gives triangle vertices in clock wise order
     vector<Float3> normals;
     normals.resize(vertexTexPair.size());
     unordered_map<Float3, Norm> vertNorm; // per vertex normal average
-    for(int i = 0; i < superIndex.size() /3; i++){
+    for(size_t i = 0; i < superIndex.size() /3; i++){
         int3 triangle = {/*x*/superIndex[i*3], /*y*/superIndex[i*3+1], /*z*/superIndex[i*3+2]};
         Float3 edge1 = vertexTexPair[triangle.y].vertex - vertexTexPair[triangle.x].vertex;
         Float3 edge2 = vertexTexPair[triangle.z].vertex - vertexTexPair[triangle.x].vertex;
