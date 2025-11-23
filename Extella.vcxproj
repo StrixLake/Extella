@@ -1,0 +1,104 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <ItemGroup>
+        <ProjectConfiguration Include="Debug|x64">
+            <Configuration>Debug</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+
+        <ProjectConfiguration Include="RelWithDebInfo|x64">
+            <Configuration>RelWithDebInfo</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <!-- Default config-->
+         <Configuration>RelWithDebInfo</Configuration>
+        <!-- MSVC toolset-->
+        <PlatformToolset>v143</PlatformToolset>
+        <Platform>x64</Platform>
+        <TargetName>main</TargetName>
+        <OutDir>.\x64\$(Configuration)\bin\</OutDir>
+        <IntDir>.\x64\$(Configuration)\obj\</IntDir>
+        <BuildInParallel>true</BuildInParallel>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(Configuration) == 'Debug'">
+        <UseDebugLibraries>true</UseDebugLibraries>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$(Configuration) == 'RelWithDebInfo'">
+        <UseDebugLibraries>false</UseDebugLibraries>
+    </PropertyGroup>
+
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+
+    <ItemDefinitionGroup>
+        <ClCompile>
+            <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+            <AdditionalIncludeDirectories>.\;C:\Users\yasha\Documents\Repositories\tinyobjloader;C:\Users\yasha\Documents\Repositories\stb</AdditionalIncludeDirectories>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <WarningLevel>Level4</WarningLevel>
+            <DisableSpecificWarnings>4267;4244;4305;4100</DisableSpecificWarnings>
+        </ClCompile>
+
+        <Link>
+            <AdditionalDependencies>
+                d3d11.lib;d2d1.lib;dxgi.lib;dwrite.lib;d3dcompiler.lib;kernel32.lib;user32.lib
+            </AdditionalDependencies>
+            <GenerateDebugInformation>true</GenerateDebugInformation>
+            <ProgramDatabaseFile>$(OutDir)main.pdb</ProgramDatabaseFile>
+            <SubSystem>Windows</SubSystem>
+        </Link>
+
+        <FxCompile>
+            <ShaderModel>4.0</ShaderModel>
+        </FxCompile>
+    </ItemDefinitionGroup>
+
+    <ItemDefinitionGroup Condition="$(Configuration) == 'Debug'">
+        <ClCompile>
+            <Optimization>Disabled</Optimization>
+        </ClCompile>
+    </ItemDefinitionGroup>
+    <ItemDefinitionGroup Condition="$(Configuration) == 'RefWithDebInfo'">
+        <ClCompile>
+            <Optimization>MaxSpeed</Optimization>
+        </ClCompile>
+    </ItemDefinitionGroup>
+
+    <ItemGroup>
+        <ClCompile Include="main.cpp"/>
+        <ClCompile Include="device.cpp"/>
+        <ClCompile Include="mesh.cpp"/>
+        <ClCompile Include="objLoader.cpp"/>
+        <ClCompile Include="render.cpp"/>
+        <ClCompile Include="shader.cpp"/>
+        <ClCompile Include="wnd.cpp"/>
+        <ClCompile Include="writer.cpp"/>
+
+        <FxCompile Include="shaders/shader.hlsl">
+            <EntryPointName>VS</EntryPointName>
+            <ShaderType>Vertex</ShaderType>
+            <ObjectFileOutput>$(OutDir)shaders/vshader.cso</ObjectFileOutput>
+        </FxCompile>
+
+        <FxCompile Include="shaders/shader.hlsl">
+            <EntryPointName>PS</EntryPointName>
+            <ShaderType>Pixel</ShaderType>
+            <ObjectFileOutput>$(OutDir)shaders/pshader.cso</ObjectFileOutput>
+        </FxCompile>
+
+        <Mesh Include="mesh\*"/>
+    </ItemGroup>
+        
+    <Target Name="CopyMesh" AfterTargets="Build">
+        <Copy SkipUnchangedFiles="true"
+                SourceFiles="@(Mesh)"
+                DestinationFolder="$(OutDir)mesh"/>
+    </Target>
+
+</Project>
