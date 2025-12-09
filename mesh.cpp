@@ -3,6 +3,7 @@
 #include <vectors.h>
 #include <objLoader.h>
 #include <stb_image.h>
+#include <filesystem>
 using int3 = DirectX::XMINT3;
 
 
@@ -115,9 +116,9 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
     return;
 }
 
- void constuctTextures(Mesh* mesh, const wchar_t* textureFile){
+ void constuctTextures(Mesh* mesh, std::filesystem::path textureFile){
         int x, y, z;
-        uint8_t* image2 = stbi_load("mesh/spot_.png", &x, &y, &z, 3);
+        uint8_t* image2 = stbi_load(textureFile.string().data(), &x, &y, &z, 3);
         uint8_t* image = (uint8_t*) malloc(x*y*4);
         uint8_t* image1 = (uint8_t*) malloc(x*y*4);
         uint8_t* imaget = image;
@@ -212,6 +213,35 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* t
     return;
 }
 
+void Mesh::Draw(array<XMMATRIX,3> camera, float time){
+    
+    extension->extensionWork(camera, time);
+
+    device->pContext->UpdateSubresource(transformBuffer, 0, NULL, 
+                                            camera.data(), 0, 0);
+        
+    device->pContext->IASetInputLayout(pLayout);
+
+    UINT offset = 0;
+    UINT stride = sizeof(DirectX::XMFLOAT3);
+    device->pContext->IASetVertexBuffers(0, 1, &pVertices, &stride, &offset);
+    stride = sizeof(DirectX::XMFLOAT2);
+    device->pContext->IASetVertexBuffers(1, 1, &pTexCoords, &stride, &offset);
+    stride = sizeof(DirectX::XMFLOAT3);
+    device->pContext->IASetVertexBuffers(2, 1, &pNormals, &stride, &offset);
+
+    device->pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
+
+    device->pContext->VSSetShader(shaders->getVertexShader(L"shaders/vshader.cso"), NULL, 0);
+    device->pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
+
+    device->pContext->VSSetConstantBuffers(0, 1, &transformBuffer);
+
+    device->pContext->PSSetSamplers(0, 1, &pSampler);
+    device->pContext->PSSetShaderResources(0, 1, &pTextureView);
+
+    device->pContext->DrawIndexed(triangleCount*3, 0, 0);
+}
 
 Mesh::~Mesh(){
     if (pVertices != NULL) pVertices->Release();
@@ -224,5 +254,8 @@ Mesh::~Mesh(){
     if (pTextureView != NULL) pTextureView->Release();
     if (transformBuffer != NULL) transformBuffer->Release();
     if (pLayout != NULL) pLayout->Release();
+
+    if(extension != NULL) delete extension;
+    if (next != NULL) delete next;
 }
 

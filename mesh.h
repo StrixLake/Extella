@@ -1,10 +1,6 @@
 #pragma once
 #include <device.h>
-#include <DirectXMath.h>
-#include <array>
 #include <shader.h>
-using DirectX::XMMATRIX;
-using std::array;
 
 enum FileType{
     obj, stl
@@ -15,7 +11,7 @@ public:
     Mesh() = delete;
     Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* textureFile);
 
-    virtual void Draw(array<XMMATRIX,3> camera, float time) = 0;
+    void Draw(array<XMMATRIX,3> camera, float time);
 
     uint32_t triangleCount;
     ID3D11Buffer* pVertices = NULL;
@@ -31,6 +27,8 @@ public:
 
     Shader* shaders;
     DXDevice* device;
+
+    BaseWorker* extension = NULL;
 
     Mesh* next = NULL;
 

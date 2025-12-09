@@ -4,6 +4,10 @@
 #include <windows.h>
 #include <config.h>
 #include <d3d9.h>
+#include <array>
+#include <DirectXMath.h>
+using DirectX::XMMATRIX;
+using std::array;
 
 class DXDevice{
 public:
@@ -31,4 +35,11 @@ public:
     ID3D11DepthStencilView* pDepthView = NULL;
     
     ~DXDevice();
+};
+
+
+class BaseWorker{
+public:
+    virtual void extensionWork(array<XMMATRIX, 3> &camera, float time) = 0;
+    virtual ~BaseWorker() = default;
 };
