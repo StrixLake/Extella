@@ -35,8 +35,8 @@ public:
 
         device->pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
 
-        device->pContext->VSSetShader(shaders->vertexShaders[cowVertex], NULL, 0);
-        device->pContext->PSSetShader(shaders->pixelShaders[cowPixel], NULL, 0);
+        device->pContext->VSSetShader(shaders->getVertexShader(L"shaders/vshader.cso"), NULL, 0);
+        device->pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
 
         device->pContext->VSSetConstantBuffers(0, 1, &transformBuffer);
 

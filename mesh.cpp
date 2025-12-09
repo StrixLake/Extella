@@ -116,7 +116,7 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
 }
 
  void constuctTextures(Mesh* mesh, const wchar_t* textureFile){
-    int x, y, z;
+        int x, y, z;
         uint8_t* image2 = stbi_load("mesh/spot_.png", &x, &y, &z, 3);
         uint8_t* image = (uint8_t*) malloc(x*y*4);
         uint8_t* image1 = (uint8_t*) malloc(x*y*4);
@@ -166,8 +166,6 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
  }
 
 void createDefaultLayout(Mesh* mesh){
-    mesh->shaders->createShader(L"shaders/vshader.cso", vertex, cowVertex);
-    mesh->shaders->createShader(L"shaders/pshader.cso", pixel, cowPixel);
 
     D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                             0, 0, 
@@ -178,8 +176,8 @@ void createDefaultLayout(Mesh* mesh){
                                             {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                                  2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
-    mesh->device->pDevice->CreateInputLayout(layout, 3, mesh->shaders->shaderBlob[cowVertex]->GetBufferPointer(), 
-                                                   mesh->shaders->shaderBlob[cowVertex]->GetBufferSize(), &mesh->pLayout);
+    mesh->device->pDevice->CreateInputLayout(layout, 3, mesh->shaders->getShaderBlob(L"shaders/vshader.cso")->GetBufferPointer(), 
+                                                   mesh->shaders->getShaderBlob(L"shaders/vshader.cso")->GetBufferSize(), &mesh->pLayout);
 
     return;
 }
