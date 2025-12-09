@@ -48,7 +48,7 @@
 
     	<Link>
       	<AdditionalDependencies>
-                	d3d9.lib;d3d11.lib;d2d1.lib;dxgi.lib;dwrite.lib;d3dcompiler.lib;kernel32.lib;user32.lib
+                	d3d9.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;kernel32.lib;user32.lib
             	</AdditionalDependencies>
       	<GenerateDebugInformation>true</GenerateDebugInformation>
       	<ProgramDatabaseFile>$(OutDir)main.pdb</ProgramDatabaseFile>
@@ -78,7 +78,7 @@
     	<ClCompile Include="objLoader.cpp" />
     	<ClCompile Include="render.cpp" />
     	<ClCompile Include="shader.cpp" />
-    	<ClCompile Include="writer.cpp" />
+    	<ClCompile Include="watch.cpp" />
 
     	<FxCompile Include="shaders\vshader.hlsl">
       	<ShaderType>Vertex</ShaderType>

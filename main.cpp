@@ -1,9 +1,11 @@
+#define EXPORT extern "C" __declspec(dllexport)
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <Windows.h>
 #include <device.h>
 #include <mesh.h>
 #include <shader.h>
+#include <watch.h>
 
 
 class Cow : Mesh{
@@ -120,14 +122,15 @@ public:
 
 };
 
-void renderer(void* input, DXDevice* device, Mesh* mesh);
 
 struct {
     DXDevice* device;
     Cow* spot;
+    Watch* stopwatch;
 } Allinfo;
 
-extern "C" __declspec(dllexport) void InitializeRenderer(IDirect3DSurface9** pSurface){
+
+EXPORT void InitializeRenderer(IDirect3DSurface9** pSurface){
     
 
     DXDevice *device = new DXDevice();
@@ -137,15 +140,20 @@ extern "C" __declspec(dllexport) void InitializeRenderer(IDirect3DSurface9** pSu
     Shader *shaders = new Shader(device);
 
     Cow *spot = new Cow("mesh/spot_.obj", shaders);
+    Watch* stopwatch = new Watch();
 
     Allinfo.device = device;
     Allinfo.spot = spot;
+    Allinfo.stopwatch = stopwatch;
 
     *pSurface = device->pD3D9Surface;
 
     return;
 }
 
-extern "C" __declspec(dllexport) void render(){
-    renderer(NULL, Allinfo.device, (Mesh*)Allinfo.spot);
+
+void renderer(void* input, DXDevice* device, Mesh* mesh, Watch* watch);
+
+EXPORT void render(){
+    renderer(NULL, Allinfo.device, (Mesh*)Allinfo.spot, Allinfo.stopwatch);
 }
