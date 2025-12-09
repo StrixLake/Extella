@@ -18,7 +18,7 @@ struct VS_OUTPUT
 //
 // Vertex Shader
 //
-VS_OUTPUT VS( float4 Pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORMAL)
+VS_OUTPUT main( float4 Pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORMAL)
 {
     VS_OUTPUT ou;
     Pos = mul( Pos, World );
@@ -31,13 +31,4 @@ VS_OUTPUT VS( float4 Pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORMAL
     ou.norm = mul( ou.norm, Projection );
     
     return ou;
-}
-
-
-
-float4 PS(VS_OUTPUT input) : SV_Target
-{   
-    float3 o = normalize(float3(-1,1,-1));
-    float b = dot(o,input.norm);
-    return image.Sample( samLinear, input.uv )*b;
 }

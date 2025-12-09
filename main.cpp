@@ -1,13 +1,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <Windows.h>
-#include <wnd.h>
 #include <device.h>
 #include <mesh.h>
 #include <shader.h>
-#include <thread>
-using std::thread;
-
 
 
 class Cow : Mesh{
@@ -88,7 +84,7 @@ public:
     ID3D11Buffer *transformBuffer;
     ID3D11InputLayout* pLayout;
 
-    void Draw(array<XMMATRIX,3> camera, float time) override{
+    void Draw(array<XMMATRIX,3> camera, float time){
         float rotationSpeed = 1; // per second;
         camera[0] *= DirectX::XMMatrixRotationY(rotationSpeed*time);
     
@@ -121,52 +117,35 @@ public:
         device->pContext->DrawIndexed(triangleCount*3, 0, 0);
     }
 
-    ~Cow(){
-        pLayout->Release();
-        transformBuffer->Release();
-        shaders->vertexShaders[cowVertex]->Release();
-        shaders->pixelShaders[cowPixel]->Release();
-        pSampler->Release();
-        pTexture->Release();
-        pTextureView->Release();
-    }
 
 };
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PWSTR pCmdLine, int nCmdShow){
+void renderer(void* input, DXDevice* device, Mesh* mesh);
+
+struct {
+    DXDevice* device;
+    Cow* spot;
+} Allinfo;
+
+extern "C" __declspec(dllexport) void InitializeRenderer(IDirect3DSurface9** pSurface){
     
-    Window window(hInstance);
 
-    InputState input;
-    input = 0;
+    DXDevice *device = new DXDevice();
+    device->CreateViews();
+    device->SetTargets();
 
-    window.camera = &input;
+    Shader *shaders = new Shader(device);
 
-    DXDevice device;
-    device.CreateSwap(window.hwnd);
-    device.CreateViews();
-    device.SetTargets();
+    Cow *spot = new Cow("mesh/spot_.obj", shaders);
 
-    Shader shaders(&device);
+    Allinfo.device = device;
+    Allinfo.spot = spot;
 
-    Cow spot("mesh/spot_.obj", &shaders);
+    *pSurface = device->pD3D9Surface;
 
-    ShowWindow(window.hwnd, nCmdShow);
+    return;
+}
 
-    MSG msg = {};
-
-    atomic<int> kill_sig;
-    kill_sig = 0;
-    thread renderThread(render, &input, &device, (Mesh*)&spot, &kill_sig);
-
-    
-    while(GetMessage(&msg, NULL, 0, 0)){
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-
-    kill_sig = 1;
-    renderThread.join();
-
-    return 0;
+extern "C" __declspec(dllexport) void render(){
+    renderer(NULL, Allinfo.device, (Mesh*)Allinfo.spot);
 }

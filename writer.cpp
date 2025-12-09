@@ -5,42 +5,42 @@ Writer::Writer(DXDevice* device){
 
     // get the target surface
     IDXGISurface *pSurface;
-    device->pSwapChain->GetBuffer(0, __uuidof(IDXGISurface), (void**)&pSurface);
+    //device->pSwapChain->GetBuffer(0, __uuidof(IDXGISurface), (void**)&pSurface);
 
     // get hwnd from swapChain desc
     DXGI_SWAP_CHAIN_DESC desc;
-    device->pSwapChain->GetDesc(&desc);
+    //device->pSwapChain->GetDesc(&desc);
 
-    HWND hwnd = desc.OutputWindow;
-    float dpi = GetDpiForWindow(hwnd);
+    //HWND hwnd = desc.OutputWindow;
+    //float dpi = GetDpiForWindow(hwnd);
 
-    D2D1_RENDER_TARGET_PROPERTIES properties = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
-                                                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-                                                dpi, dpi);
+    //D2D1_RENDER_TARGET_PROPERTIES properties = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
+    //                                            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
+    //                                            dpi, dpi);
 
     ID2D1Factory *pFactory;
-    D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, &pFactory);
+    //D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, &pFactory);
 
-    pFactory->CreateDxgiSurfaceRenderTarget(pSurface, properties, &this->pRenderTarget);
+    //pFactory->CreateDxgiSurfaceRenderTarget(pSurface, properties, &this->pRenderTarget);
 
-    pFactory->Release();
-    pSurface->Release();
+    //pFactory->Release();
+    //pSurface->Release();
 
     // set up dwrite now
-    IDWriteFactory *pDFactory;
-    DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown**)&pDFactory);
+    //IDWriteFactory *pDFactory;
+    //DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown**)&pDFactory);
 
-    pDFactory->CreateTextFormat(L"Ariel", NULL, 
-                                DWRITE_FONT_WEIGHT_REGULAR,
-                                DWRITE_FONT_STYLE_NORMAL,
-                                DWRITE_FONT_STRETCH_NORMAL,
-                                18.f, 
-                                L"en-us",
-                                &this->pFormat);
+    //pDFactory->CreateTextFormat(L"Ariel", NULL, 
+    //                            DWRITE_FONT_WEIGHT_REGULAR,
+    //                            DWRITE_FONT_STYLE_NORMAL,
+    //                            DWRITE_FONT_STRETCH_NORMAL,
+    //                            18.f, 
+    //                            L"en-us",
+    //                            &this->pFormat);
 
-    pDFactory->Release();
+    //pDFactory->Release();
 
-    pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::GhostWhite), &this->pBrush);
+    //pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::GhostWhite), &this->pBrush);
 
     QueryPerformanceCounter(&performanceCount);
     QueryPerformanceCounter(&delay);
@@ -69,13 +69,13 @@ void Writer::frameTime(){
 
     swprintf(time, 7, L"%f", last_frame_time);
     
-    pRenderTarget->BeginDraw();
-
-    D2D1_RECT_F rect = {0, 0, 150, 50};
-
-    pRenderTarget->DrawTextA(time, 9, pFormat, rect, pBrush);
-
-    pRenderTarget->EndDraw();
+    //pRenderTarget->BeginDraw();
+//
+    //D2D1_RECT_F rect = {0, 0, 150, 50};
+//
+    //pRenderTarget->DrawTextA(time, 9, pFormat, rect, pBrush);
+//
+    //pRenderTarget->EndDraw();
 
     performanceCount = now;
 
@@ -85,8 +85,8 @@ void Writer::frameTime(){
 
 
 Writer::~Writer(){
-    pRenderTarget->Release();
-    pBrush->Release();
-    pFormat->Release();
+    //pRenderTarget->Release();
+    //pBrush->Release();
+    //pFormat->Release();
     
 }

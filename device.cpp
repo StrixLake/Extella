@@ -2,11 +2,11 @@
 
 DXDevice::DXDevice(){
     
-    IDXGIFactory* pDXGIFactory;
-    CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&pDXGIFactory);
+    IDXGIFactory1* pDXGIFactory;
+    CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&pDXGIFactory);
 
-    IDXGIAdapter* pAdapter;
-    pDXGIFactory->EnumAdapters(DEVICE, &pAdapter);
+    IDXGIAdapter1* pAdapter;
+    pDXGIFactory->EnumAdapters1(DEVICE, &pAdapter);
 
     D3D_FEATURE_LEVEL pFeatures[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
     D3D_FEATURE_LEVEL pFeatureLevel;
@@ -25,6 +25,17 @@ DXDevice::DXDevice(){
     pRasterState->Release();
     #endif
     
+    Direct3DCreate9Ex(D3D_SDK_VERSION, &pD3D9ExObj);
+    D3DPRESENT_PARAMETERS presentParams = {};
+    presentParams.Windowed = TRUE;
+    presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    presentParams.BackBufferCount = 1;
+    presentParams.BackBufferFormat = D3DFMT_UNKNOWN;
+    presentParams.hDeviceWindow = GetDesktopWindow(); // Dummy window
+    presentParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+    pD3D9ExObj->CreateDeviceEx(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL, 
+                     D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED | D3DCREATE_FPU_PRESERVE, 
+                     &presentParams, NULL, &pD3D9ExDevice);
 
     pAdapter->Release();
     pDXGIFactory->Release();
@@ -75,15 +86,25 @@ void DXDevice::CreateSwap(HWND hwnd){
 }
 
 void DXDevice::CreateViews(){
-    ID3D11Texture2D* pRender;
-    pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pRender);
+
+    D3D11_TEXTURE2D_DESC textureDesc = {};
+    textureDesc.Width = WIDTH;
+    textureDesc.Height = HEIGHT;
+    textureDesc.MipLevels = 1;
+    textureDesc.ArraySize = 1;
+    textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    textureDesc.Usage = D3D11_USAGE_DEFAULT;
+    textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    textureDesc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
+    textureDesc.SampleDesc = {1,0};
+    pDevice->CreateTexture2D(&textureDesc, NULL, &pRender);
 
     D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
     rtvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
     rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
     pDevice->CreateRenderTargetView(pRender, &rtvDesc, &pRenderView);
-    pRender->Release();
+    
 
     // create depth buffer
     D3D11_TEXTURE2D_DESC descDepth = {};
@@ -110,6 +131,18 @@ void DXDevice::CreateViews(){
 }
 
 void DXDevice::SetTargets(){
+
+    // get a shared handle for the dx9 surface
+    IDXGIResource* pDXGIResource;
+    pRender->QueryInterface(__uuidof(IDXGIResource), (void**)&pDXGIResource);
+    HANDLE pSharedHandle;
+    pDXGIResource->GetSharedHandle(&pSharedHandle);
+
+    // create a dx9 texture
+    pD3D9ExDevice->CreateTexture(WIDTH, HEIGHT, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pD3D9Texture, &pSharedHandle);
+    pD3D9Texture->GetSurfaceLevel(0, &pD3D9Surface);
+
+    // set the render target for dx11 renderer
     pContext->OMSetRenderTargets(1, &pRenderView, pDepthView);
     
     // set viewport for the resterizer
@@ -126,12 +159,18 @@ void DXDevice::SetTargets(){
 }
 
 DXDevice::~DXDevice(){
-    this->pDevice->Release();
-    this->pContext->Release();
-    this->pSwapChain->Release();
-    this->pRenderView->Release();
-    this->pDepthBuffer->Release();
-    this->pDepthView->Release();
+    if (pD3D9ExObj != NULL) pD3D9ExObj->Release();
+    if (pD3D9ExDevice != NULL) pD3D9ExDevice->Release();
+    if (pD3D9Surface != NULL) pD3D9Surface->Release();
+    if (pD3D9Texture != NULL) pD3D9Texture->Release();
+
+    if (pDevice != NULL) pDevice->Release();
+    if (pContext != NULL) pContext->Release();
+    if (pSwapChain != NULL) pSwapChain->Release();
+    if (pRender != NULL) pRender->Release();
+    if (pRenderView != NULL) pRenderView->Release();
+    if (pDepthBuffer != NULL) pDepthBuffer->Release();
+    if (pDepthView != NULL) pDepthView->Release();
 
     return;
 }
