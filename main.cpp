@@ -10,81 +10,7 @@
 
 class Cow : Mesh{
 public:
-    Cow(const char* filename, Shader* shader) : Mesh(filename, shader, obj){
-        this->shaders->createShader(L"shaders/vshader.cso", vertex, cowVertex);
-        this->shaders->createShader(L"shaders/pshader.cso", pixel, cowPixel);
-
-        D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-                                            0, 0, 
-                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
-                                            1, 0, 
-                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-                                                 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
-
-        shader->device->pDevice->CreateInputLayout(layout, 3, shader->shaderBlob[cowVertex]->GetBufferPointer(), 
-                                                   shader->shaderBlob[cowVertex]->GetBufferSize(), &pLayout);
-
-        D3D11_BUFFER_DESC cBuffer = {};
-        cBuffer.Usage = D3D11_USAGE_DEFAULT;
-        cBuffer.ByteWidth = sizeof(XMMATRIX)*3;
-        cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        shader->device->pDevice->CreateBuffer(&cBuffer, NULL, &transformBuffer);
-        
-        int x, y, z;
-        uint8_t* image2 = stbi_load("mesh/spot_.png", &x, &y, &z, 3);
-        uint8_t* image = (uint8_t*) malloc(x*y*4);
-        uint8_t* image1 = (uint8_t*) malloc(x*y*4);
-        uint8_t* imaget = image;
-        for (int i = 0; i < x*y*3; i += 3){
-            memcpy(imaget, image2, 3);
-            imaget[3] = 255;
-            imaget += 4;
-            image2 += 3;
-        }
-        image1 += (x*y*4 -1);
-        for(int i = 0; i < y; ++i){
-            image1 -= x*4;
-            memcpy(image1, image, x*4);
-            image += x*4;
-        }
-        
-
-        D3D11_SAMPLER_DESC sampDesc = {};
-        sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-        sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-        sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-        sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-        sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-        sampDesc.MinLOD = 0;
-        sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-        device->pDevice->CreateSamplerState( &sampDesc, &pSampler );
-
-        D3D11_TEXTURE2D_DESC desc = {};
-        desc.Width = x;
-        desc.Height = y;
-        desc.MipLevels = 1;
-        desc.ArraySize = 1;
-        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        desc.Usage = D3D11_USAGE_DEFAULT;
-        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-        desc.SampleDesc = {1,0};
-        D3D11_SUBRESOURCE_DATA init;
-        init.pSysMem = image1;
-        init.SysMemPitch = x*4;
-        device->pDevice->CreateTexture2D(&desc, &init, &pTexture);
-        device->pDevice->CreateShaderResourceView(pTexture, NULL, &pTextureView);
-        
-        
-        return;
-    }
-
-    ID3D11SamplerState *pSampler;
-    ID3D11Texture2D *pTexture;
-    ID3D11ShaderResourceView *pTextureView;
-    ID3D11Buffer *transformBuffer;
-    ID3D11InputLayout* pLayout;
+    Cow(const char* filename, Shader* shader, const wchar_t* textureFile) : Mesh(filename, shader, obj, textureFile) {}
 
     void Draw(array<XMMATRIX,3> camera, float time){
         float rotationSpeed = 1; // per second;
@@ -94,9 +20,10 @@ public:
         camera[1] = DirectX::XMMatrixTranspose(camera[1]);
         camera[2] = DirectX::XMMatrixTranspose(camera[2]);
 
-        shaders->device->pContext->UpdateSubresource(transformBuffer, 0, NULL, camera.data(), 0, 0);
+        device->pContext->UpdateSubresource(transformBuffer, 0, NULL, 
+                                            camera.data(), 0, 0);
         
-        shaders->device->pContext->IASetInputLayout(pLayout);
+        device->pContext->IASetInputLayout(pLayout);
 
         UINT offset = 0;
         UINT stride = sizeof(DirectX::XMFLOAT3);
@@ -139,7 +66,7 @@ EXPORT void InitializeRenderer(IDirect3DSurface9** pSurface){
 
     Shader *shaders = new Shader(device);
 
-    Cow *spot = new Cow("mesh/spot_.obj", shaders);
+    Cow *spot = new Cow("mesh/spot_.obj", shaders, L"mesh/spot_.png");
     Watch* stopwatch = new Watch();
 
     Allinfo.device = device;
@@ -152,8 +79,8 @@ EXPORT void InitializeRenderer(IDirect3DSurface9** pSurface){
 }
 
 
-void renderer(void* input, DXDevice* device, Mesh* mesh, Watch* watch);
+void renderer(DXDevice* device, Mesh* mesh, Watch* watch);
 
 EXPORT void render(){
-    renderer(NULL, Allinfo.device, (Mesh*)Allinfo.spot, Allinfo.stopwatch);
+    renderer(Allinfo.device, (Mesh*)Allinfo.spot, Allinfo.stopwatch);
 }

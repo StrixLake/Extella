@@ -2,6 +2,7 @@
 #include <mesh.h>
 #include <vectors.h>
 #include <objLoader.h>
+#include <stb_image.h>
 using int3 = DirectX::XMINT3;
 
 
@@ -114,140 +115,76 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
     return;
 }
 
+ void constuctTextures(Mesh* mesh, const wchar_t* textureFile){
+    int x, y, z;
+        uint8_t* image2 = stbi_load("mesh/spot_.png", &x, &y, &z, 3);
+        uint8_t* image = (uint8_t*) malloc(x*y*4);
+        uint8_t* image1 = (uint8_t*) malloc(x*y*4);
+        uint8_t* imaget = image;
 
-void objMeshFactory(Mesh* mesh, const char* filename){
-    string inputfile(filename);
-    tinyobj::ObjReaderConfig config;
-    config.vertex_color = false;
-
-    tinyobj::ObjReader reader;
-    reader.ParseFromFile(inputfile, config);
-
-    vector<tinyobj::shape_t> shapes = reader.GetShapes();
-    tinyobj::shape_t shape = shapes[0];
-
-    tinyobj::attrib_t attribute = reader.GetAttrib();
-
-    // need to copy vector<index_t> to another
-    // vector for indices of vertices
-    vector<int> index;
-    for (tinyobj::index_t i : shape.mesh.indices){
-        index.push_back(i.vertex_index);
-    }
-
-    mesh->triangleCount = index.size() / 3;
-
-    // i don't know what to call it
-    unordered_map<Float5, int> superIndexMap;
-    vector<int> superIndex;
-    vector<Float5> vertexTexPair;
-    // put each vertex, texture pair in the vector and
-    // in the subsequent loop, check if that pair already
-    // is in there, if so put the index of it in index array
-    for(tinyobj::index_t ind: shape.mesh.indices){
-        Float5 pair = {/*vertex = */{/*x = */attribute.vertices[ind.vertex_index*3 ], /*y = */attribute.vertices[ind.vertex_index*3 +1], 
-                          /*z  =*/attribute.vertices[ind.vertex_index*3 +2]}
-                          ,/*texcord = */{/*x = */attribute.texcoords[ind.texcoord_index*2], /*y = */attribute.texcoords[ind.texcoord_index*2+1]}};
-
-        if(superIndexMap.find(pair) == superIndexMap.end()){
-            vertexTexPair.push_back(pair);
-            superIndexMap[pair] = vertexTexPair.size() -1;
-            superIndex.push_back(superIndexMap[pair]);
+        // invert the image as stbi loads the image upside down
+        for (int i = 0; i < x*y*3; i += 3){
+            memcpy(imaget, image2, 3);
+            imaget[3] = 255;
+            imaget += 4;
+            image2 += 3;
         }
-        else{
-            superIndex.push_back(superIndexMap[pair]);
+        image1 += (x*y*4 -1);
+        for(int i = 0; i < y; ++i){
+            image1 -= x*4;
+            memcpy(image1, image, x*4);
+            image += x*4;
         }
-    }
-
-    struct Norm{
-        Float3 normal;
-        int count;
-    };
-    // calculate the normal for each triangle
-    // assuming the index buffer gives triangle vertices in clock wise order
-    vector<Float3> normals;
-    normals.resize(vertexTexPair.size());
-    unordered_map<Float3, Norm> vertNorm; // per vertex normal average
-    for(size_t i = 0; i < superIndex.size() /3; i++){
-        int3 triangle = {/*x*/superIndex[i*3], /*y*/superIndex[i*3+1], /*z*/superIndex[i*3+2]};
-        Float3 edge1 = vertexTexPair[triangle.y].vertex - vertexTexPair[triangle.x].vertex;
-        Float3 edge2 = vertexTexPair[triangle.z].vertex - vertexTexPair[triangle.x].vertex;
-        Float3 normal = Float3::normalize(Float3::cross(edge1, edge2));
         
-        if(vertNorm.find(vertexTexPair[triangle.x].vertex) == vertNorm.end()){
-            vertNorm[vertexTexPair[triangle.x].vertex] = {/*normal*/ normal, /*count*/ 1};
-            normals[triangle.x] = normal;
-        }
-        else{
-            Norm runningNormal = vertNorm[vertexTexPair[triangle.x].vertex];
-            runningNormal.normal = (runningNormal.normal*runningNormal.count + normal)/(runningNormal.count+1);
-            runningNormal.count += 1;
-            vertNorm[vertexTexPair[triangle.x].vertex] = runningNormal;
-            normals[triangle.x] = runningNormal.normal;
-        }
-        if(vertNorm.find(vertexTexPair[triangle.y].vertex) == vertNorm.end()){
-            vertNorm[vertexTexPair[triangle.y].vertex] = {/*normal*/ normal, /*count*/ 1};
-            normals[triangle.y] = normal;
-        }
-        else{
-            Norm runningNormal = vertNorm[vertexTexPair[triangle.y].vertex];
-            runningNormal.normal = (runningNormal.normal*runningNormal.count + normal)/(runningNormal.count+1);
-            runningNormal.count += 1;
-            vertNorm[vertexTexPair[triangle.y].vertex] = runningNormal;
-            normals[triangle.y] = runningNormal.normal;
-        }
-        if(vertNorm.find(vertexTexPair[triangle.z].vertex) == vertNorm.end()){
-            vertNorm[vertexTexPair[triangle.z].vertex] = {/*normal*/ normal, /*count*/ 1};
-            normals[triangle.z] = normal;
-        }
-        else{
-            Norm runningNormal = vertNorm[vertexTexPair[triangle.z].vertex];
-            runningNormal.normal = (runningNormal.normal*runningNormal.count + normal)/(runningNormal.count+1);
-            runningNormal.count += 1;
-            vertNorm[vertexTexPair[triangle.z].vertex] = runningNormal;
-            normals[triangle.z] = runningNormal.normal;
-        }
-    }
 
-    // init vertex buffer
-    D3D11_BUFFER_DESC desc = {};
-    desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc.ByteWidth = vertexTexPair.size()*sizeof(Float5);
-    
-    D3D11_SUBRESOURCE_DATA InitData;
-    InitData.pSysMem = vertexTexPair.data();
+        D3D11_SAMPLER_DESC sampDesc = {};
+        sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+        sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+        sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+        sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+        sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+        sampDesc.MinLOD = 0;
+        sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+        mesh->device->pDevice->CreateSamplerState( &sampDesc, &mesh->pSampler);
 
-    mesh->device->pDevice->CreateBuffer(&desc, &InitData, &mesh->pVertices);
+        D3D11_TEXTURE2D_DESC desc = {};
+        desc.Width = x;
+        desc.Height = y;
+        desc.MipLevels = 1;
+        desc.ArraySize = 1;
+        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.SampleDesc = {1,0};
+        D3D11_SUBRESOURCE_DATA init;
+        init.pSysMem = image1;
+        init.SysMemPitch = x*4;
+        mesh->device->pDevice->CreateTexture2D(&desc, &init, &mesh->pTexture);
+        mesh->device->pDevice->CreateShaderResourceView(mesh->pTexture, NULL, &mesh->pTextureView);
 
-    // init index buffer
-    D3D11_BUFFER_DESC desc2 = {};
-    desc2.Usage = D3D11_USAGE_DEFAULT;
-    desc2.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    desc2.ByteWidth = superIndex.size()*sizeof(int);
-    
-    D3D11_SUBRESOURCE_DATA InitData2;
-    InitData2.pSysMem = superIndex.data();
+        return;
+ }
 
-    mesh->device->pDevice->CreateBuffer(&desc2, &InitData2, &mesh->pIndices);
-    
-    // init normal buffer
-    D3D11_BUFFER_DESC desc3 = {};
-    desc3.Usage = D3D11_USAGE_DEFAULT;
-    desc3.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc3.ByteWidth = normals.size()*sizeof(Float3);
-    
-    D3D11_SUBRESOURCE_DATA InitData3;
-    InitData3.pSysMem = normals.data();
+void createDefaultLayout(Mesh* mesh){
+    mesh->shaders->createShader(L"shaders/vshader.cso", vertex, cowVertex);
+    mesh->shaders->createShader(L"shaders/pshader.cso", pixel, cowPixel);
 
-    mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pNormals);
+    D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+                                            0, 0, 
+                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
+                                            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+                                            1, 0, 
+                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
+                                            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+                                                 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
+    mesh->device->pDevice->CreateInputLayout(layout, 3, mesh->shaders->shaderBlob[cowVertex]->GetBufferPointer(), 
+                                                   mesh->shaders->shaderBlob[cowVertex]->GetBufferSize(), &mesh->pLayout);
 
     return;
-
 }
 
-Mesh::Mesh(const char* filename, Shader* shader, FileType type){
+Mesh::Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* textureFile){
     this->shaders = shader;
     this->device = shader->device;
     switch (type) {
@@ -259,15 +196,35 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type){
             break;
     }
 
-    this->device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+    device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+
+    // create the camera transformation buffers
+    D3D11_BUFFER_DESC cBuffer = {};
+    cBuffer.Usage = D3D11_USAGE_DEFAULT;
+    cBuffer.ByteWidth = sizeof(XMMATRIX)*3;
+    cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    device->pDevice->CreateBuffer(&cBuffer, NULL, &transformBuffer);
+
+    if (textureFile != NULL){
+        constuctTextures(this, textureFile);
+    }
+
+    createDefaultLayout(this);
 
     return;
 }
 
 
 Mesh::~Mesh(){
-    pVertices->Release();
-    pNormals->Release();
+    if (pVertices != NULL) pVertices->Release();
+    if (pNormals != NULL) pNormals->Release();
     if (pTexCoords != NULL) pTexCoords->Release();
-    pIndices->Release();
+    if (pIndices != NULL) pIndices->Release();
+
+    if (pSampler != NULL) pSampler->Release();
+    if (pTexture != NULL) pTexture->Release();
+    if (pTextureView != NULL) pTextureView->Release();
+    if (transformBuffer != NULL) transformBuffer->Release();
+    if (pLayout != NULL) pLayout->Release();
 }
+

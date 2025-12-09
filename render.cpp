@@ -7,7 +7,7 @@
 
 using DirectX::XMVectorSet;
 
-void renderer(void* input, DXDevice* device, Mesh* mesh, Watch* stopwatch){
+void renderer(DXDevice* device, Mesh* mesh, Watch* stopwatch){
 
     auto color = DirectX::Colors::Black;
 
