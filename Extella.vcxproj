@@ -48,7 +48,7 @@
 
     	<Link>
       	<AdditionalDependencies>
-                	d3d9.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;kernel32.lib;user32.lib
+                	d3d9.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;kernel32.lib;user32.lib;oleaut32.lib;ole32.lib
             	</AdditionalDependencies>
       	<GenerateDebugInformation>true</GenerateDebugInformation>
       	<ProgramDatabaseFile>$(OutDir)main.pdb</ProgramDatabaseFile>
