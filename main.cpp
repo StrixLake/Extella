@@ -62,6 +62,12 @@ EXPORT void render(){
     renderer(Allinfo.device, (Mesh*)Allinfo.spot, Allinfo.stopwatch);
 }
 
+EXPORT void release() {
+    delete Allinfo.device;
+    delete Allinfo.spot;
+    delete Allinfo.stopwatch;
+}
+
 EXPORT SAFEARRAY* getGlobalVariables(){
     BSTR *x = (BSTR*)CoTaskMemAlloc(sizeof(BSTR));
     x[0] = SysAllocString(L"Rotation speed");

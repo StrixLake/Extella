@@ -11,7 +11,7 @@ DXDevice::DXDevice(){
     D3D_FEATURE_LEVEL pFeatures[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
     D3D_FEATURE_LEVEL pFeatureLevel;
     D3D11CreateDevice(pAdapter, D3D_DRIVER_TYPE_UNKNOWN, 0, D3D11_CREATE_DEVICE_DEBUG | D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-                        pFeatures, 2, D3D11_SDK_VERSION, &this->pDevice, &pFeatureLevel, &this->pContext);
+                        pFeatures, 2, D3D11_SDK_VERSION, &pDevice, &pFeatureLevel, &pContext);
     
     #ifdef WIREFRAME
     D3D11_RASTERIZER_DESC desc;
@@ -137,6 +137,7 @@ void DXDevice::SetTargets(){
     pRender->QueryInterface(__uuidof(IDXGIResource), (void**)&pDXGIResource);
     HANDLE pSharedHandle;
     pDXGIResource->GetSharedHandle(&pSharedHandle);
+    pDXGIResource->Release();
 
     // create a dx9 texture
     pD3D9ExDevice->CreateTexture(WIDTH, HEIGHT, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pD3D9Texture, &pSharedHandle);
