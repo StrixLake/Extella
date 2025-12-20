@@ -18,14 +18,10 @@ struct VS_OUTPUT
 VS_OUTPUT main( float4 Pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORMAL)
 {
     VS_OUTPUT ou;
-    Pos = mul( Pos, World );
-    Pos = mul( Pos, View );
-    Pos = mul( Pos, Projection );
+
     ou.Pos = Pos;
     ou.uv = tex;
-    ou.norm = mul( float4(norm, 1), World );
-    ou.norm = mul( ou.norm, View );
-    ou.norm = mul( ou.norm, Projection );
-    
+    ou.norm = norm;
+
     return ou;
 }

@@ -35,6 +35,34 @@ ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
     return pixelShaders[ShaderFileName];
 }
 
+ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
+    
+    if(hullShaders.find(ShaderFileName) == hullShaders.end()){
+        ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
+
+        ID3D11HullShader* hshader;
+        device->pDevice->CreateHullShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &hshader);
+
+        hullShaders[ShaderFileName] = hshader;
+    }
+
+    return hullShaders[ShaderFileName];   
+}
+
+ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
+    
+    if(domainShaders.find(ShaderFileName) == domainShaders.end()){
+        ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
+
+        ID3D11DomainShader* dshader;
+        device->pDevice->CreateDomainShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &dshader);
+
+        domainShaders[ShaderFileName] = dshader;
+    }
+
+    return domainShaders[ShaderFileName];   
+}
+
 ID3DBlob* Shader::getShaderBlob(wstring ShaderFileName){
 
     if(shaderBlob.find(ShaderFileName) == shaderBlob.end()){
@@ -52,6 +80,12 @@ Shader::~Shader(){
     }
     for (auto pshaders : pixelShaders){
         pshaders.second->Release();
+    }
+    for (auto hshaders : hullShaders){
+        hshaders.second->Release();
+    }
+    for (auto dshaders : domainShaders){
+        dshaders.second->Release();
     }
     for (auto shaders : shaderBlob){
         shaders.second->Release();

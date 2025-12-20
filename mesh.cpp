@@ -195,7 +195,7 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* t
             break;
     }
 
-    device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+    device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST );
 
     // create the camera transformation buffers
     D3D11_BUFFER_DESC cBuffer = {};
@@ -233,9 +233,12 @@ void Mesh::Draw(array<XMMATRIX,3> camera, float time){
     device->pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
 
     device->pContext->VSSetShader(shaders->getVertexShader(L"shaders/vshader.cso"), NULL, 0);
+    device->pContext->HSSetShader(shaders->getHullShader(L"shaders/hshader.cso"), NULL, 0);
+    device->pContext->DSSetShader(shaders->getDomainShader(L"shaders/dshader.cso"), NULL, 0);
     device->pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
 
     device->pContext->VSSetConstantBuffers(0, 1, &transformBuffer);
+    device->pContext->DSSetConstantBuffers(0, 1, &transformBuffer);
 
     device->pContext->PSSetSamplers(0, 1, &pSampler);
     device->pContext->PSSetShaderResources(0, 1, &pTextureView);

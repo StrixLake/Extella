@@ -20,10 +20,15 @@ public:
     Extension(Mesh* meshPointer) : mesh(meshPointer) {}
 
     void extensionWork(array<XMMATRIX, 3> &camera, float time){
-        float rotationSpeed = Allinfo.variables[L"Rotation speed"];
         //float rotationSpeed = 1;// per second;
-        camera[0] *= DirectX::XMMatrixRotationY(rotationSpeed*time);
+        float angleRotated = Allinfo.variables[L"Angle"]/100;
+        camera[0] *= DirectX::XMMatrixRotationY(angleRotated);
     
+        float xoffset = Allinfo.variables[L"Position X"] /100;
+        float yoffset = Allinfo.variables[L"Position Y"] /100;
+        float zoffset = Allinfo.variables[L"Position Z"] /100;
+        camera[0] *= DirectX::XMMatrixTranslation(xoffset, yoffset, zoffset);
+
         camera[0] = DirectX::XMMatrixTranspose(camera[0]);
         camera[1] = DirectX::XMMatrixTranspose(camera[1]);
         camera[2] = DirectX::XMMatrixTranspose(camera[2]);
@@ -69,11 +74,15 @@ EXPORT void release() {
 }
 
 EXPORT SAFEARRAY* getGlobalVariables(){
-    BSTR *x = (BSTR*)CoTaskMemAlloc(sizeof(BSTR));
-    x[0] = SysAllocString(L"Rotation speed");
+    int elements = 4;
+    BSTR *x = (BSTR*)CoTaskMemAlloc(sizeof(BSTR)*elements);
+    x[0] = SysAllocString(L"Angle");
+    x[1] = SysAllocString(L"Position X");
+    x[2] = SysAllocString(L"Position Y");
+    x[3] = SysAllocString(L"Position Z");
 
     SAFEARRAYBOUND bound = {};
-    bound.cElements = 1;
+    bound.cElements = elements;
     bound.lLbound = 0;
 
     SAFEARRAY* ar = (SAFEARRAY*)CoTaskMemAlloc(sizeof(SAFEARRAY));

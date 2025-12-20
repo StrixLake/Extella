@@ -17,7 +17,7 @@ void renderer(DXDevice* device, Mesh* mesh, Watch* stopwatch){
                                                                   XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f ),
                                                                   XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f )), // camera matrix
                                       DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, 
-                                                                          (float)WIDTH/HEIGHT, 0.01, 100.)}; // perspective matrix
+                                                                          (float)WIDTH/HEIGHT, 0.01, 1000.)}; // perspective matrix
                                                                           
     stopwatch->lap();
                                                                           

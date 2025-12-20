@@ -56,7 +56,7 @@
     	</Link>
 		
     	<FxCompile>
-      	<ShaderModel>4.0</ShaderModel>
+      	<ShaderModel>5.0</ShaderModel>
     	</FxCompile>
   	</ItemDefinitionGroup>
   	<ItemDefinitionGroup Condition="$(Configuration) == 'Debug'">
@@ -81,14 +81,24 @@
     	<ClCompile Include="watch.cpp" />
 
     	<FxCompile Include="shaders\vshader.hlsl">
-      	<ShaderType>Vertex</ShaderType>
-      	<ObjectFileOutput>$(OutDir)shaders/vshader.cso</ObjectFileOutput>
+      		<ShaderType>Vertex</ShaderType>
+      		<ObjectFileOutput>$(OutDir)shaders/vshader.cso</ObjectFileOutput>
     	</FxCompile>
 
     	<FxCompile Include="shaders\pshader.hlsl">
-      	<ShaderType>Pixel</ShaderType>
-      	<ObjectFileOutput>$(OutDir)shaders/pshader.cso</ObjectFileOutput>
+      		<ShaderType>Pixel</ShaderType>
+      		<ObjectFileOutput>$(OutDir)shaders/pshader.cso</ObjectFileOutput>
     	</FxCompile>
+
+		<FxCompile Include="shaders\hshader.hlsl">
+			<ShaderType>Hull</ShaderType>
+			<ObjectFileOutput>$(OutDir)shaders/hshader.cso</ObjectFileOutput>
+		</FxCompile>
+
+		<FxCompile Include="shaders\dshader.hlsl">
+			<ShaderType>Domain</ShaderType>
+			<ObjectFileOutput>$(OutDir)shaders/dshader.cso</ObjectFileOutput>
+		</FxCompile>
 	
     	<Mesh Include="mesh\*" />
 

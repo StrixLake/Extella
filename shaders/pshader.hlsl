@@ -12,6 +12,6 @@ float4 main(VS_OUTPUT input) : SV_Target
 {   
     float3 o = normalize(float3(-1,1,-1));
     float b = dot(o,input.norm);
-    o = image.Sample( samLinear, input.uv )*b;
+    o = image.Sample( samLinear, input.uv );
     return float4(o, 1);
 }
