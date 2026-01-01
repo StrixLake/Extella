@@ -1,3 +1,10 @@
+cbuffer tesfactor : register (b0)
+{
+    int outtesFactor;
+    int intesFactor;
+    int g;
+    int p;
+}
 
 struct VS_OUTPUT
 {
@@ -24,11 +31,11 @@ HS_CONSTANT_DATA_OUTPUT ConstantPatchFunction(InputPatch<VS_OUTPUT, 3> ip, uint 
 
     HS_CONSTANT_DATA_OUTPUT output;
 
-    output.EdgeTesFactor[0] = 3;
-    output.EdgeTesFactor[1] = 3;
-    output.EdgeTesFactor[2] = 3;
+    output.EdgeTesFactor[0] = outtesFactor + 1;
+    output.EdgeTesFactor[1] = outtesFactor + 1;
+    output.EdgeTesFactor[2] = outtesFactor + 1;
 
-    output.insideTexFactor = 3;
+    output.insideTexFactor = intesFactor + 1;
     return output;
 }
 

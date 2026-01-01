@@ -22,8 +22,11 @@ public:
     ID3D11SamplerState *pSampler = NULL;
     ID3D11Texture2D *pTexture = NULL;
     ID3D11ShaderResourceView *pTextureView = NULL;
-    ID3D11Buffer *transformBuffer = NULL;
     ID3D11InputLayout* pLayout = NULL;
+    
+    ID3D11Buffer *transformBuffer = NULL;
+    ID3D11Buffer *tesBuffer = NULL;
+    
 
     Shader* shaders;
     DXDevice* device;

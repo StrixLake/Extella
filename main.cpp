@@ -11,6 +11,7 @@ struct {
     DXDevice* device;
     Mesh* spot;
     Watch* stopwatch;
+    Shader* shaders;
     unordered_map<wstring, float> variables;
 } Allinfo;
 
@@ -32,6 +33,12 @@ public:
         camera[0] = DirectX::XMMatrixTranspose(camera[0]);
         camera[1] = DirectX::XMMatrixTranspose(camera[1]);
         camera[2] = DirectX::XMMatrixTranspose(camera[2]);
+
+        // set the tessellation factor in the constant buffers
+        int Tes[4] = {static_cast<int>(Allinfo.variables[L"out-tes"] / 10),
+                    static_cast<int>(Allinfo.variables[L"in-tes"] / 10)};
+
+        mesh->device->pContext->UpdateSubresource(mesh->tesBuffer, 0, NULL, Tes, 0, 0);
     }
 
     Mesh* mesh;
@@ -42,10 +49,12 @@ EXPORT void InitializeRenderer(IDirect3DSurface9** pSurface){
     
 
     DXDevice *device = new DXDevice();
+    //device->CreateSwap(0);
     device->CreateViews();
     device->SetTargets();
 
     Shader *shaders = new Shader(device);
+    Allinfo.shaders = shaders;
 
     Mesh *spot = new Mesh("mesh/spot_.obj", shaders, obj, L"mesh/spot_.png");
     spot->extension = new Extension(spot);
@@ -71,15 +80,18 @@ EXPORT void release() {
     delete Allinfo.device;
     delete Allinfo.spot;
     delete Allinfo.stopwatch;
+    delete Allinfo.shaders;
 }
 
 EXPORT SAFEARRAY* getGlobalVariables(){
-    int elements = 4;
+    int elements = 6;
     BSTR *x = (BSTR*)CoTaskMemAlloc(sizeof(BSTR)*elements);
     x[0] = SysAllocString(L"Angle");
     x[1] = SysAllocString(L"Position X");
     x[2] = SysAllocString(L"Position Y");
     x[3] = SysAllocString(L"Position Z");
+    x[4] = SysAllocString(L"in-tes");
+    x[5] = SysAllocString(L"out-tes");
 
     SAFEARRAYBOUND bound = {};
     bound.cElements = elements;

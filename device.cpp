@@ -2,8 +2,8 @@
 
 DXDevice::DXDevice(){
     
-    IDXGIFactory1* pDXGIFactory;
-    CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&pDXGIFactory);
+    IDXGIFactory2* pDXGIFactory;
+    CreateDXGIFactory1(__uuidof(IDXGIFactory2), (void**)&pDXGIFactory);
 
     IDXGIAdapter1* pAdapter;
     pDXGIFactory->EnumAdapters1(DEVICE, &pAdapter);
@@ -54,29 +54,30 @@ void DXDevice::CreateSwap(HWND hwnd){
     desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
     desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 
-    DXGI_SWAP_CHAIN_DESC sd;
-    sd.BufferDesc = desc;
-    sd.BufferCount = 1;
+    DXGI_SWAP_CHAIN_DESC1 sd = {};
+    sd.Width = WIDTH;
+    sd.Height = HEIGHT;
+    sd.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    sd.Stereo = false;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.Flags = 0;
-    sd.SampleDesc = {1, 0};
-    sd.Windowed = true;
-    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    sd.OutputWindow = hwnd;
+    sd.BufferCount = 2;
+    sd.SampleDesc = {1,0};
+    sd.Scaling = DXGI_SCALING_STRETCH;
+    sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 
-    IDXGIDevice* dxgiDevice = 0;
-    pDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice);
+    IDXGIDevice1* dxgiDevice = 0;
+    pDevice->QueryInterface(__uuidof(IDXGIDevice1), (void**)&dxgiDevice);
 
-    IDXGIAdapter* dxgiAdapter = 0;
-    dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter);
+    IDXGIAdapter1* dxgiAdapter = 0;
+    dxgiDevice->GetParent(__uuidof(IDXGIAdapter1), (void**)&dxgiAdapter);
 
-    IDXGIFactory* dxgiFactory = 0;
-    dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory);
+    IDXGIFactory2* dxgiFactory = 0;
+    dxgiAdapter->GetParent(__uuidof(IDXGIFactory2), (void**)&dxgiFactory);
 
-    DXGI_ADAPTER_DESC ddc;
+    
     dxgiAdapter->GetDesc(&ddc);
 
-    dxgiFactory->CreateSwapChain(this->pDevice, &sd, &this->pSwapChain);
+    dxgiFactory->CreateSwapChainForComposition(this->pDevice, &sd, NULL,&this->pSwapChain);
 
     dxgiFactory->Release();
     dxgiAdapter->Release();

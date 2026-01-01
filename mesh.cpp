@@ -203,6 +203,13 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* t
     cBuffer.ByteWidth = sizeof(XMMATRIX)*3;
     cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     device->pDevice->CreateBuffer(&cBuffer, NULL, &transformBuffer);
+    
+    D3D11_BUFFER_DESC tBuffer = {};
+    tBuffer.Usage = D3D11_USAGE_DEFAULT;
+    tBuffer.ByteWidth = sizeof(int)*4;
+    tBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    device->pDevice->CreateBuffer(&tBuffer, NULL, &tesBuffer);
+
 
     if (textureFile != NULL){
         constuctTextures(this, textureFile);
@@ -238,6 +245,7 @@ void Mesh::Draw(array<XMMATRIX,3> camera, float time){
     device->pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
 
     device->pContext->VSSetConstantBuffers(0, 1, &transformBuffer);
+    device->pContext->HSSetConstantBuffers(0, 1, &tesBuffer);
     device->pContext->DSSetConstantBuffers(0, 1, &transformBuffer);
 
     device->pContext->PSSetSamplers(0, 1, &pSampler);
@@ -256,6 +264,7 @@ Mesh::~Mesh(){
     if (pTexture != NULL) pTexture->Release();
     if (pTextureView != NULL) pTextureView->Release();
     if (transformBuffer != NULL) transformBuffer->Release();
+    if (tesBuffer != NULL) tesBuffer->Release();
     if (pLayout != NULL) pLayout->Release();
 
     if(extension != NULL) delete extension;
