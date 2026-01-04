@@ -24,18 +24,6 @@ DXDevice::DXDevice(){
     this->pContext->RSSetState(pRasterState);
     pRasterState->Release();
     #endif
-    
-    Direct3DCreate9Ex(D3D_SDK_VERSION, &pD3D9ExObj);
-    D3DPRESENT_PARAMETERS presentParams = {};
-    presentParams.Windowed = TRUE;
-    presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    presentParams.BackBufferCount = 1;
-    presentParams.BackBufferFormat = D3DFMT_UNKNOWN;
-    presentParams.hDeviceWindow = GetDesktopWindow(); // Dummy window
-    presentParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-    pD3D9ExObj->CreateDeviceEx(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL, 
-                     D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED | D3DCREATE_FPU_PRESERVE, 
-                     &presentParams, NULL, &pD3D9ExDevice);
 
     pAdapter->Release();
     pDXGIFactory->Release();
@@ -133,17 +121,6 @@ void DXDevice::CreateViews(){
 
 void DXDevice::SetTargets(){
 
-    // get a shared handle for the dx9 surface
-    IDXGIResource* pDXGIResource;
-    pRender->QueryInterface(__uuidof(IDXGIResource), (void**)&pDXGIResource);
-    HANDLE pSharedHandle;
-    pDXGIResource->GetSharedHandle(&pSharedHandle);
-    pDXGIResource->Release();
-
-    // create a dx9 texture
-    pD3D9ExDevice->CreateTexture(WIDTH, HEIGHT, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &pD3D9Texture, &pSharedHandle);
-    pD3D9Texture->GetSurfaceLevel(0, &pD3D9Surface);
-
     // set the render target for dx11 renderer
     pContext->OMSetRenderTargets(1, &pRenderView, pDepthView);
     
@@ -161,10 +138,6 @@ void DXDevice::SetTargets(){
 }
 
 DXDevice::~DXDevice(){
-    if (pD3D9ExObj != NULL) pD3D9ExObj->Release();
-    if (pD3D9ExDevice != NULL) pD3D9ExDevice->Release();
-    if (pD3D9Surface != NULL) pD3D9Surface->Release();
-    if (pD3D9Texture != NULL) pD3D9Texture->Release();
 
     if (pDevice != NULL) pDevice->Release();
     if (pContext != NULL) pContext->Release();

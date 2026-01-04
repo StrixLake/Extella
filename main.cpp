@@ -45,7 +45,7 @@ public:
 };
 
 
-EXPORT void InitializeRenderer(IDirect3DSurface9** pSurface){
+EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice){
     
 
     DXDevice *device = new DXDevice();
@@ -64,7 +64,8 @@ EXPORT void InitializeRenderer(IDirect3DSurface9** pSurface){
     Allinfo.spot = spot;
     Allinfo.stopwatch = stopwatch;
 
-    *pSurface = device->pD3D9Surface;
+    device->pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
+    device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);
 
     return;
 }
@@ -111,4 +112,9 @@ EXPORT void setVariable(BSTR variable, float value){
     // since BSTR is wchar_t*
     // we can use it directly as the key
     Allinfo.variables[variable] = value;
+}
+
+EXPORT float getVariable(BSTR variable)
+{
+    return Allinfo.variables[variable];
 }

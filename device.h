@@ -19,12 +19,6 @@ public:
 
     void SetTargets();
 
-    // dx9 interfaces
-    IDirect3D9Ex* pD3D9ExObj = NULL;
-    LPDIRECT3DDEVICE9EX pD3D9ExDevice = NULL;
-    IDirect3DSurface9* pD3D9Surface = NULL;
-    IDirect3DTexture9* pD3D9Texture = NULL;
-
     // dx11 interfaces
     ID3D11Device* pDevice = NULL;
     ID3D11DeviceContext* pContext = NULL;
