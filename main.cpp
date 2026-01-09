@@ -6,13 +6,15 @@
 #include <mesh.h>
 #include <shader.h>
 #include <watch.h>
+#include <atomic>
+using std::atomic;
 
 struct {
     DXDevice* device;
     Mesh* spot;
     Watch* stopwatch;
     Shader* shaders;
-    unordered_map<wstring, float> variables;
+    unordered_map<wstring, atomic<float>> variables;
 } Allinfo;
 
 class Extension : public BaseWorker{
@@ -29,6 +31,8 @@ public:
         float yoffset = Allinfo.variables[L"Position Y"] /100;
         float zoffset = Allinfo.variables[L"Position Z"] /100;
         camera[0] *= DirectX::XMMatrixTranslation(xoffset, yoffset, zoffset);
+        camera[0] = DirectX::XMMatrixRotationX(Allinfo.variables[L"CameraY"]/100) * camera[0];
+        camera[0] = DirectX::XMMatrixRotationY(Allinfo.variables[L"CameraX"]/100) * camera[0];
 
         camera[0] = DirectX::XMMatrixTranspose(camera[0]);
         camera[1] = DirectX::XMMatrixTranspose(camera[1]);
@@ -56,12 +60,16 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     Shader *shaders = new Shader(device);
     Allinfo.shaders = shaders;
 
+    Mesh *plane = new Mesh("mesh/plane.obj", shaders, obj, L"mesh/default_.png");
+    plane->extension = new Extension(plane);
     Mesh *spot = new Mesh("mesh/spot_.obj", shaders, obj, L"mesh/spot_.png");
     spot->extension = new Extension(spot);
     Watch* stopwatch = new Watch();
 
+    plane->next = spot;
+
     Allinfo.device = device;
-    Allinfo.spot = spot;
+    Allinfo.spot = plane;
     Allinfo.stopwatch = stopwatch;
 
     device->pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);

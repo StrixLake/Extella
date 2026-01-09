@@ -268,6 +268,13 @@ Mesh::~Mesh(){
     if (pLayout != NULL) pLayout->Release();
 
     if(extension != NULL) delete extension;
-    if (next != NULL) delete next;
+    
+    while (next != NULL)
+    {
+        Mesh* nxt = next->next;
+        delete next;
+        next = nxt;
+    }
+    
 }
 
