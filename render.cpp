@@ -1,13 +1,14 @@
 #include <device.h>
 #include <mesh.h>
 #include <watch.h>
+#include <state.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 #define MOVE 0.01
 
 using DirectX::XMVectorSet;
 
-void renderer(DXDevice* device, Mesh* mesh, Watch* stopwatch){
+void renderer(State* state){
 
     auto color = DirectX::Colors::Black;
 
@@ -19,21 +20,21 @@ void renderer(DXDevice* device, Mesh* mesh, Watch* stopwatch){
                                       DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, 
                                                                           (float)WIDTH/HEIGHT, 0.01, 1000.)}; // perspective matrix
                                                                           
-    stopwatch->lap();
+    state->stopwatch->lap();
                                                                           
-    float time = stopwatch->getTotalTime(); // in seconds
+    state->variables[L"time"] = state->stopwatch->getTotalTime(); // in seconds
 
-    device->pContext->ClearDepthStencilView(device->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
-    device->pContext->ClearRenderTargetView(device->pRenderView, color);
+    state->pDevice->pContext->ClearDepthStencilView(state->pDevice->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
+    state->pDevice->pContext->ClearRenderTargetView(state->pDevice->pRenderView, color);
 
         
-    Mesh* nmesh = mesh;
+    Mesh* nmesh = state->mesh;
     while(nmesh != NULL){
-        nmesh->Draw(transform, time);
+        nmesh->Draw(transform, state->variables);
         nmesh = nmesh->next;
     }
 
-    device->pContext->Flush();
+    //state->pDevice->pContext->Flush();
     
     return;
 }

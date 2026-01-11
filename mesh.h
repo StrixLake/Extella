@@ -11,7 +11,7 @@ public:
     Mesh() = delete;
     Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* textureFile);
 
-    void Draw(array<XMMATRIX,3> camera, float time);
+    void Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variables);
 
     uint32_t triangleCount;
     ID3D11Buffer* pVertices = NULL;

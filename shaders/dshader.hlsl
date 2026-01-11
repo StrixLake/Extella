@@ -34,7 +34,10 @@ DOUTPUT main(HS_CONSTANT_DATA_OUTPUT input, float3 bary : SV_DomainLocation, con
                     patch[1].pos * bary.y +
                     patch[2].pos * bary.z;
 
-    output.pos = mul(float4(vertex,1.f), World);
+    output.pos = float4(vertex, 1.f);
+    output.pos.y += sin(output.pos.x) + sin(output.pos.z);
+
+    output.pos = mul(output.pos, World);
     output.pos = mul(output.pos, View);
     output.pos = mul(output.pos, Projection);
 

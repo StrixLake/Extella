@@ -220,9 +220,9 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* t
     return;
 }
 
-void Mesh::Draw(array<XMMATRIX,3> camera, float time){
+void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variables){
     
-    extension->extensionWork(camera, time);
+    extension->extensionWork(camera, variables);
 
     device->pContext->UpdateSubresource(transformBuffer, 0, NULL, 
                                             camera.data(), 0, 0);
@@ -269,12 +269,7 @@ Mesh::~Mesh(){
 
     if(extension != NULL) delete extension;
     
-    while (next != NULL)
-    {
-        Mesh* nxt = next->next;
-        delete next;
-        next = nxt;
-    }
+    if (next != NULL) delete next;    
     
 }
 

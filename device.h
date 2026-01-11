@@ -6,6 +6,10 @@
 #include <d3d9.h>
 #include <array>
 #include <DirectXMath.h>
+#include <string>
+#include <unordered_map>
+using std::unordered_map;
+using std::wstring;
 using DirectX::XMMATRIX;
 using std::array;
 
@@ -36,6 +40,7 @@ public:
 
 class BaseWorker{
 public:
-    virtual void extensionWork(array<XMMATRIX, 3> &camera, float time) = 0;
+    virtual void extensionWork(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) = 0;
     virtual ~BaseWorker() = default;
 };
+
