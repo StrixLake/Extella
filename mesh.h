@@ -1,6 +1,11 @@
 #pragma once
-#include <device.h>
+#include <d3d11.h>
 #include <shader.h>
+#include <DirectXMath.h>
+#include <array>
+#include <extension.h>
+using std::array;
+using DirectX::XMMATRIX;
 
 enum FileType{
     obj, stl
@@ -9,7 +14,7 @@ enum FileType{
 class Mesh{
 public:
     Mesh() = delete;
-    Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* textureFile);
+    Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, FileType type, const wchar_t* textureFile);
 
     void Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variables);
 
@@ -29,7 +34,8 @@ public:
     
 
     Shader* shaders;
-    DXDevice* device;
+    ID3D11Device* pDevice;
+    ID3D11DeviceContext* pContext;
 
     BaseWorker* extension = NULL;
 

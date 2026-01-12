@@ -1,8 +1,8 @@
 #include <shader.h>
 #include <d3dcompiler.h>
 
-Shader::Shader(DXDevice* device){
-    this->device = device;
+Shader::Shader(ID3D11Device* device){
+    this->pDevice = device;
     return;
 }
 
@@ -13,7 +13,7 @@ ID3D11VertexShader* Shader::getVertexShader(wstring ShaderFileName){
         ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
 
         ID3D11VertexShader* vshader;
-        device->pDevice->CreateVertexShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &vshader);
+        pDevice->CreateVertexShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &vshader);
 
         vertexShaders[ShaderFileName] = vshader;
     }
@@ -27,7 +27,7 @@ ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
         ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
 
         ID3D11PixelShader* pshader;
-        device->pDevice->CreatePixelShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &pshader);
+        pDevice->CreatePixelShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &pshader);
 
         pixelShaders[ShaderFileName] = pshader;
     }
@@ -41,7 +41,7 @@ ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
         ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
 
         ID3D11HullShader* hshader;
-        device->pDevice->CreateHullShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &hshader);
+        pDevice->CreateHullShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &hshader);
 
         hullShaders[ShaderFileName] = hshader;
     }
@@ -55,7 +55,7 @@ ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
         ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
 
         ID3D11DomainShader* dshader;
-        device->pDevice->CreateDomainShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &dshader);
+        pDevice->CreateDomainShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &dshader);
 
         domainShaders[ShaderFileName] = dshader;
     }

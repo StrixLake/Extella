@@ -79,6 +79,8 @@
     	<ClCompile Include="render.cpp" />
     	<ClCompile Include="shader.cpp" />
     	<ClCompile Include="watch.cpp" />
+		<ClCompile Include="extension.cpp"/>
+		<ClCompile Include="resources.cpp"/>
 
     	<FxCompile Include="shaders\vshader.hlsl">
       		<ShaderType>Vertex</ShaderType>

@@ -25,7 +25,7 @@ void stlMeshFactory(Mesh* mesh, const char* filename){
     D3D11_SUBRESOURCE_DATA InitData;
     InitData.pSysMem = vertex.data();
 
-    mesh->device->pDevice->CreateBuffer(&desc, &InitData, &mesh->pVertices);
+    mesh->pDevice->CreateBuffer(&desc, &InitData, &mesh->pVertices);
     
     // init normals buffer
     D3D11_BUFFER_DESC desc2 = {};
@@ -36,7 +36,7 @@ void stlMeshFactory(Mesh* mesh, const char* filename){
     D3D11_SUBRESOURCE_DATA InitData2;
     InitData2.pSysMem = normal.data();
 
-    mesh->device->pDevice->CreateBuffer(&desc2, &InitData2, &mesh->pNormals);
+    mesh->pDevice->CreateBuffer(&desc2, &InitData2, &mesh->pNormals);
     
     // init index buffer
     D3D11_BUFFER_DESC desc3 = {};
@@ -47,7 +47,7 @@ void stlMeshFactory(Mesh* mesh, const char* filename){
     D3D11_SUBRESOURCE_DATA InitData3;
     InitData3.pSysMem = index.data();
 
-    mesh->device->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pIndices);
+    mesh->pDevice->CreateBuffer(&desc3, &InitData3, &mesh->pIndices);
     
     
     return;
@@ -73,7 +73,7 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
     D3D11_SUBRESOURCE_DATA indexData = {};
     indexData.pSysMem = index.data();
 
-    mesh->device->pDevice->CreateBuffer(&indexDesc, &indexData, &mesh->pIndices);
+    mesh->pDevice->CreateBuffer(&indexDesc, &indexData, &mesh->pIndices);
     
     
     // init vertex buffer
@@ -85,7 +85,7 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
     D3D11_SUBRESOURCE_DATA vertexData = {};
     vertexData.pSysMem = vertex.data();
 
-    mesh->device->pDevice->CreateBuffer(&vertexDesc, &vertexData, &mesh->pVertices);
+    mesh->pDevice->CreateBuffer(&vertexDesc, &vertexData, &mesh->pVertices);
     
     if (normals.size() != 0){
     // init normal buffer
@@ -97,7 +97,7 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
     D3D11_SUBRESOURCE_DATA normalData = {};
     normalData.pSysMem = normals.data();
 
-    mesh->device->pDevice->CreateBuffer(&normalDesc, &normalData, &mesh->pNormals);
+    mesh->pDevice->CreateBuffer(&normalDesc, &normalData, &mesh->pNormals);
     }
     
     if (texCoords.size() != 0){
@@ -110,7 +110,7 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
         D3D11_SUBRESOURCE_DATA tcData = {};
         tcData.pSysMem = texCoords.data();
     
-        mesh->device->pDevice->CreateBuffer(&tcDesc, &tcData, &mesh->pTexCoords);
+        mesh->pDevice->CreateBuffer(&tcDesc, &tcData, &mesh->pTexCoords);
     }
 
     return;
@@ -146,7 +146,7 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
         sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
         sampDesc.MinLOD = 0;
         sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-        mesh->device->pDevice->CreateSamplerState( &sampDesc, &mesh->pSampler);
+        mesh->pDevice->CreateSamplerState( &sampDesc, &mesh->pSampler);
 
         D3D11_TEXTURE2D_DESC desc = {};
         desc.Width = x;
@@ -160,8 +160,8 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
         D3D11_SUBRESOURCE_DATA init;
         init.pSysMem = image1;
         init.SysMemPitch = x*4;
-        mesh->device->pDevice->CreateTexture2D(&desc, &init, &mesh->pTexture);
-        mesh->device->pDevice->CreateShaderResourceView(mesh->pTexture, NULL, &mesh->pTextureView);
+        mesh->pDevice->CreateTexture2D(&desc, &init, &mesh->pTexture);
+        mesh->pDevice->CreateShaderResourceView(mesh->pTexture, NULL, &mesh->pTextureView);
 
         return;
  }
@@ -177,15 +177,16 @@ void createDefaultLayout(Mesh* mesh){
                                             {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                                  2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
-    mesh->device->pDevice->CreateInputLayout(layout, 3, mesh->shaders->getShaderBlob(L"shaders/vshader.cso")->GetBufferPointer(), 
+    mesh->pDevice->CreateInputLayout(layout, 3, mesh->shaders->getShaderBlob(L"shaders/vshader.cso")->GetBufferPointer(), 
                                                    mesh->shaders->getShaderBlob(L"shaders/vshader.cso")->GetBufferSize(), &mesh->pLayout);
 
     return;
 }
 
-Mesh::Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* textureFile){
+Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, FileType type, const wchar_t* textureFile){
     this->shaders = shader;
-    this->device = shader->device;
+    this->pDevice = shader->pDevice;
+    this->pContext = context;
     switch (type) {
         case stl:
             stlMeshFactory(this, filename);
@@ -195,20 +196,19 @@ Mesh::Mesh(const char* filename, Shader* shader, FileType type, const wchar_t* t
             break;
     }
 
-    device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST );
 
     // create the camera transformation buffers
     D3D11_BUFFER_DESC cBuffer = {};
     cBuffer.Usage = D3D11_USAGE_DEFAULT;
     cBuffer.ByteWidth = sizeof(XMMATRIX)*3;
     cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    device->pDevice->CreateBuffer(&cBuffer, NULL, &transformBuffer);
+    pDevice->CreateBuffer(&cBuffer, NULL, &transformBuffer);
     
     D3D11_BUFFER_DESC tBuffer = {};
     tBuffer.Usage = D3D11_USAGE_DEFAULT;
     tBuffer.ByteWidth = sizeof(int)*4;
     tBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    device->pDevice->CreateBuffer(&tBuffer, NULL, &tesBuffer);
+    pDevice->CreateBuffer(&tBuffer, NULL, &tesBuffer);
 
 
     if (textureFile != NULL){
@@ -224,34 +224,34 @@ void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variabl
     
     extension->extensionWork(camera, variables);
 
-    device->pContext->UpdateSubresource(transformBuffer, 0, NULL, 
+    pContext->UpdateSubresource(transformBuffer, 0, NULL, 
                                             camera.data(), 0, 0);
         
-    device->pContext->IASetInputLayout(pLayout);
+    pContext->IASetInputLayout(pLayout);
 
     UINT offset = 0;
     UINT stride = sizeof(DirectX::XMFLOAT3);
-    device->pContext->IASetVertexBuffers(0, 1, &pVertices, &stride, &offset);
+    pContext->IASetVertexBuffers(0, 1, &pVertices, &stride, &offset);
     stride = sizeof(DirectX::XMFLOAT2);
-    device->pContext->IASetVertexBuffers(1, 1, &pTexCoords, &stride, &offset);
+    pContext->IASetVertexBuffers(1, 1, &pTexCoords, &stride, &offset);
     stride = sizeof(DirectX::XMFLOAT3);
-    device->pContext->IASetVertexBuffers(2, 1, &pNormals, &stride, &offset);
+    pContext->IASetVertexBuffers(2, 1, &pNormals, &stride, &offset);
 
-    device->pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
+    pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
 
-    device->pContext->VSSetShader(shaders->getVertexShader(L"shaders/vshader.cso"), NULL, 0);
-    device->pContext->HSSetShader(shaders->getHullShader(L"shaders/hshader.cso"), NULL, 0);
-    device->pContext->DSSetShader(shaders->getDomainShader(L"shaders/dshader.cso"), NULL, 0);
-    device->pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
+    pContext->VSSetShader(shaders->getVertexShader(L"shaders/vshader.cso"), NULL, 0);
+    pContext->HSSetShader(shaders->getHullShader(L"shaders/hshader.cso"), NULL, 0);
+    pContext->DSSetShader(shaders->getDomainShader(L"shaders/dshader.cso"), NULL, 0);
+    pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
 
-    device->pContext->VSSetConstantBuffers(0, 1, &transformBuffer);
-    device->pContext->HSSetConstantBuffers(0, 1, &tesBuffer);
-    device->pContext->DSSetConstantBuffers(0, 1, &transformBuffer);
+    pContext->VSSetConstantBuffers(0, 1, &transformBuffer);
+    pContext->HSSetConstantBuffers(0, 1, &tesBuffer);
+    pContext->DSSetConstantBuffers(0, 1, &transformBuffer);
 
-    device->pContext->PSSetSamplers(0, 1, &pSampler);
-    device->pContext->PSSetShaderResources(0, 1, &pTextureView);
+    pContext->PSSetSamplers(0, 1, &pSampler);
+    pContext->PSSetShaderResources(0, 1, &pTextureView);
 
-    device->pContext->DrawIndexed(triangleCount*3, 0, 0);
+    pContext->DrawIndexed(triangleCount*3, 0, 0);
 }
 
 Mesh::~Mesh(){

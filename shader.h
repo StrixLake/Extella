@@ -1,5 +1,5 @@
 #pragma once
-#include <device.h>
+#include <d3d11.h>
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -16,7 +16,7 @@ class Shader{
     unordered_map<wstring, ID3DBlob*> shaderBlob;
 
 public:
-    Shader(DXDevice* device);
+    Shader(ID3D11Device* device);
 
     ID3D11VertexShader* getVertexShader(wstring ShaderFileName);
     ID3D11PixelShader* getPixelShader(wstring ShaderFileName);
@@ -24,7 +24,7 @@ public:
     ID3D11DomainShader* getDomainShader(wstring ShaderFileName);
     ID3DBlob* getShaderBlob(wstring ShaderFileName);
 
-    DXDevice* device;
+    ID3D11Device* pDevice;
 
     ~Shader();
 };

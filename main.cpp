@@ -17,12 +17,12 @@ public:
 
     void extensionWork(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){
     
-        float xoffset = variables[L"Position X"] /100;
-        float yoffset = variables[L"Position Y"] /100;
+        float xoffset = variables[L"Position X"] /20;
+        float yoffset = variables[L"Position Y"] /20;
         float zoffset = variables[L"Position Z"] /10;
-        camera[0] = DirectX::XMMatrixTranslation(xoffset, yoffset, zoffset) * camera[0];
-        camera[0] = DirectX::XMMatrixRotationX(variables[L"CameraY"]/100) * camera[0];
-        camera[0] = DirectX::XMMatrixRotationY(variables[L"CameraX"]/100) * camera[0];
+        camera[0] *= DirectX::XMMatrixRotationX(variables[L"CameraY"]/100);
+        camera[0] *= DirectX::XMMatrixRotationY(variables[L"CameraX"]/100);
+        camera[0] *= DirectX::XMMatrixTranslation(xoffset, yoffset, zoffset);
 
         camera[0] = DirectX::XMMatrixTranspose(camera[0]);
         camera[1] = DirectX::XMMatrixTranspose(camera[1]);
@@ -32,7 +32,7 @@ public:
         int Tes[4] = {static_cast<int>(variables[L"out-tes"] / 10),
                     static_cast<int>(variables[L"in-tes"] / 10)};
 
-        mesh->device->pContext->UpdateSubresource(mesh->tesBuffer, 0, NULL, Tes, 0, 0);
+        mesh->pContext->UpdateSubresource(mesh->tesBuffer, 0, NULL, Tes, 0, 0);
     }
 
     Mesh* mesh;
@@ -43,17 +43,18 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     
 
     DXDevice *device = new DXDevice();
+    device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST );
     //device->CreateSwap(0);
     device->CreateViews();
     device->SetTargets();
 
-    Shader *shaders = new Shader(device);
+    Shader *shaders = new Shader(device->pDevice);
 
     state = new State();
 
     state->shaders = shaders;
 
-    Mesh *plane = new Mesh("mesh/plane.obj", shaders, obj, L"mesh/default_.png");
+    Mesh *plane = new Mesh("mesh/plane.obj", shaders, device->pContext, obj, L"mesh/default_.png");
     plane->extension = new Extension(plane);
     Watch* stopwatch = new Watch();
 

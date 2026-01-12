@@ -36,11 +36,3 @@ public:
     
     ~DXDevice();
 };
-
-
-class BaseWorker{
-public:
-    virtual void extensionWork(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) = 0;
-    virtual ~BaseWorker() = default;
-};
-
