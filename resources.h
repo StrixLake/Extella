@@ -18,5 +18,7 @@ public:
 
     void createConstantBuffer(string name, size_t size);
 
-    ID3D11Buffer* getConstBuffer(string name);
+    ID3D11Buffer** getConstBuffer(string name);
+
+    ~ShaderResources();
 };

@@ -195,14 +195,6 @@ Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, F
             objMeshFactory2(this, filename);
             break;
     }
-
-
-    // create the camera transformation buffers
-    D3D11_BUFFER_DESC cBuffer = {};
-    cBuffer.Usage = D3D11_USAGE_DEFAULT;
-    cBuffer.ByteWidth = sizeof(XMMATRIX)*3;
-    cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    pDevice->CreateBuffer(&cBuffer, NULL, &transformBuffer);
     
     D3D11_BUFFER_DESC tBuffer = {};
     tBuffer.Usage = D3D11_USAGE_DEFAULT;
@@ -223,9 +215,6 @@ Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, F
 void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variables){
     
     extension->extensionWork(camera, variables);
-
-    pContext->UpdateSubresource(transformBuffer, 0, NULL, 
-                                            camera.data(), 0, 0);
         
     pContext->IASetInputLayout(pLayout);
 
@@ -244,9 +233,7 @@ void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variabl
     pContext->DSSetShader(shaders->getDomainShader(L"shaders/dshader.cso"), NULL, 0);
     pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
 
-    pContext->VSSetConstantBuffers(0, 1, &transformBuffer);
     pContext->HSSetConstantBuffers(0, 1, &tesBuffer);
-    pContext->DSSetConstantBuffers(0, 1, &transformBuffer);
 
     pContext->PSSetSamplers(0, 1, &pSampler);
     pContext->PSSetShaderResources(0, 1, &pTextureView);

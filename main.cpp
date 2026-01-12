@@ -7,13 +7,14 @@
 #include <shader.h>
 #include <watch.h>
 #include <state.h>
+#include <resources.h>
 
 State* state;
 
 class Extension : public BaseWorker{
 public:
     Extension() = delete;
-    Extension(Mesh* meshPointer) : mesh(meshPointer) {}
+    Extension(Mesh* meshPointer, ShaderResources* cbuf) : mesh(meshPointer), cbuffers(cbuf) {}
 
     void extensionWork(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){
     
@@ -28,6 +29,8 @@ public:
         camera[1] = DirectX::XMMatrixTranspose(camera[1]);
         camera[2] = DirectX::XMMatrixTranspose(camera[2]);
 
+        mesh->pContext->UpdateSubresource(*cbuffers->getConstBuffer("transformMatrix"), 0, NULL, camera.data(), 0,0);
+
         // set the tessellation factor in the constant buffers
         int Tes[4] = {static_cast<int>(variables[L"out-tes"] / 10),
                     static_cast<int>(variables[L"in-tes"] / 10)};
@@ -36,6 +39,7 @@ public:
     }
 
     Mesh* mesh;
+    ShaderResources* cbuffers;
 };
 
 
@@ -55,13 +59,18 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     state->shaders = shaders;
 
     Mesh *plane = new Mesh("mesh/plane.obj", shaders, device->pContext, obj, L"mesh/default_.png");
-    plane->extension = new Extension(plane);
+    ShaderResources* resource = new ShaderResources(device->pDevice);
+    resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
+    
+    device->pContext->DSSetConstantBuffers(0, 1, resource->getConstBuffer("transformMatrix"));
+    plane->extension = new Extension(plane, resource);
     Watch* stopwatch = new Watch();
 
 
     state->pDevice = device;
     state->mesh = plane;
     state->stopwatch = stopwatch;
+    state->resources = resource;
 
     device->pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
     device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);

@@ -36,6 +36,8 @@ ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
 }
 
 ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
+     
+    if(ShaderFileName == L"") return NULL;
     
     if(hullShaders.find(ShaderFileName) == hullShaders.end()){
         ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
@@ -51,6 +53,8 @@ ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
 
 ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
     
+    if(ShaderFileName == L"") return NULL;
+
     if(domainShaders.find(ShaderFileName) == domainShaders.end()){
         ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
 
