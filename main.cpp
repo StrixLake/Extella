@@ -11,43 +11,14 @@
 
 State* state;
 
-class Extension : public BaseWorker{
-public:
-    Extension() = delete;
-    Extension(Mesh* meshPointer, ShaderResources* cbuf) : mesh(meshPointer), cbuffers(cbuf) {}
-
-    void extensionWork(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){
-    
-        float xoffset = variables[L"Position X"] /20;
-        float yoffset = variables[L"Position Y"] /20;
-        float zoffset = variables[L"Position Z"] /10;
-        camera[0] *= DirectX::XMMatrixRotationX(variables[L"CameraY"]/100);
-        camera[0] *= DirectX::XMMatrixRotationY(variables[L"CameraX"]/100);
-        camera[0] *= DirectX::XMMatrixTranslation(xoffset, yoffset, zoffset);
-
-        camera[0] = DirectX::XMMatrixTranspose(camera[0]);
-        camera[1] = DirectX::XMMatrixTranspose(camera[1]);
-        camera[2] = DirectX::XMMatrixTranspose(camera[2]);
-
-        mesh->pContext->UpdateSubresource(*cbuffers->getConstBuffer("transformMatrix"), 0, NULL, camera.data(), 0,0);
-
-        // set the tessellation factor in the constant buffers
-        int Tes[4] = {static_cast<int>(variables[L"out-tes"] / 10),
-                    static_cast<int>(variables[L"in-tes"] / 10)};
-
-        mesh->pContext->UpdateSubresource(mesh->tesBuffer, 0, NULL, Tes, 0, 0);
-    }
-
-    Mesh* mesh;
-    ShaderResources* cbuffers;
-};
+BaseWorker* createTransformation(Mesh* mesh, ShaderResources* resource);
+BaseWorker* createTessellation(Mesh* mesh, ShaderResources* resource);
 
 
 EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice){
     
 
     DXDevice *device = new DXDevice();
-    device->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST );
     //device->CreateSwap(0);
     device->CreateViews();
     device->SetTargets();
@@ -61,9 +32,12 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     Mesh *plane = new Mesh("mesh/plane.obj", shaders, device->pContext, obj, L"mesh/default_.png");
     ShaderResources* resource = new ShaderResources(device->pDevice);
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
-    
-    device->pContext->DSSetConstantBuffers(0, 1, resource->getConstBuffer("transformMatrix"));
-    plane->extension = new Extension(plane, resource);
+    resource->createConstantBuffer("TesBuffer", sizeof(int)*4);
+    plane->cbuffers = resource;
+
+    plane->extension += createTransformation(plane, resource);
+    plane->extension += createTessellation(plane, resource);
+
     Watch* stopwatch = new Watch();
 
 

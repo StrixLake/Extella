@@ -214,7 +214,7 @@ Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, F
 
 void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variables){
     
-    extension->extensionWork(camera, variables);
+    extension.prePipelineSetup(camera, variables);
         
     pContext->IASetInputLayout(pLayout);
 
@@ -228,15 +228,22 @@ void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variabl
 
     pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
 
+    
     pContext->VSSetShader(shaders->getVertexShader(L"shaders/vshader.cso"), NULL, 0);
     pContext->HSSetShader(shaders->getHullShader(L"shaders/hshader.cso"), NULL, 0);
     pContext->DSSetShader(shaders->getDomainShader(L"shaders/dshader.cso"), NULL, 0);
     pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
 
-    pContext->HSSetConstantBuffers(0, 1, &tesBuffer);
-
     pContext->PSSetSamplers(0, 1, &pSampler);
     pContext->PSSetShaderResources(0, 1, &pTextureView);
+
+    extension.postPipelineSetup(camera, variables);
+    
+    camera[0] = DirectX::XMMatrixTranspose(camera[0]);
+    camera[1] = DirectX::XMMatrixTranspose(camera[1]);
+    camera[2] = DirectX::XMMatrixTranspose(camera[2]);
+    
+    pContext->UpdateSubresource(*cbuffers->getConstBuffer("transformMatrix"), 0, NULL, camera.data(), 0,0);
 
     pContext->DrawIndexed(triangleCount*3, 0, 0);
 }
@@ -250,11 +257,8 @@ Mesh::~Mesh(){
     if (pSampler != NULL) pSampler->Release();
     if (pTexture != NULL) pTexture->Release();
     if (pTextureView != NULL) pTextureView->Release();
-    if (transformBuffer != NULL) transformBuffer->Release();
     if (tesBuffer != NULL) tesBuffer->Release();
     if (pLayout != NULL) pLayout->Release();
-
-    if(extension != NULL) delete extension;
     
     if (next != NULL) delete next;    
     

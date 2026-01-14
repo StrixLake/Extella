@@ -3,7 +3,8 @@
 #include <shader.h>
 #include <DirectXMath.h>
 #include <array>
-#include <extension.h>
+#include <delegate.h>
+#include <resources.h>
 using std::array;
 using DirectX::XMMATRIX;
 
@@ -29,15 +30,14 @@ public:
     ID3D11ShaderResourceView *pTextureView = NULL;
     ID3D11InputLayout* pLayout = NULL;
     
-    ID3D11Buffer *transformBuffer = NULL;
     ID3D11Buffer *tesBuffer = NULL;
     
-
+    ShaderResources* cbuffers;
     Shader* shaders;
     ID3D11Device* pDevice;
     ID3D11DeviceContext* pContext;
 
-    BaseWorker* extension = NULL;
+    Delegate extension;
 
     Mesh* next = NULL;
 
