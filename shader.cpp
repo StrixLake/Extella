@@ -76,10 +76,10 @@ ID3D11GeometryShader* Shader::getGeometryShader(wstring ShaderFileName){
     if(geometryShaders.find(ShaderFileName) == geometryShaders.end()){
         ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
 
-        ID3D11GeometryShader* dshader;
-        pDevice->CreateGeometryShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &dshader);
+        ID3D11GeometryShader* gshader;
+        pDevice->CreateGeometryShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &gshader);
 
-        geometryShaders[ShaderFileName] = dshader;
+        geometryShaders[ShaderFileName] = gshader;
     }
 
     return geometryShaders[ShaderFileName];   

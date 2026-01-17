@@ -166,23 +166,6 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
         return;
  }
 
-void createDefaultLayout(Mesh* mesh){
-
-    D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-                                            0, 0, 
-                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
-                                            1, 0, 
-                                            D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-                                                 2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
-
-    mesh->pDevice->CreateInputLayout(layout, 3, mesh->shaders->getShaderBlob(L"shaders/vshader.cso")->GetBufferPointer(), 
-                                                   mesh->shaders->getShaderBlob(L"shaders/vshader.cso")->GetBufferSize(), &mesh->pLayout);
-
-    return;
-}
-
 Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, FileType type, const wchar_t* textureFile){
     this->shaders = shader;
     this->pDevice = shader->pDevice;
@@ -200,8 +183,6 @@ Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, F
         constuctTextures(this, textureFile);
     }
 
-    createDefaultLayout(this);
-
     return;
 }
 
@@ -209,28 +190,6 @@ void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variabl
     
     extension.prePipelineSetup(camera, variables);
         
-    pContext->IASetInputLayout(pLayout);
-
-    UINT offset = 0;
-    UINT stride = sizeof(DirectX::XMFLOAT3);
-    pContext->IASetVertexBuffers(0, 1, &pVertices, &stride, &offset);
-    stride = sizeof(DirectX::XMFLOAT2);
-    pContext->IASetVertexBuffers(1, 1, &pTexCoords, &stride, &offset);
-    stride = sizeof(DirectX::XMFLOAT3);
-    pContext->IASetVertexBuffers(2, 1, &pNormals, &stride, &offset);
-
-    pContext->IASetIndexBuffer(pIndices, DXGI_FORMAT_R32_UINT, 0);
-
-    
-    pContext->VSSetShader(shaders->getVertexShader(L"shaders/vshader.cso"), NULL, 0);
-    pContext->HSSetShader(shaders->getHullShader(L"shaders/hshader.cso"), NULL, 0);
-    pContext->DSSetShader(shaders->getDomainShader(L"shaders/dshader.cso"), NULL, 0);
-    pContext->GSSetShader(shaders->getGeometryShader(L"shaders/gshader.cso"), NULL, 0);
-    pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
-
-    pContext->PSSetSamplers(0, 1, &pSampler);
-    pContext->PSSetShaderResources(0, 1, &pTextureView);
-
     extension.postPipelineSetup(camera, variables);
     
     camera[0] = DirectX::XMMatrixTranspose(camera[0]);
@@ -251,7 +210,6 @@ Mesh::~Mesh(){
     if (pSampler != NULL) pSampler->Release();
     if (pTexture != NULL) pTexture->Release();
     if (pTextureView != NULL) pTextureView->Release();
-    if (pLayout != NULL) pLayout->Release();
     
     if (next != NULL) delete next;    
     

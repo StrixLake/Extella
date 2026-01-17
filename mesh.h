@@ -28,7 +28,6 @@ public:
     ID3D11SamplerState *pSampler = NULL;
     ID3D11Texture2D *pTexture = NULL;
     ID3D11ShaderResourceView *pTextureView = NULL;
-    ID3D11InputLayout* pLayout = NULL;
     
     ShaderResources* cbuffers;
     Shader* shaders;

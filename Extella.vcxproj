@@ -80,8 +80,11 @@
     	<ClCompile Include="shader.cpp" />
     	<ClCompile Include="watch.cpp" />
 		<ClCompile Include="resources.cpp"/>
-		<ClCompile Include="extension.cpp"/>
 		<ClCompile Include="delegate.cpp"/>
+		<ClCompile Include="extension/vShader.cpp"/>
+		<ClCompile Include="extension/tShader.cpp"/>
+		<ClCompile Include="extension/gShader.cpp"/>
+		<ClCompile Include="extension/pShader.cpp"/>
 
     	<FxCompile Include="shaders\vshader.hlsl">
       		<ShaderType>Vertex</ShaderType>
@@ -93,6 +96,11 @@
       		<ObjectFileOutput>$(OutDir)shaders/pshader.cso</ObjectFileOutput>
     	</FxCompile>
 
+    	<FxCompile Include="shaders\pshader2.hlsl">
+      		<ShaderType>Pixel</ShaderType>
+      		<ObjectFileOutput>$(OutDir)shaders/pshader2.cso</ObjectFileOutput>
+    	</FxCompile>
+
 		<FxCompile Include="shaders\hshader.hlsl">
 			<ShaderType>Hull</ShaderType>
 			<ObjectFileOutput>$(OutDir)shaders/hshader.cso</ObjectFileOutput>
@@ -101,6 +109,11 @@
 		<FxCompile Include="shaders\dshader.hlsl">
 			<ShaderType>Domain</ShaderType>
 			<ObjectFileOutput>$(OutDir)shaders/dshader.cso</ObjectFileOutput>
+		</FxCompile>
+
+		<FxCompile Include="shaders\dshader2.hlsl">
+			<ShaderType>Domain</ShaderType>
+			<ObjectFileOutput>$(OutDir)shaders/dshader2.cso</ObjectFileOutput>
 		</FxCompile>
 
 		<FxCompile Include="shaders\gshader.hlsl">
