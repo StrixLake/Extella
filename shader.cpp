@@ -54,6 +54,7 @@ ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
 ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
     
     if(ShaderFileName == L"") return NULL;
+    
 
     if(domainShaders.find(ShaderFileName) == domainShaders.end()){
         ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
@@ -65,6 +66,23 @@ ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
     }
 
     return domainShaders[ShaderFileName];   
+}
+
+ID3D11GeometryShader* Shader::getGeometryShader(wstring ShaderFileName){
+    
+    if(ShaderFileName == L"") return NULL;
+
+
+    if(geometryShaders.find(ShaderFileName) == geometryShaders.end()){
+        ID3DBlob *ShaderByte = getShaderBlob(ShaderFileName);
+
+        ID3D11GeometryShader* dshader;
+        pDevice->CreateGeometryShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &dshader);
+
+        geometryShaders[ShaderFileName] = dshader;
+    }
+
+    return geometryShaders[ShaderFileName];   
 }
 
 ID3DBlob* Shader::getShaderBlob(wstring ShaderFileName){
@@ -90,6 +108,9 @@ Shader::~Shader(){
     }
     for (auto dshaders : domainShaders){
         dshaders.second->Release();
+    }
+    for (auto gshaders : geometryShaders){
+        gshaders.second->Release();
     }
     for (auto shaders : shaderBlob){
         shaders.second->Release();

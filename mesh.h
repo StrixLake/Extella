@@ -30,8 +30,6 @@ public:
     ID3D11ShaderResourceView *pTextureView = NULL;
     ID3D11InputLayout* pLayout = NULL;
     
-    ID3D11Buffer *tesBuffer = NULL;
-    
     ShaderResources* cbuffers;
     Shader* shaders;
     ID3D11Device* pDevice;

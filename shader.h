@@ -13,6 +13,7 @@ class Shader{
     unordered_map<wstring, ID3D11PixelShader*> pixelShaders;
     unordered_map<wstring, ID3D11HullShader*> hullShaders;
     unordered_map<wstring, ID3D11DomainShader*> domainShaders;
+    unordered_map<wstring, ID3D11GeometryShader*> geometryShaders;
     unordered_map<wstring, ID3DBlob*> shaderBlob;
 
 public:
@@ -22,6 +23,7 @@ public:
     ID3D11PixelShader* getPixelShader(wstring ShaderFileName);
     ID3D11HullShader* getHullShader(wstring ShaderFileName);
     ID3D11DomainShader* getDomainShader(wstring ShaderFileName);
+    ID3D11GeometryShader* getGeometryShader(wstring ShaderFileName);
     ID3DBlob* getShaderBlob(wstring ShaderFileName);
 
     ID3D11Device* pDevice;

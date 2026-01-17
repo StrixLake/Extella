@@ -102,6 +102,11 @@
 			<ShaderType>Domain</ShaderType>
 			<ObjectFileOutput>$(OutDir)shaders/dshader.cso</ObjectFileOutput>
 		</FxCompile>
+
+		<FxCompile Include="shaders\gshader.hlsl">
+			<ShaderType>Geometry</ShaderType>
+			<ObjectFileOutput>$(OutDir)shaders/gshader.cso</ObjectFileOutput>
+		</FxCompile>
 	
     	<Mesh Include="mesh\*" />
 

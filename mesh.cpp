@@ -196,13 +196,6 @@ Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, F
             break;
     }
     
-    D3D11_BUFFER_DESC tBuffer = {};
-    tBuffer.Usage = D3D11_USAGE_DEFAULT;
-    tBuffer.ByteWidth = sizeof(int)*4;
-    tBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    pDevice->CreateBuffer(&tBuffer, NULL, &tesBuffer);
-
-
     if (textureFile != NULL){
         constuctTextures(this, textureFile);
     }
@@ -232,6 +225,7 @@ void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variabl
     pContext->VSSetShader(shaders->getVertexShader(L"shaders/vshader.cso"), NULL, 0);
     pContext->HSSetShader(shaders->getHullShader(L"shaders/hshader.cso"), NULL, 0);
     pContext->DSSetShader(shaders->getDomainShader(L"shaders/dshader.cso"), NULL, 0);
+    pContext->GSSetShader(shaders->getGeometryShader(L"shaders/gshader.cso"), NULL, 0);
     pContext->PSSetShader(shaders->getPixelShader(L"shaders/pshader.cso"), NULL, 0);
 
     pContext->PSSetSamplers(0, 1, &pSampler);
@@ -242,7 +236,7 @@ void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variabl
     camera[0] = DirectX::XMMatrixTranspose(camera[0]);
     camera[1] = DirectX::XMMatrixTranspose(camera[1]);
     camera[2] = DirectX::XMMatrixTranspose(camera[2]);
-    
+
     pContext->UpdateSubresource(*cbuffers->getConstBuffer("transformMatrix"), 0, NULL, camera.data(), 0,0);
 
     pContext->DrawIndexed(triangleCount*3, 0, 0);
@@ -257,7 +251,6 @@ Mesh::~Mesh(){
     if (pSampler != NULL) pSampler->Release();
     if (pTexture != NULL) pTexture->Release();
     if (pTextureView != NULL) pTextureView->Release();
-    if (tesBuffer != NULL) tesBuffer->Release();
     if (pLayout != NULL) pLayout->Release();
     
     if (next != NULL) delete next;    

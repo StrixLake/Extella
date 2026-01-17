@@ -8,10 +8,18 @@ struct VS_OUTPUT
     float3 norm : NORMAL;
 };
 
-float4 main(VS_OUTPUT input) : SV_Target
-{   
-    float3 o = normalize(float3(-100,100,-100));
-    float b = -dot(o,input.norm);
+struct GS_OUTPUT
+{
+    float4 Pos : SV_POSITION;
+    float2 uv : TEXCOORD;
+    float3 norm : NORMAL;
+    float3 col : COLOR;
+};
+
+float4 main(GS_OUTPUT input) : SV_Target
+{
+    float3 o = normalize(float3(0,0,1));
+    float b = abs(dot(o,input.norm));
     o = image.Sample( samLinear, input.uv );
-    return float4(o, 1);
+    return float4(input.col, 1);
 }
