@@ -5,6 +5,14 @@ cbuffer ConstantBuffer : register( b0 )
     matrix Projection;
 }
 
+cbuffer tesfactor : register (b1)
+{
+    int outtesFactor;
+    int intesFactor;
+    int g;
+    float time;
+}
+
 struct HS_CONSTANT_DATA_OUTPUT
 {
     float EdgeTesFactor[3] : SV_TessFactor;
@@ -35,10 +43,10 @@ DOUTPUT main(HS_CONSTANT_DATA_OUTPUT input, float3 bary : SV_DomainLocation, con
                     patch[2].pos * bary.z;
 
     output.pos = float4(vertex, 1.f);
-    output.pos.y = sin(output.pos.x) + sin(output.pos.z);
+    output.pos.y = sin(output.pos.x + time) + sin(output.pos.z + time);
 
-    float3 norm1 = normalize(float3(1, cos(output.pos.x), 0));
-    float3 norm2 = normalize(float3(0, cos(output.pos.z), 1));
+    float3 norm1 = normalize(float3(1, cos(output.pos.x + time), 0));
+    float3 norm2 = normalize(float3(0, cos(output.pos.z + time), 1));
     output.norm = cross(norm2, norm1);
 
     output.uv = patch[0].uv * bary.x + 

@@ -2,6 +2,14 @@
 #include <delegate.h>
 #include <mesh.h>
 
+struct Tesfactor
+{
+    int outtesFactor;
+    int intesFactor;
+    int g;
+    float time;
+};
+
 class TessellationExtension : public BaseWorker{
 public:
     Mesh* mesh;
@@ -13,7 +21,7 @@ public:
     void postConstruction(){
         
         D3D11_RASTERIZER_DESC desc = {};
-        desc.FillMode =	D3D11_FILL_WIREFRAME;
+        desc.FillMode =	D3D11_FILL_SOLID;
         desc.CullMode =	D3D11_CULL_NONE;
         desc.FrontCounterClockwise = FALSE;
         desc.DepthBias = 0;
@@ -26,7 +34,7 @@ public:
         
         mesh->pDevice->CreateRasterizerState(&desc, &pRasterState);
 
-        cbuffers->createConstantBuffer("TesBuffer", sizeof(int)*4);
+        cbuffers->createConstantBuffer("TesBuffer", sizeof(Tesfactor));
     };
     
     void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
@@ -34,14 +42,16 @@ public:
 
         mesh->pContext->RSSetState(pRasterState);
         // set the tessellation factor in the constant buffers
-        int Tes[4] = {static_cast<int>(variables[L"out-tes"] / 10),
-                    static_cast<int>(variables[L"in-tes"] / 10)};
+        Tesfactor Tes = {static_cast<int>(variables[L"out-tes"] / 10),
+                    static_cast<int>(variables[L"in-tes"] / 10),
+                0, variables[L"time"]};
 
         mesh->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST );
 
-        mesh->pContext->UpdateSubresource(*cbuffers->getConstBuffer("TesBuffer"), 0, NULL, Tes, 0, 0);
+        mesh->pContext->UpdateSubresource(*cbuffers->getConstBuffer("TesBuffer"), 0, NULL, &Tes, 0, 0);
         mesh->pContext->HSSetConstantBuffers(0, 1, cbuffers->getConstBuffer("TesBuffer"));
         mesh->pContext->DSSetConstantBuffers(0, 1, cbuffers->getConstBuffer("transformMatrix"));
+        mesh->pContext->DSSetConstantBuffers(1, 1, cbuffers->getConstBuffer("TesBuffer"));
         
         mesh->pContext->HSSetShader(mesh->shaders->getHullShader(hullShader), NULL, 0);
         mesh->pContext->DSSetShader(mesh->shaders->getDomainShader(domainShader), NULL, 0);

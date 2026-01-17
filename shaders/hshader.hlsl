@@ -3,7 +3,7 @@ cbuffer tesfactor : register (b0)
     int outtesFactor;
     int intesFactor;
     int g;
-    int p;
+    float time;
 }
 
 struct VS_OUTPUT

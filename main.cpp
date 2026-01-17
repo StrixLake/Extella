@@ -30,19 +30,10 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     state->shaders = shaders;
 
-    Mesh *plane2 = new Mesh("mesh/plane.obj", shaders, device->pContext, obj, L"mesh/white.png");
-    Mesh *plane = new Mesh("mesh/plane.obj", shaders, device->pContext, obj, L"mesh/default_.png");
-    plane->next = plane2;
+    Mesh *plane2 = new Mesh("mesh/plane.obj", shaders, device->pContext, obj, L"mesh/default_.png");
     ShaderResources* resource = new ShaderResources(device->pDevice);
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
-    plane->cbuffers = resource;
     plane2->cbuffers = resource;
-    
-    plane->extension += createTransformation(plane, resource);
-    plane->extension += createVertex(plane, resource, L"shaders/vshader.cso");
-    plane->extension += createTessellation(plane, resource, L"shaders/hshader.cso", L"shaders/dshader.cso");
-    plane->extension += createGeometry(plane, resource, L"shaders/gshader.cso");
-    plane->extension += createPixel(plane, resource, L"shaders/pshader.cso");
     
     plane2->extension += createTransformation(plane2, resource);
     plane2->extension += createVertex(plane2, resource, L"shaders/vshader.cso");
@@ -54,7 +45,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
 
     state->pDevice = device;
-    state->mesh = plane;
+    state->mesh = plane2;
     state->stopwatch = stopwatch;
     state->resources = resource;
 

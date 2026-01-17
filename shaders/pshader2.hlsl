@@ -17,8 +17,8 @@ struct GS_OUTPUT
 
 float4 main(GS_OUTPUT input) : SV_Target
 {
-    float3 o = normalize(float3(0,0,1));
-    float b = abs(dot(o,input.norm));
-    o = image.Sample( samLinear, input.uv );
-    return float4(o, 1);
+    float4 o = 1;
+    float b = abs(dot(normalize(float3(0,0,1)),normalize(input.norm)));
+    o = image.Sample( samLinear, input.uv ) *b + 0.001;
+    return o;
 }
