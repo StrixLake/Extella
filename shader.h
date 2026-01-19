@@ -26,6 +26,8 @@ public:
     ID3D11GeometryShader* getGeometryShader(wstring ShaderFileName);
     ID3DBlob* getShaderBlob(wstring ShaderFileName);
 
+    void HotReload();
+
     ID3D11Device* pDevice;
 
     ~Shader();

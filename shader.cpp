@@ -96,6 +96,35 @@ ID3DBlob* Shader::getShaderBlob(wstring ShaderFileName){
     return shaderBlob[ShaderFileName];
 }
 
+void Shader::HotReload()
+{
+    for (auto vshaders : vertexShaders){
+        vshaders.second->Release();
+    }
+    for (auto pshaders : pixelShaders){
+        pshaders.second->Release();
+    }
+    for (auto hshaders : hullShaders){
+        hshaders.second->Release();
+    }
+    for (auto dshaders : domainShaders){
+        dshaders.second->Release();
+    }
+    for (auto gshaders : geometryShaders){
+        gshaders.second->Release();
+    }
+    for (auto shaders : shaderBlob){
+        shaders.second->Release();
+    }
+
+    vertexShaders = {};
+    pixelShaders = {};
+    hullShaders = {};
+    domainShaders = {};
+    geometryShaders = {};
+    shaderBlob = {};
+}
+
 Shader::~Shader(){
     for (auto vshaders : vertexShaders){
         vshaders.second->Release();

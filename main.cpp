@@ -100,3 +100,8 @@ EXPORT float getVariable(BSTR variable)
 {
     return state->variables[variable];
 }
+
+EXPORT void hotReload()
+{
+    state->shaders->HotReload();
+}
