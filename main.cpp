@@ -37,9 +37,9 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     
     plane2->extension += createTransformation(plane2, resource);
     plane2->extension += createVertex(plane2, resource, L"shaders/vshader.cso");
-    plane2->extension += createTessellation(plane2, resource, L"shaders/hshader.cso", L"shaders/dshader2.cso");
-    plane2->extension += createGeometry(plane2, resource, L"");
-    plane2->extension += createPixel(plane2, resource, L"shaders/pshader2.cso");
+    plane2->extension += createTessellation(plane2, resource, L"shaders/hshader.cso", L"shaders/dshader.cso");
+    plane2->extension += createGeometry(plane2, resource, L"shaders/gsSolidWireframe.cso");
+    plane2->extension += createPixel(plane2, resource, L"shaders/psSolidWireframe.cso");
 
     Watch* stopwatch = new Watch();
 

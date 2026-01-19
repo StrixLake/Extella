@@ -101,6 +101,12 @@
       		<ObjectFileOutput>$(OutDir)shaders/pshader2.cso</ObjectFileOutput>
     	</FxCompile>
 
+    	<FxCompile Include="shaders\psSolidWireframe.hlsl">
+      		<ShaderType>Pixel</ShaderType>
+      		<ObjectFileOutput>$(OutDir)shaders/psSolidWireframe.cso</ObjectFileOutput>
+    	</FxCompile>
+
+		
 		<FxCompile Include="shaders\hshader.hlsl">
 			<ShaderType>Hull</ShaderType>
 			<ObjectFileOutput>$(OutDir)shaders/hshader.cso</ObjectFileOutput>
@@ -119,6 +125,11 @@
 		<FxCompile Include="shaders\gshader.hlsl">
 			<ShaderType>Geometry</ShaderType>
 			<ObjectFileOutput>$(OutDir)shaders/gshader.cso</ObjectFileOutput>
+		</FxCompile>
+
+		<FxCompile Include="shaders\gsSolidWireframe.hlsl">
+			  <ShaderType>Geometry</ShaderType>
+			  <ObjectFileOutput>$(OutDir)shaders/gsSolidWireframe.cso</ObjectFileOutput>
 		</FxCompile>
 	
     	<Mesh Include="mesh\*" />
