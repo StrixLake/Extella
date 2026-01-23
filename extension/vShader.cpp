@@ -81,6 +81,8 @@ public:
         mesh->pContext->IASetIndexBuffer(mesh->pIndices, DXGI_FORMAT_R32_UINT, 0);
         mesh->pContext->VSSetShader(mesh->shaders->getVertexShader(vertexShader), NULL, 0);
         mesh->pContext->VSSetConstantBuffers(0, 1, cbuffers->getConstBuffer("transformMatrix"));
+
+        mesh->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     }
 
     void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){};

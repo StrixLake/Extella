@@ -15,9 +15,11 @@ struct VS_OUTPUT
 struct GS_OUTPUT
 {
     float4 Pos : SV_POSITION;
-    float2 uv : TEXCOORD;
+    float2 uv : TEXCOORD0;
     float3 norm : NORMAL;
     float3 dist : POSITION;
+    float4 xyz : TEXCOORD1;
+    float ldist : TEXCOORD2;
 };
 
 
@@ -71,6 +73,14 @@ void main(triangle VS_OUTPUT vertex[3], inout TriangleStream<GS_OUTPUT> triStrea
     v1.dist = float3(0, minDistance(v1.Pos.xyz, v2.Pos.xyz, v0.Pos.xyz), 0);
     v2.dist = float3(0, 0, minDistance(v2.Pos.xyz, v0.Pos.xyz, v1.Pos.xyz));
 
+    v0.xyz = v0.Pos;
+    v1.xyz = v1.Pos;
+    v2.xyz = v2.Pos;
+
+    matrix wv = mul(World, View);
+    v0.ldist = mul(vertex[0].Pos, wv).z;
+    v1.ldist = mul(vertex[1].Pos, wv).z;
+    v2.ldist = mul(vertex[2].Pos, wv).z;
 
     triStream.Append(v0);
     triStream.Append(v1);
