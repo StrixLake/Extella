@@ -15,10 +15,10 @@ ID3D11VertexShader* Shader::getVertexShader(wstring ShaderFileName){
         ID3D11VertexShader* vshader;
         pDevice->CreateVertexShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &vshader);
 
-        vertexShaders[ShaderFileName] = vshader;
+        vertexShaders[ShaderFileName] = unique_ptr<ID3D11VertexShader, Deleter<ID3D11VertexShader*>>(vshader);
     }
 
-    return vertexShaders[ShaderFileName];
+    return vertexShaders[ShaderFileName].get();
 }
 
 ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
@@ -29,10 +29,10 @@ ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
         ID3D11PixelShader* pshader;
         pDevice->CreatePixelShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &pshader);
 
-        pixelShaders[ShaderFileName] = pshader;
+        pixelShaders[ShaderFileName] = unique_ptr<ID3D11PixelShader, Deleter<ID3D11PixelShader*>>(pshader);
     }
 
-    return pixelShaders[ShaderFileName];
+    return pixelShaders[ShaderFileName].get();
 }
 
 ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
@@ -45,10 +45,10 @@ ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
         ID3D11HullShader* hshader;
         pDevice->CreateHullShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &hshader);
 
-        hullShaders[ShaderFileName] = hshader;
+        hullShaders[ShaderFileName] = unique_ptr<ID3D11HullShader, Deleter<ID3D11HullShader*>>(hshader);
     }
 
-    return hullShaders[ShaderFileName];   
+    return hullShaders[ShaderFileName].get();   
 }
 
 ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
@@ -62,10 +62,10 @@ ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
         ID3D11DomainShader* dshader;
         pDevice->CreateDomainShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &dshader);
 
-        domainShaders[ShaderFileName] = dshader;
+        domainShaders[ShaderFileName] = unique_ptr<ID3D11DomainShader, Deleter<ID3D11DomainShader*>>(dshader);
     }
 
-    return domainShaders[ShaderFileName];   
+    return domainShaders[ShaderFileName].get();   
 }
 
 ID3D11GeometryShader* Shader::getGeometryShader(wstring ShaderFileName){
@@ -79,10 +79,10 @@ ID3D11GeometryShader* Shader::getGeometryShader(wstring ShaderFileName){
         ID3D11GeometryShader* gshader;
         pDevice->CreateGeometryShader(ShaderByte->GetBufferPointer(), ShaderByte->GetBufferSize(), NULL, &gshader);
 
-        geometryShaders[ShaderFileName] = gshader;
+        geometryShaders[ShaderFileName] = unique_ptr<ID3D11GeometryShader, Deleter<ID3D11GeometryShader*>>(gshader);
     }
 
-    return geometryShaders[ShaderFileName];   
+    return geometryShaders[ShaderFileName].get();   
 }
 
 ID3DBlob* Shader::getShaderBlob(wstring ShaderFileName){
@@ -91,59 +91,17 @@ ID3DBlob* Shader::getShaderBlob(wstring ShaderFileName){
         ID3DBlob* ShaderByte;
         D3DReadFileToBlob(ShaderFileName.data(), &ShaderByte);
 
-        shaderBlob[ShaderFileName] = ShaderByte;
+        shaderBlob[ShaderFileName] = unique_ptr<ID3DBlob, Deleter<ID3DBlob*>>(ShaderByte);
     }
-    return shaderBlob[ShaderFileName];
+    return shaderBlob[ShaderFileName].get();
 }
 
 void Shader::HotReload()
 {
-    for (auto vshaders : vertexShaders){
-        vshaders.second->Release();
-    }
-    for (auto pshaders : pixelShaders){
-        pshaders.second->Release();
-    }
-    for (auto hshaders : hullShaders){
-        hshaders.second->Release();
-    }
-    for (auto dshaders : domainShaders){
-        dshaders.second->Release();
-    }
-    for (auto gshaders : geometryShaders){
-        gshaders.second->Release();
-    }
-    for (auto shaders : shaderBlob){
-        shaders.second->Release();
-    }
-
-    vertexShaders = {};
-    pixelShaders = {};
-    hullShaders = {};
-    domainShaders = {};
-    geometryShaders = {};
-    shaderBlob = {};
-}
-
-Shader::~Shader(){
-    for (auto vshaders : vertexShaders){
-        vshaders.second->Release();
-    }
-    for (auto pshaders : pixelShaders){
-        pshaders.second->Release();
-    }
-    for (auto hshaders : hullShaders){
-        hshaders.second->Release();
-    }
-    for (auto dshaders : domainShaders){
-        dshaders.second->Release();
-    }
-    for (auto gshaders : geometryShaders){
-        gshaders.second->Release();
-    }
-    for (auto shaders : shaderBlob){
-        shaders.second->Release();
-    }
-    
-    return;
+    vertexShaders.clear();
+    pixelShaders.clear();
+    hullShaders.clear();
+    domainShaders.clear();
+    geometryShaders.clear();
+    shaderBlob.clear();
 }
