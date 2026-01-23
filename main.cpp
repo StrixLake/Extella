@@ -36,8 +36,8 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     plane2->cbuffers = resource;
     
     plane2->extension += createTransformation(plane2, resource);
-    plane2->extension += createVertex(plane2, resource, L"shaders/vshader.cso");
-    plane2->extension += createPixel(plane2, resource, L"shaders/pshader2.cso");
+    plane2->extension += createVertex(plane2, resource, L"vshader.cso");
+    plane2->extension += createPixel(plane2, resource, L"pshader2.cso");
 
     Watch* stopwatch = new Watch();
 

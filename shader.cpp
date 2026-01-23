@@ -89,7 +89,8 @@ ID3DBlob* Shader::getShaderBlob(wstring ShaderFileName){
 
     if(shaderBlob.find(ShaderFileName) == shaderBlob.end()){
         ID3DBlob* ShaderByte;
-        D3DReadFileToBlob(ShaderFileName.data(), &ShaderByte);
+        wstring ShaderFileNameFull = L"shaders/" + ShaderFileName;
+        D3DReadFileToBlob(ShaderFileNameFull.data(), &ShaderByte);
 
         shaderBlob[ShaderFileName] = unique_ptr<ID3DBlob, Deleter<ID3DBlob*>>(ShaderByte);
     }
