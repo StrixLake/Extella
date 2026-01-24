@@ -31,16 +31,18 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     state->shaders = shaders;
 
     Mesh *plane2 = new Mesh("mesh/triangle.obj", shaders, device->pContext, obj, L"mesh/default_.png");
+    
     ShaderResources* resource = new ShaderResources(device->pDevice);
-    resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     plane2->cbuffers = resource;
+
+    resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     
     plane2->extension += createTransformation(plane2, resource);
-    plane2->extension += createVertex(plane2, resource, L"vshader.cso");
+    plane2->extension += createVertex(plane2, resource, L"vsGridShader.cso");
     plane2->extension += createPixel(plane2, resource, L"psGridShader.cso");
+    plane2->extension += disableBackCulling(plane2);
 
     Watch* stopwatch = new Watch();
-
 
     state->pDevice = device;
     state->mesh = plane2;

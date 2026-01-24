@@ -11,3 +11,5 @@ BaseWorker* createTessellation(Mesh* mesh, ShaderResources* resources, wstring h
 BaseWorker* createGeometry(Mesh* mesh, ShaderResources* resources, wstring geometryShader);
 
 BaseWorker* createPixel(Mesh* mesh, ShaderResources* resources, wstring pixelShader);
+
+BaseWorker* disableBackCulling(Mesh* mesh);
