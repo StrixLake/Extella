@@ -31,7 +31,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     state->shaders = shaders;
 
     Mesh *plane2 = new Mesh("mesh/triangle.obj", shaders, device->pContext, obj, L"mesh/default_.png");
-    Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, obj, L"mesh/default_.png");
+    Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, obj, L"mesh/normals.png");
     plane2->next = grass;
 
     ShaderResources* resource = new ShaderResources(device->pDevice);

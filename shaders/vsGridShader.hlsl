@@ -24,8 +24,8 @@ VS_OUTPUT main( float4 Pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORM
     ou.uv = tex;
     ou.norm = norm;
 
-    ou.Pos.x *= 100;
-    ou.Pos.z *= 100;
+    ou.Pos.x *= 5;
+    ou.Pos.z *= 5;
     ou.p = ou.Pos;
 
     ou.Pos = mul(ou.Pos, World);
