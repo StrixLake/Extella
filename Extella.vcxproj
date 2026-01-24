@@ -56,7 +56,8 @@
     	</Link>
 		
     	<FxCompile>
-      	<ShaderModel>5.0</ShaderModel>
+      		<ShaderModel>5.0</ShaderModel>
+			<ObjectFileOutput>$(OutDir)shaders/%(Filename).cso</ObjectFileOutput>
     	</FxCompile>
   	</ItemDefinitionGroup>
   	<ItemDefinitionGroup Condition="$(Configuration) == 'Debug'">
@@ -87,50 +88,24 @@
 		<ClCompile Include="extension/pShader.cpp"/>
 		<ClCompile Include="extension/configuration.cpp"/>
 
-    	<FxCompile Include="shaders\vshader.hlsl">
+    	<FxCompile Include="shaders\v*.hlsl">
       		<ShaderType>Vertex</ShaderType>
-      		<ObjectFileOutput>$(OutDir)shaders/vshader.cso</ObjectFileOutput>
     	</FxCompile>
 
-    	<FxCompile Include="shaders\pshader.hlsl">
+    	<FxCompile Include="shaders\p*.hlsl">
       		<ShaderType>Pixel</ShaderType>
-      		<ObjectFileOutput>$(OutDir)shaders/pshader.cso</ObjectFileOutput>
     	</FxCompile>
-
-    	<FxCompile Include="shaders\psGridShader.hlsl">
-      		<ShaderType>Pixel</ShaderType>
-      		<ObjectFileOutput>$(OutDir)shaders/pshader2.cso</ObjectFileOutput>
-    	</FxCompile>
-
-    	<FxCompile Include="shaders\psSolidWireframe.hlsl">
-      		<ShaderType>Pixel</ShaderType>
-      		<ObjectFileOutput>$(OutDir)shaders/psSolidWireframe.cso</ObjectFileOutput>
-    	</FxCompile>
-
 		
-		<FxCompile Include="shaders\hshader.hlsl">
+		<FxCompile Include="shaders\h*.hlsl">
 			<ShaderType>Hull</ShaderType>
-			<ObjectFileOutput>$(OutDir)shaders/hshader.cso</ObjectFileOutput>
 		</FxCompile>
 
-		<FxCompile Include="shaders\dshader.hlsl">
+		<FxCompile Include="shaders\d*.hlsl">
 			<ShaderType>Domain</ShaderType>
-			<ObjectFileOutput>$(OutDir)shaders/dshader.cso</ObjectFileOutput>
 		</FxCompile>
 
-		<FxCompile Include="shaders\dshader2.hlsl">
-			<ShaderType>Domain</ShaderType>
-			<ObjectFileOutput>$(OutDir)shaders/dshader2.cso</ObjectFileOutput>
-		</FxCompile>
-
-		<FxCompile Include="shaders\gshader.hlsl">
+		<FxCompile Include="shaders\g*.hlsl">
 			<ShaderType>Geometry</ShaderType>
-			<ObjectFileOutput>$(OutDir)shaders/gshader.cso</ObjectFileOutput>
-		</FxCompile>
-
-		<FxCompile Include="shaders\gsSolidWireframe.hlsl">
-			  <ShaderType>Geometry</ShaderType>
-			  <ObjectFileOutput>$(OutDir)shaders/gsSolidWireframe.cso</ObjectFileOutput>
 		</FxCompile>
 	
     	<Mesh Include="mesh\*" />
