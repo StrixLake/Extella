@@ -10,8 +10,8 @@ public:
         float xoffset = variables[L"Position X"] /20;
         float yoffset = variables[L"Position Y"] /20;
         float zoffset = variables[L"Position Z"] /10;
-        camera[0] *= DirectX::XMMatrixRotationX(variables[L"CameraY"]/100);
         camera[0] *= DirectX::XMMatrixRotationY(variables[L"CameraX"]/100);
+        camera[0] *= DirectX::XMMatrixRotationX(variables[L"CameraY"]/100);
         camera[0] *= DirectX::XMMatrixTranslation(xoffset, yoffset, zoffset);
 
     };

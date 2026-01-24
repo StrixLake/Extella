@@ -14,7 +14,7 @@ void renderer(State* state){
 
     
     array<XMMATRIX, 3> transform = {DirectX::XMMatrixIdentity(), // world transform
-                                    DirectX::XMMatrixLookAtLH(XMVectorSet(-5., 5., -5., 0.),
+                                    DirectX::XMMatrixLookAtLH(XMVectorSet(0., 5., -5., 0.),
                                                                   XMVectorSet( 0.0f, 0.0f, 0.0f, 0.0f ),
                                                                   XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f )), // camera matrix
                                       DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, 

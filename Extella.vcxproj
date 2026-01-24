@@ -85,6 +85,7 @@
 		<ClCompile Include="extension/tShader.cpp"/>
 		<ClCompile Include="extension/gShader.cpp"/>
 		<ClCompile Include="extension/pShader.cpp"/>
+		<ClCompile Include="extension/configuration.cpp"/>
 
     	<FxCompile Include="shaders\vshader.hlsl">
       		<ShaderType>Vertex</ShaderType>
@@ -96,7 +97,7 @@
       		<ObjectFileOutput>$(OutDir)shaders/pshader.cso</ObjectFileOutput>
     	</FxCompile>
 
-    	<FxCompile Include="shaders\pshader2.hlsl">
+    	<FxCompile Include="shaders\psGridShader.hlsl">
       		<ShaderType>Pixel</ShaderType>
       		<ObjectFileOutput>$(OutDir)shaders/pshader2.cso</ObjectFileOutput>
     	</FxCompile>
