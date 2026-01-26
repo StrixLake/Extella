@@ -70,7 +70,7 @@ void parseIndex(tinyobj::mesh_t &mesh, tinyobj::attrib_t &attribute, vector<Floa
             node.TexCord = {attribute.texcoords[2*triangle.texcoord_index],
                             attribute.texcoords[2*triangle.texcoord_index+1]};
         }
-        else if constexpr(is_same_v<T, Float6> || is_same_v<T, Float8>) {
+        if constexpr(is_same_v<T, Float6> || is_same_v<T, Float8>) {
             node.normal = {attribute.normals[3*triangle.normal_index],
                             attribute.normals[3*triangle.normal_index+1],
                             attribute.normals[3*triangle.normal_index+2]};
@@ -82,7 +82,7 @@ void parseIndex(tinyobj::mesh_t &mesh, tinyobj::attrib_t &attribute, vector<Floa
 
             if constexpr (is_same_v<T, Float5> || is_same_v<T, Float8>) TexCoords.push_back(node.TexCord);
             
-            else if constexpr (is_same_v<T, Float6> || is_same_v<T, Float8>) normals.push_back(node.normal);
+            if constexpr (is_same_v<T, Float6> || is_same_v<T, Float8>) normals.push_back(node.normal);
 
             vertex_[node] = vertices.size() -1;
             index.push_back(vertex_[node]);

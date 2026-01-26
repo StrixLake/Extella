@@ -198,7 +198,25 @@ void Mesh::Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variabl
 
     pContext->UpdateSubresource(*cbuffers->getConstBuffer("transformMatrix"), 0, NULL, camera.data(), 0,0);
 
-    pContext->DrawIndexed(triangleCount*3, 0, 0);
+    if(instanceCount == 0)
+    {
+        pContext->DrawIndexed(triangleCount*3, 0, 0);
+    }
+    else
+    {
+        pContext->DrawIndexedInstanced(triangleCount*3, instanceCount, 0, 0, 0);
+    }
+}
+
+void Mesh::createInstanceBuffer(vector<float> &instanceData)
+{
+    D3D11_BUFFER_DESC cBuffer = {};
+    cBuffer.Usage = D3D11_USAGE_DEFAULT;
+    cBuffer.ByteWidth = instanceData.size()*sizeof(float);
+    cBuffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    pDevice->CreateBuffer(&cBuffer, NULL, &pInstanceData);
+
+    pContext->UpdateSubresource(pInstanceData, 0, NULL, instanceData.data(), 0, 0);
 }
 
 Mesh::~Mesh(){
@@ -210,8 +228,8 @@ Mesh::~Mesh(){
     if (pSampler != NULL) pSampler->Release();
     if (pTexture != NULL) pTexture->Release();
     if (pTextureView != NULL) pTextureView->Release();
+    if (pInstanceData != NULL) pInstanceData->Release();
     
-    if (next != NULL) delete next;    
-    
+    if (next != NULL) delete next;       
 }
 

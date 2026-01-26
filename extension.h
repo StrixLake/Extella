@@ -13,3 +13,5 @@ BaseWorker* createGeometry(Mesh* mesh, ShaderResources* resources, wstring geome
 BaseWorker* createPixel(Mesh* mesh, ShaderResources* resources, wstring pixelShader);
 
 BaseWorker* disableBackCulling(Mesh* mesh);
+
+BaseWorker* createVertexInstanced(Mesh* mesh, ShaderResources* resources, wstring vertexShader);

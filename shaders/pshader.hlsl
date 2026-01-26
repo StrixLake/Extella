@@ -13,6 +13,6 @@ struct VS_OUTPUT
 float4 main(VS_OUTPUT input) : SV_Target
 {
     float4 norm = normalize(image.Sample(samLinear, input.uv));
-    float b = dot(normalize(norm), normalize(float3(0,-20,-20)));
-    return norm;
+    float b = dot(input.norm, normalize(float3(0,-20,-20)));
+    return abs(b);
 }

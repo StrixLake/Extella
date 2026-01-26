@@ -32,6 +32,10 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     Mesh *plane2 = new Mesh("mesh/triangle.obj", shaders, device->pContext, obj, L"mesh/default_.png");
     Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, obj, L"mesh/normals.png");
+    grass->instanceCount = 5;
+    
+    vector<float> pos = {0,0, -10, -10, 10,10, 20,20, 10, 20};
+    grass->createInstanceBuffer(pos);
     plane2->next = grass;
 
     ShaderResources* resource = new ShaderResources(device->pDevice);
@@ -46,7 +50,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     plane2->extension += disableBackCulling(plane2);
 
     grass->extension += createTransformation(grass, resource);
-    grass->extension += createVertex(grass, resource, L"vshader.cso");
+    grass->extension += createVertexInstanced(grass, resource, L"vsGrass.cso");
     grass->extension += createPixel(grass, resource, L"pshader.cso");
     grass->extension += disableBackCulling(grass);
 
