@@ -31,16 +31,13 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     state->shaders = shaders;
 
     Mesh *plane2 = new Mesh("mesh/triangle.obj", shaders, device->pContext, obj, L"mesh/default_.png");
-    Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, obj, L"mesh/normals.png");
-    grass->instanceCount = 5;
-    
-    vector<float> pos = {0,0, -10, -10, 10,10, 20,20, 10, 20};
-    grass->createInstanceBuffer(pos);
-    plane2->next = grass;
+    Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, obj, L"mesh/spot_.png");
+
+    plane2->next = spot;
 
     ShaderResources* resource = new ShaderResources(device->pDevice);
     plane2->cbuffers = resource;
-    grass->cbuffers = resource;
+    spot->cbuffers = resource;
 
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     
@@ -49,10 +46,10 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     plane2->extension += createPixel(plane2, resource, L"psGridShader.cso");
     plane2->extension += disableBackCulling(plane2);
 
-    grass->extension += createTransformation(grass, resource);
-    grass->extension += createVertexInstanced(grass, resource, L"vsGrass.cso");
-    grass->extension += createPixel(grass, resource, L"pshader.cso");
-    grass->extension += disableBackCulling(grass);
+    spot->extension += createTransformation(spot, resource);
+    spot->extension += createVertex(spot, resource, L"vshader.cso");
+    spot->extension += createPixel(spot, resource, L"pshader.cso");
+    spot->extension += disableBackCulling(spot);
 
     Watch* stopwatch = new Watch();
 

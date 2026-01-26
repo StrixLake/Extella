@@ -20,11 +20,15 @@ VS_OUTPUT main( float4 pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORM
     output.norm = norm;
     output.uv = tex;
     output.pos = pos;
-    output.p = pos;
+
+    output.pos.y += 1;
 
     output.pos = mul(output.pos, World);
+    output.p = pos;
     output.pos = mul(output.pos, View);
     output.pos = mul(output.pos, Projection);
+
+    output.norm = mul(output.norm, World);
 
     return output;
 }

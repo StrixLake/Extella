@@ -12,7 +12,7 @@ struct VS_OUTPUT
 
 float4 main(VS_OUTPUT input) : SV_Target
 {
-    float4 norm = normalize(image.Sample(samLinear, input.uv));
-    float b = dot(input.norm, normalize(float3(0,-20,-20)));
-    return abs(b);
+    float3 norm = input.norm;
+    float b = -dot(input.norm, normalize(input.p.xyz - float3(0,5,-5)));
+    return b;
 }
