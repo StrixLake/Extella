@@ -15,7 +15,7 @@ struct VS_OUTPUT
     float4 p : POSITION;
 };
 
-float4 main(VS_OUTPUT input) : SV_Target
+float4 PS_MAIN(VS_OUTPUT input) : SV_Target
 {
     float2 uv = input.p.xz;
     float2 duv = fwidth(uv);

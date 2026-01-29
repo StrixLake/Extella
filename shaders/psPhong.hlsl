@@ -11,7 +11,7 @@ struct VS_OUTPUT
 };
 
 
-float4 main(VS_OUTPUT input) : SV_Target
+float4 PS_MAIN(VS_OUTPUT input) : SV_Target
 {
 
     // light

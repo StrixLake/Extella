@@ -16,7 +16,7 @@ struct VS_OUTPUT
 //
 // Vertex Shader
 //
-VS_OUTPUT main( float4 Pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORMAL)
+VS_OUTPUT VS_MAIN( float4 Pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORMAL)
 {
     VS_OUTPUT ou;
 

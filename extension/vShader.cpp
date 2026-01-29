@@ -44,8 +44,8 @@ public:
                                             {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                                  2, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}};
 
-        mesh->pDevice->CreateInputLayout(layout, 3, mesh->shaders->getShaderBlob(vertexShader)->GetBufferPointer(), 
-                                                   mesh->shaders->getShaderBlob(vertexShader)->GetBufferSize(), &pLayout);
+        mesh->pDevice->CreateInputLayout(layout, 3, mesh->shaders->getVertexShaderBlob(vertexShader)->GetBufferPointer(), 
+                                                   mesh->shaders->getVertexShaderBlob(vertexShader)->GetBufferSize(), &pLayout);
     }
 
     void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
@@ -110,8 +110,8 @@ public:
                                                 3, 0, 
                                                 D3D11_INPUT_PER_INSTANCE_DATA, 1}};
 
-        hr = mesh->pDevice->CreateInputLayout(layout, 4, mesh->shaders->getShaderBlob(vertexShader)->GetBufferPointer(), 
-                                                   mesh->shaders->getShaderBlob(vertexShader)->GetBufferSize(), &pLayout);
+        hr = mesh->pDevice->CreateInputLayout(layout, 4, mesh->shaders->getVertexShaderBlob(vertexShader)->GetBufferPointer(), 
+                                                   mesh->shaders->getVertexShaderBlob(vertexShader)->GetBufferSize(), &pLayout);
     }
 
     void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)

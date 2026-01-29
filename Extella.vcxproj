@@ -88,30 +88,17 @@
 		<ClCompile Include="extension/pShader.cpp"/>
 		<ClCompile Include="extension/configuration.cpp"/>
 
-    	<FxCompile Include="shaders\v*.hlsl">
-      		<ShaderType>Vertex</ShaderType>
-    	</FxCompile>
-
-    	<FxCompile Include="shaders\p*.hlsl">
-      		<ShaderType>Pixel</ShaderType>
-    	</FxCompile>
-		
-		<FxCompile Include="shaders\h*.hlsl">
-			<ShaderType>Hull</ShaderType>
-		</FxCompile>
-
-		<FxCompile Include="shaders\d*.hlsl">
-			<ShaderType>Domain</ShaderType>
-		</FxCompile>
-
-		<FxCompile Include="shaders\g*.hlsl">
-			<ShaderType>Geometry</ShaderType>
-		</FxCompile>
+    	<Shaders Include="shaders\*.hlsl" />
 	
     	<Mesh Include="mesh\*" />
 
   	</ItemGroup>
-  	<Target Name="CopyMesh" AfterTargets="Build">
+  	
+	<Target Name="Copy Mesh" AfterTargets="Build">
     	<Copy SkipUnchangedFiles="true" SourceFiles="@(Mesh)" DestinationFolder="$(OutDir)mesh" />
+  	</Target>
+
+  	<Target Name="Copy Shaders" AfterTargets="Build">
+    	<Copy SkipUnchangedFiles="true" SourceFiles="@(Shaders)" DestinationFolder="$(OutDir)shaders" />
   	</Target>
 </Project>
