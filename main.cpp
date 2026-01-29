@@ -48,7 +48,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     spot->extension += createTransformation(spot, resource);
     spot->extension += createVertex(spot, resource, L"vshader.cso");
-    spot->extension += createPixel(spot, resource, L"pshader.cso");
+    spot->extension += createPixel(spot, resource, L"psPhong.cso");
     spot->extension += disableBackCulling(spot);
 
     Watch* stopwatch = new Watch();
@@ -60,6 +60,8 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     device->pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
     device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);
+
+    state->variables[L"Distance"] = 100;
 
     return;
 }
@@ -78,7 +80,7 @@ EXPORT void release() {
 EXPORT SAFEARRAY* getGlobalVariables(){
     int elements = 6;
     BSTR *x = (BSTR*)CoTaskMemAlloc(sizeof(BSTR)*elements);
-    x[0] = SysAllocString(L"Angle");
+    x[0] = SysAllocString(L"Distance");
     x[1] = SysAllocString(L"Position X");
     x[2] = SysAllocString(L"Position Y");
     x[3] = SysAllocString(L"Position Z");
