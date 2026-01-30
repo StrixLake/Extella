@@ -88,7 +88,7 @@
 		<ClCompile Include="extension/pShader.cpp"/>
 		<ClCompile Include="extension/configuration.cpp"/>
 
-    	<Shaders Include="shaders\*.hlsl" />
+    	<Shaders Include="shaders\*" />
 	
     	<Mesh Include="mesh\*" />
 

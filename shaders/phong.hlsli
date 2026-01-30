@@ -1,0 +1,19 @@
+float bl_phong(float4 position, float3 norm, float3 light)
+{
+    // light
+    const float ia = 0.2, is = 1, id = 0.7;
+    // material
+    const float ks = 0.8, kd = 0.4, ka = 0.3, alpha = 80;
+
+    norm = normalize(norm);
+    float3 l = -normalize(position.xyz - light.xyz);
+    float3 r = 2*dot(l, norm)*(norm-l);
+    float3 v = -normalize(position.xyz - float3(0,5,-5));
+    float3 h = normalize(l+v);
+
+    float lighting = ka*ia + kd*dot(l, norm)*id + ks*is*pow(dot(norm, h), alpha);
+
+    if(dot(r, v) < 0) lighting = ka*ia + kd*dot(l, norm)*id;
+
+    return lighting;
+}

@@ -27,7 +27,7 @@ ID3D11VertexShader* Shader::getVertexShader(wstring ShaderFileName){
         // compile the loaded source code to a d3dblob
         ID3DBlob* compiledShader = NULL;
         ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, NULL, "VS_MAIN", "vs_5_0", 0, 0, &compiledShader, &errorMsg);
+        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS_MAIN", "vs_5_0", 0, 0, &compiledShader, &errorMsg);
 
         Handle_Err_Msg(errorMsg);
 
@@ -52,7 +52,7 @@ ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
         // compile the loaded source code to a d3dblob
         ID3DBlob* compiledShader = NULL;
         ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, NULL, "PS_MAIN", "ps_5_0", 0, 0, &compiledShader, &errorMsg);
+        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS_MAIN", "ps_5_0", 0, 0, &compiledShader, &errorMsg);
 
         Handle_Err_Msg(errorMsg);
 
@@ -79,7 +79,7 @@ ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
         // compile the loaded source code to a d3dblob
         ID3DBlob* compiledShader = NULL;
         ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, NULL, "HS_MAIN", "hs_5_0", 0, 0, &compiledShader, &errorMsg);
+        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "HS_MAIN", "hs_5_0", 0, 0, &compiledShader, &errorMsg);
 
         Handle_Err_Msg(errorMsg);
 
@@ -107,7 +107,7 @@ ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
         // compile the loaded source code to a d3dblob
         ID3DBlob* compiledShader = NULL;
         ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, NULL, "DS_MAIN", "ds_5_0", 0, 0, &compiledShader, &errorMsg);
+        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "DS_MAIN", "ds_5_0", 0, 0, &compiledShader, &errorMsg);
 
         Handle_Err_Msg(errorMsg);
 
@@ -135,7 +135,7 @@ ID3D11GeometryShader* Shader::getGeometryShader(wstring ShaderFileName){
         // compile the loaded source code to a d3dblob
         ID3DBlob* compiledShader = NULL;
         ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, NULL, "GS_MAIN", "gs_5_0", 0, 0, &compiledShader, &errorMsg);
+        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GS_MAIN", "gs_5_0", 0, 0, &compiledShader, &errorMsg);
 
         Handle_Err_Msg(errorMsg);
 
@@ -159,7 +159,7 @@ ID3DBlob* Shader::getVertexShaderBlob(wstring ShaderFileName){
         
         ID3DBlob* compiledShader = NULL;
         ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, NULL, "VS_MAIN", "vs_5_0", 0, 0, &compiledShader, &errorMsg);
+        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS_MAIN", "vs_5_0", 0, 0, &compiledShader, &errorMsg);
 
         Handle_Err_Msg(errorMsg);
 

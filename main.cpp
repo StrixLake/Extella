@@ -42,13 +42,13 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     
     plane2->extension += createTransformation(plane2, resource);
-    plane2->extension += createVertex(plane2, resource, L"vsGridShader");
-    plane2->extension += createPixel(plane2, resource, L"psGridShader");
+    plane2->extension += createVertex(plane2, resource, L"GridShader");
+    plane2->extension += createPixel(plane2, resource, L"GridShader");
     plane2->extension += disableBackCulling(plane2);
 
     spot->extension += createTransformation(spot, resource);
-    spot->extension += createVertex(spot, resource, L"vshader");
-    spot->extension += createPixel(spot, resource, L"psPhong");
+    spot->extension += createVertex(spot, resource, L"spot");
+    spot->extension += createPixel(spot, resource, L"spot");
     spot->extension += disableBackCulling(spot);
 
     Watch* stopwatch = new Watch();

@@ -20,6 +20,8 @@ struct Deleter
 
 class Shader{
 
+    wstring src = L"C:\\Users\\yasha\\Documents\\Projects\\StayNight\\Native\\shaders";
+
     unordered_map<wstring, unique_ptr<ID3D11VertexShader, Deleter<ID3D11VertexShader*>>> vertexShaders;
     unordered_map<wstring, unique_ptr<ID3D11PixelShader, Deleter<ID3D11PixelShader*>>> pixelShaders;
     unordered_map<wstring, unique_ptr<ID3D11HullShader, Deleter<ID3D11HullShader*>>> hullShaders;
