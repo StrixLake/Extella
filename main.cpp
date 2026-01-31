@@ -32,12 +32,16 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     Mesh *plane2 = new Mesh("mesh/triangle.obj", shaders, device->pContext, obj, L"mesh/default_.png");
     Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, obj, L"mesh/spot_.png");
+    Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, obj, L"mesh/normals.png");
+    grass->instanceCount = 10000;
 
     plane2->next = spot;
+    spot->next = grass;
 
     ShaderResources* resource = new ShaderResources(device->pDevice);
     plane2->cbuffers = resource;
     spot->cbuffers = resource;
+    grass->cbuffers = resource;
 
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     
@@ -49,7 +53,11 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     spot->extension += createTransformation(spot, resource);
     spot->extension += createVertex(spot, resource, L"spot");
     spot->extension += createPixel(spot, resource, L"spot");
-    spot->extension += disableBackCulling(spot);
+
+    grass->extension += createTransformation(grass, resource);
+    grass->extension += createVertex(grass, resource, L"grass");
+    grass->extension += createPixel(grass, resource, L"grass");
+    grass->extension += disableBackCulling(grass);
 
     Watch* stopwatch = new Watch();
 
