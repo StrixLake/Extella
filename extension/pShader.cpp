@@ -17,6 +17,7 @@ public:
 
         mesh->pContext->PSSetSamplers(0, 1, &mesh->pSampler);
         mesh->pContext->PSSetShaderResources(0, 1, &mesh->pTextureView);
+        mesh->pContext->PSSetConstantBuffers(1, 1, cbuffers->getConstBuffer("grassVariables"));
     }
 
     void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){}

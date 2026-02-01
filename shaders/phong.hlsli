@@ -5,7 +5,7 @@ float bl_phong(float4 position, float3 norm, float3 light)
     // light
     const float ia = 0.2, is = 1, id = 0.4;
     // material
-    const float ks = 1 , kd = 0.4, ka = 0.2, alpha = 80;
+    const float ks = 0.3 , kd = 0.4, ka = 0.3, alpha = 80;
 
     norm = normalize(norm);
     float3 l = -normalize(position.xyz - light.xyz);
