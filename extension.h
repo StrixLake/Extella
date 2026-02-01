@@ -15,3 +15,5 @@ BaseWorker* createPixel(Mesh* mesh, ShaderResources* resources, wstring pixelSha
 BaseWorker* disableBackCulling(Mesh* mesh);
 
 BaseWorker* createVertexInstanced(Mesh* mesh, ShaderResources* resources, wstring vertexShader);
+
+BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages);

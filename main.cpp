@@ -56,9 +56,9 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     spot->extension += createPixel(spot, resource, L"spot");
 
     grass->extension += createTransformation(grass, resource);
-    grass->extension += createVertex(grass, resource, L"grass");
-    grass->extension += createPixel(grass, resource, L"grass");
+    grass->extension += createUnifiedShader(grass, L"grass", "vp");
     grass->extension += disableBackCulling(grass);
+    grass->constBuffers = {"transformMatrix", "grassVariables"};
 
     Watch* stopwatch = new Watch();
 

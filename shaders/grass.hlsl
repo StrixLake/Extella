@@ -81,7 +81,7 @@ float4 PS_MAIN(VS_OUTPUT input) : SV_TARGET
     float z = sin(input.p.x/2+input.p.z/2+2*time) + 1;
     float4 norm = 0;
     norm.xy = bezierNormal(float2(0,0), float2(0,2), float2(z*2,4), input.p.y/4.1);
-    input.p.xy = bezier(float2(0,0), float2(0,2), float2(z*2,4), input.pos.y/4.1);
+    input.p.xy = bezier(float2(0,0), float2(0,2), float2(z*2,4), input.p.y/4.1);
     input.p = mul(input.p, World);
     norm.xyz = mul(norm.xyz, input.world);
     float color = bl_phong(input.p, norm.xyz, input.light.xyz);

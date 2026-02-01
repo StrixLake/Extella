@@ -86,6 +86,7 @@
 		<ClCompile Include="extension/tShader.cpp"/>
 		<ClCompile Include="extension/gShader.cpp"/>
 		<ClCompile Include="extension/pShader.cpp"/>
+		<ClCompile Include="extension/uShader.cpp"/>
 		<ClCompile Include="extension/configuration.cpp"/>
 
     	<Shaders Include="shaders\*" />

@@ -34,6 +34,8 @@ public:
     ID3D11ShaderResourceView *pTextureView = NULL;
     
     ShaderResources* cbuffers;
+    vector<string> constBuffers = {"transformMatrix"};
+
     Shader* shaders;
     ID3D11Device* pDevice;
     ID3D11DeviceContext* pContext;
