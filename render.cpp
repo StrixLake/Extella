@@ -25,6 +25,9 @@ void renderer(State* state){
                                                                           
     state->variables[L"time"] = state->stopwatch->getTotalTime(); // in seconds
 
+    float var[4] = {state->variables[L"time"], 0, 0, 0};
+    state->pDevice->pContext->UpdateSubresource(*state->resources->getConstBuffer("grassVariables"), 0, NULL, var, 0,0);
+
     state->pDevice->pContext->ClearDepthStencilView(state->pDevice->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
     state->pDevice->pContext->ClearRenderTargetView(state->pDevice->pRenderView, color);
 

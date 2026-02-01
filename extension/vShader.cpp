@@ -64,6 +64,7 @@ public:
         mesh->pContext->IASetIndexBuffer(mesh->pIndices, DXGI_FORMAT_R32_UINT, 0);
         mesh->pContext->VSSetShader(mesh->shaders->getVertexShader(vertexShader), NULL, 0);
         mesh->pContext->VSSetConstantBuffers(0, 1, cbuffers->getConstBuffer("transformMatrix"));
+        mesh->pContext->VSSetConstantBuffers(1, 1, cbuffers->getConstBuffer("grassVariables"));
 
     }
 
