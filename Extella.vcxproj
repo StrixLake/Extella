@@ -82,6 +82,7 @@
     	<ClCompile Include="watch.cpp" />
 		<ClCompile Include="resources.cpp"/>
 		<ClCompile Include="delegate.cpp"/>
+		<ClCompile Include="query.cpp"/>
 		<ClCompile Include="extension/vShader.cpp"/>
 		<ClCompile Include="extension/tShader.cpp"/>
 		<ClCompile Include="extension/gShader.cpp"/>

@@ -5,6 +5,7 @@
 #include <shader.h>
 #include <unordered_map>
 #include <resources.h>
+#include <query.h>
 using std::unordered_map;
 
 class State
@@ -15,6 +16,7 @@ public:
     Shader* shaders;
     Watch* stopwatch;
     ShaderResources* resources;
+    Query* query;
     unordered_map<wstring, float> variables;
 
     ~State()
@@ -24,5 +26,6 @@ public:
         delete stopwatch;
         delete shaders;
         delete resources;
+        delete query;
     }
 };

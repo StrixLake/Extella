@@ -61,7 +61,7 @@ VS_OUTPUT VS_MAIN(float4 pos : POSITION, float2 tex : TEXCOORD0, float3 norm : N
     float z = sin(pos.x/2+pos.z/2+2*time) + 1;
     output.pos.xy = bezier(float2(0,0), float2(0,3), float2(2,z*2), pos.y/4.1);
 
-    //output.pos.xz += float2(2, 0);
+    output.pos.xz += float2(x1, y1);
 
     output.light = mul(output.light, World);
     
@@ -76,6 +76,7 @@ VS_OUTPUT VS_MAIN(float4 pos : POSITION, float2 tex : TEXCOORD0, float3 norm : N
 
 #include <phong.hlsli>
 
+[earlydepthstencil]
 float4 PS_MAIN(VS_OUTPUT input) : SV_TARGET
 {
     float z = sin(input.p.x/2+input.p.z/2+2*time) + 1;

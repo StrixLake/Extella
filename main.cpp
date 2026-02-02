@@ -9,6 +9,7 @@
 #include <state.h>
 #include <resources.h>
 #include <extension.h>
+#include <query.h>
 
 State* state;
 
@@ -24,22 +25,20 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     device->CreateViews();
     device->SetTargets();
 
+    Query* query = new Query(device->pDevice, device->pContext);
+
     Shader *shaders = new Shader(device->pDevice);
 
-    state = new State();
-
-    state->shaders = shaders;
-
     ShaderResources* resource = new ShaderResources(device->pDevice);
-
+    
     Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
-    Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, resource, L"mesh/spot_.png");
+    //Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, resource, L"mesh/spot_.png");
     Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, resource, L"mesh/normals.png");
-    grass->instanceCount = 1;
-
+    grass->instanceCount = 100000;
+    
     grid->insertNextNode(grass);
-    grid->insertNextNode(spot);
-
+    //grid->insertNextNode(spot);
+    
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     resource->createConstantBuffer("grassVariables", sizeof(float)*4);
     
@@ -47,22 +46,25 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     grid->extension += createVertex(grid, resource, L"GridShader");
     grid->extension += createPixel(grid, resource, L"GridShader");
     grid->extension += disableBackCulling(grid);
-
-    spot->extension += createTransformation(spot, resource);
-    spot->extension += createVertex(spot, resource, L"spot");
-    spot->extension += createPixel(spot, resource, L"spot");
-
+    
+    //spot->extension += createTransformation(spot, resource);
+    //spot->extension += createVertex(spot, resource, L"spot");
+    //spot->extension += createPixel(spot, resource, L"spot");
+    
     grass->extension += createTransformation(grass, resource);
     grass->extension += createUnifiedShader(grass, L"grass", "vp");
     grass->extension += disableBackCulling(grass);
     grass->constBuffers = {"transformMatrix", "grassVariables"};
 
     Watch* stopwatch = new Watch();
-
+    
+    state = new State();
     state->pDevice = device;
     state->mesh = grid;
     state->stopwatch = stopwatch;
     state->resources = resource;
+    state->shaders = shaders;
+    state->query = query;
 
     device->pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
     device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);
