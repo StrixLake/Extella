@@ -59,7 +59,7 @@ VS_OUTPUT VS_MAIN(float4 pos : POSITION, float2 tex : TEXCOORD0, float3 norm : N
     float x1 = randomPCG(seed, -200, 200);
     float y1 = randomPCG(seed, -200, 200);
     float z = sin(pos.x/2+pos.z/2+2*time) + 1;
-    output.pos.xy = bezier(float2(0,0), float2(0,2), float2(z*2,4), pos.y/4.1);
+    output.pos.xy = bezier(float2(0,0), float2(0,3), float2(2,z*2), pos.y/4.1);
 
     //output.pos.xz += float2(2, 0);
 
@@ -80,8 +80,8 @@ float4 PS_MAIN(VS_OUTPUT input) : SV_TARGET
 {
     float z = sin(input.p.x/2+input.p.z/2+2*time) + 1;
     float4 norm = 0;
-    norm.xy = bezierNormal(float2(0,0), float2(0,2), float2(z*2,4), input.p.y/4.1);
-    input.p.xy = bezier(float2(0,0), float2(0,2), float2(z*2,4), input.p.y/4.1);
+    norm.xy = bezierNormal(float2(0,0), float2(0,3), float2(2,z*2), input.p.y/4.1);
+    input.p.xy = bezier(float2(0,0), float2(0,3), float2(2,z*2), input.p.y/4.1);
     input.p = mul(input.p, World);
     norm.xyz = mul(norm.xyz, input.world);
     float color = bl_phong(input.p, norm.xyz, input.light.xyz);

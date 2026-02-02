@@ -30,18 +30,15 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     state->shaders = shaders;
 
-    Mesh *plane2 = new Mesh("mesh/triangle.obj", shaders, device->pContext, obj, L"mesh/default_.png");
-    Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, obj, L"mesh/spot_.png");
-    Mesh *grass = new Mesh("mesh/grassHigh.obj", shaders, device->pContext, obj, L"mesh/normals.png");
+    ShaderResources* resource = new ShaderResources(device->pDevice);
+
+    Mesh *plane2 = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
+    Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, resource, L"mesh/spot_.png");
+    Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, resource, L"mesh/normals.png");
     grass->instanceCount = 1;
 
     plane2->next = spot;
     spot->next = grass;
-
-    ShaderResources* resource = new ShaderResources(device->pDevice);
-    plane2->cbuffers = resource;
-    spot->cbuffers = resource;
-    grass->cbuffers = resource;
 
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     resource->createConstantBuffer("grassVariables", sizeof(float)*4);

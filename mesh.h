@@ -8,14 +8,10 @@
 using std::array;
 using DirectX::XMMATRIX;
 
-enum FileType{
-    obj, stl
-};
-
 class Mesh{
 public:
     Mesh() = delete;
-    Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, FileType type, const wchar_t* textureFile);
+    Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, ShaderResources* resource, const wchar_t* textureFile);
 
     void Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variables);
 

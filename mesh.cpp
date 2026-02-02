@@ -166,18 +166,13 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
         return;
  }
 
-Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, FileType type, const wchar_t* textureFile){
+Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, ShaderResources* resource, const wchar_t* textureFile){
     this->shaders = shader;
     this->pDevice = shader->pDevice;
     this->pContext = context;
-    switch (type) {
-        case stl:
-            stlMeshFactory(this, filename);
-            break;
-        case obj:
-            objMeshFactory2(this, filename);
-            break;
-    }
+    this->cbuffers = resource;
+
+    objMeshFactory2(this, filename);
     
     if (textureFile != NULL){
         constuctTextures(this, textureFile);
