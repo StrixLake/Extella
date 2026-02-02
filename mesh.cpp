@@ -214,6 +214,18 @@ void Mesh::createInstanceBuffer(vector<float> &instanceData)
     pContext->UpdateSubresource(pInstanceData, 0, NULL, instanceData.data(), 0, 0);
 }
 
+// a helper function to insert nodes at the end of the linked list
+// from any node in between
+void Mesh::insertNextNode(Mesh* other)
+{
+    Mesh* current = this;
+    while(current->next != NULL)
+    {
+        current = current->next;
+    }
+    current->next = other;
+}
+
 Mesh::~Mesh(){
     if (pVertices != NULL) pVertices->Release();
     if (pNormals != NULL) pNormals->Release();

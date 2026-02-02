@@ -17,6 +17,10 @@ public:
 
     void createInstanceBuffer(vector<float> &instanceData);
 
+    // a helper function to insert nodes at the end of the linked list
+    // from any node in between
+    void insertNextNode(Mesh* other);
+
     uint32_t triangleCount;
     uint32_t instanceCount = 0;
     ID3D11Buffer* pVertices = NULL;
