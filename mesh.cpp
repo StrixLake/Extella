@@ -117,25 +117,9 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
 }
 
  void constuctTextures(Mesh* mesh, std::filesystem::path textureFile){
+        stbi_set_flip_vertically_on_load(true);
         int x, y, z;
-        uint8_t* image2 = stbi_load(textureFile.string().data(), &x, &y, &z, 3);
-        uint8_t* image = (uint8_t*) malloc(x*y*4);
-        uint8_t* image1 = (uint8_t*) malloc(x*y*4);
-        uint8_t* imaget = image;
-
-        // invert the image as stbi loads the image upside down
-        for (int i = 0; i < x*y*3; i += 3){
-            memcpy(imaget, image2, 3);
-            imaget[3] = 255;
-            imaget += 4;
-            image2 += 3;
-        }
-        image1 += (x*y*4 -1);
-        for(int i = 0; i < y; ++i){
-            image1 -= x*4;
-            memcpy(image1, image, x*4);
-            image += x*4;
-        }
+        uint8_t* image = stbi_load(textureFile.string().data(), &x, &y, &z, 4);
         
 
         D3D11_SAMPLER_DESC sampDesc = {};
@@ -158,10 +142,12 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
         desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         desc.SampleDesc = {1,0};
         D3D11_SUBRESOURCE_DATA init;
-        init.pSysMem = image1;
+        init.pSysMem = image;
         init.SysMemPitch = x*4;
         mesh->pDevice->CreateTexture2D(&desc, &init, &mesh->pTexture);
         mesh->pDevice->CreateShaderResourceView(mesh->pTexture, NULL, &mesh->pTextureView);
+
+        stbi_image_free(image);
 
         return;
  }

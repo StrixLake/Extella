@@ -31,21 +31,21 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     ShaderResources* resource = new ShaderResources(device->pDevice);
     
-    Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
+    //Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
     //Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, resource, L"mesh/spot_.png");
     Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, resource, L"mesh/normals.png");
     grass->instanceCount = 100000;
     
-    grid->insertNextNode(grass);
+    //grid->insertNextNode(grass);
     //grid->insertNextNode(spot);
     
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     resource->createConstantBuffer("grassVariables", sizeof(float)*4);
     
-    grid->extension += createTransformation(grid, resource);
-    grid->extension += createVertex(grid, resource, L"GridShader");
-    grid->extension += createPixel(grid, resource, L"GridShader");
-    grid->extension += disableBackCulling(grid);
+    //grid->extension += createTransformation(grid, resource);
+    //grid->extension += createVertex(grid, resource, L"GridShader");
+    //grid->extension += createPixel(grid, resource, L"GridShader");
+    //grid->extension += disableBackCulling(grid);
     
     //spot->extension += createTransformation(spot, resource);
     //spot->extension += createVertex(spot, resource, L"spot");
@@ -60,7 +60,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     
     state = new State();
     state->pDevice = device;
-    state->mesh = grid;
+    state->mesh = grass;
     state->stopwatch = stopwatch;
     state->resources = resource;
     state->shaders = shaders;
@@ -87,24 +87,19 @@ EXPORT void release() {
 
 EXPORT SAFEARRAY* getGlobalVariables(){
     int elements = 6;
-    BSTR *x = (BSTR*)CoTaskMemAlloc(sizeof(BSTR)*elements);
-    x[0] = SysAllocString(L"Distance");
-    x[1] = SysAllocString(L"Position X");
-    x[2] = SysAllocString(L"Position Y");
-    x[3] = SysAllocString(L"Position Z");
-    x[4] = SysAllocString(L"in-tes");
-    x[5] = SysAllocString(L"out-tes");
+    
+    const wchar_t* x[] = {L"Distance", L"Position X",
+                          L"Position Y", L"Position Z",
+                          L"in-tes", L"Instances"};
 
-    SAFEARRAYBOUND bound = {};
-    bound.cElements = elements;
-    bound.lLbound = 0;
-
-    SAFEARRAY* ar = (SAFEARRAY*)CoTaskMemAlloc(sizeof(SAFEARRAY));
-    ar->cbElements = sizeof(BSTR);
-    ar->cDims = 1;
-    ar->rgsabound[0] = bound;
-    ar->fFeatures = FADF_BSTR;
-    ar->pvData = x;
+    SAFEARRAY* ar = SafeArrayCreateVector(VT_BSTR, 0, elements);
+    
+    for(long i = 0; i < elements; ++i)
+    {
+        BSTR data = SysAllocString(x[i]);
+        SafeArrayPutElement(ar, &i, data);
+        SysFreeString(data);
+    }
 
     return ar;
 }
