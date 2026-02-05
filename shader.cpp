@@ -139,12 +139,28 @@ ID3DBlob* Shader::getVertexShaderBlob(wstring ShaderFileName){
     return vertexShaderBlob[ShaderFileName].get();
 }
 
+template<typename T>
+void hotReload(unordered_map<wstring, T>& TShader, const char entryPoint[], const char target[])
+{
+    for(auto shader = TShader.begin(); shader != TShader.end();)
+    {
+        ID3DBlob* compiledShader = compileBlob(shader->first, entryPoint, target);
+        if(compiledShader != NULL)
+        {
+            shader = TShader.erase(shader);
+        }
+        else {
+            ++shader;
+        }
+    }
+}
+
 void Shader::HotReload()
 {
-    vertexShaders.clear();
-    pixelShaders.clear();
-    hullShaders.clear();
-    domainShaders.clear();
-    geometryShaders.clear();
-    vertexShaderBlob.clear();
+    hotReload(vertexShaders, "VS_MAIN", "vs_5_0");
+    hotReload(pixelShaders, "PS_MAIN", "ps_5_0");
+    hotReload(hullShaders, "HS_MAIN", "hs_5_0");
+    hotReload(domainShaders, "DS_MAIN", "ds_5_0");
+    hotReload(geometryShaders, "GS_MAIN", "gs_5_0");
+    hotReload(vertexShaderBlob, "VS_MAIN", "vs_5_0");
 }
