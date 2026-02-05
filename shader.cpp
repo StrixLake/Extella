@@ -12,6 +12,20 @@ inline void Handle_Err_Msg(ID3DBlob* errorMsg)
     }
 }
 
+ID3DBlob* compileBlob(wstring ShaderFileName, const char entryPoint[], const char target[])
+{
+    wstring ShaderFullName = L"shaders/" + ShaderFileName + L".hlsl";
+
+    // compile the loaded source code to a d3dblob
+    ID3DBlob* compiledShader = NULL;
+    ID3DBlob* errorMsg;
+    D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint, target, 0, 0, &compiledShader, &errorMsg);
+
+    Handle_Err_Msg(errorMsg);
+
+    return compiledShader;
+}
+
 Shader::Shader(ID3D11Device* device){
     this->pDevice = device;
     return;
@@ -21,17 +35,9 @@ ID3D11VertexShader* Shader::getVertexShader(wstring ShaderFileName){
 
     // if the shader isn't loaded, then compile and create the shader
     if(vertexShaders.find(ShaderFileName) == vertexShaders.end()){
-        
-        wstring ShaderFullName = L"shaders/" + ShaderFileName + L".hlsl";
 
         // compile the loaded source code to a d3dblob
-        ID3DBlob* compiledShader = NULL;
-        ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS_MAIN", "vs_5_0", 0, 0, &compiledShader, &errorMsg);
-
-        Handle_Err_Msg(errorMsg);
-
-        if(compiledShader == NULL) return NULL;
+        ID3DBlob* compiledShader = compileBlob(ShaderFileName, "VS_MAIN", "vs_5_0");
 
         ID3D11VertexShader* vshader;
         pDevice->CreateVertexShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &vshader);
@@ -45,18 +51,10 @@ ID3D11VertexShader* Shader::getVertexShader(wstring ShaderFileName){
 
 ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
 
-    if(pixelShaders.find(ShaderFileName) == pixelShaders.end()){
-        
-        wstring ShaderFullName = L"shaders/" + ShaderFileName + L".hlsl";
-
+    if(pixelShaders.find(ShaderFileName) == pixelShaders.end())
+    {
         // compile the loaded source code to a d3dblob
-        ID3DBlob* compiledShader = NULL;
-        ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "PS_MAIN", "ps_5_0", 0, 0, &compiledShader, &errorMsg);
-
-        Handle_Err_Msg(errorMsg);
-
-        if(compiledShader == NULL) return NULL;
+        ID3DBlob* compiledShader = compileBlob(ShaderFileName, "PS_MAIN", "ps_5_0");
 
         ID3D11PixelShader* pshader;
         pDevice->CreatePixelShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &pshader);
@@ -72,18 +70,10 @@ ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
      
     if(ShaderFileName == L"") return NULL;
     
-    if(hullShaders.find(ShaderFileName) == hullShaders.end()){
-        
-        wstring ShaderFullName = L"shaders/" + ShaderFileName + L".hlsl";
-
+    if(hullShaders.find(ShaderFileName) == hullShaders.end())
+    {    
         // compile the loaded source code to a d3dblob
-        ID3DBlob* compiledShader = NULL;
-        ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "HS_MAIN", "hs_5_0", 0, 0, &compiledShader, &errorMsg);
-
-        Handle_Err_Msg(errorMsg);
-
-        if(compiledShader == NULL) return NULL;
+        ID3DBlob* compiledShader = compileBlob(ShaderFileName, "HS_MAIN", "hs_5_0");
 
         ID3D11HullShader* hshader;
         pDevice->CreateHullShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &hshader);
@@ -100,18 +90,10 @@ ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
     if(ShaderFileName == L"") return NULL;
     
 
-    if(domainShaders.find(ShaderFileName) == domainShaders.end()){
-        
-        wstring ShaderFullName = L"shaders/" + ShaderFileName + L".hlsl";
-
+    if(domainShaders.find(ShaderFileName) == domainShaders.end())
+    {    
         // compile the loaded source code to a d3dblob
-        ID3DBlob* compiledShader = NULL;
-        ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "DS_MAIN", "ds_5_0", 0, 0, &compiledShader, &errorMsg);
-
-        Handle_Err_Msg(errorMsg);
-
-        if(compiledShader == NULL) return NULL;
+        ID3DBlob* compiledShader = compileBlob(ShaderFileName, "DS_MAIN", "ds_5_0");
 
         ID3D11DomainShader* dshader;
         pDevice->CreateDomainShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &dshader);
@@ -128,18 +110,10 @@ ID3D11GeometryShader* Shader::getGeometryShader(wstring ShaderFileName){
     if(ShaderFileName == L"") return NULL;
 
 
-    if(geometryShaders.find(ShaderFileName) == geometryShaders.end()){
-        
-        wstring ShaderFullName = L"shaders/" + ShaderFileName + L".hlsl";
-
+    if(geometryShaders.find(ShaderFileName) == geometryShaders.end())
+    {
         // compile the loaded source code to a d3dblob
-        ID3DBlob* compiledShader = NULL;
-        ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "GS_MAIN", "gs_5_0", 0, 0, &compiledShader, &errorMsg);
-
-        Handle_Err_Msg(errorMsg);
-
-        if(compiledShader == NULL) return NULL;
+        ID3DBlob* compiledShader = compileBlob(ShaderFileName, "GS_MAIN", "gs_5_0");
 
         ID3D11GeometryShader* gshader;
         pDevice->CreateGeometryShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &gshader);
@@ -155,13 +129,7 @@ ID3DBlob* Shader::getVertexShaderBlob(wstring ShaderFileName){
 
     if(vertexShaderBlob.find(ShaderFileName) == vertexShaderBlob.end())
     {
-        wstring ShaderFullName = L"shaders/" + ShaderFileName + L".hlsl";
-        
-        ID3DBlob* compiledShader = NULL;
-        ID3DBlob* errorMsg;
-        D3DCompileFromFile(ShaderFullName.data(), NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, "VS_MAIN", "vs_5_0", 0, 0, &compiledShader, &errorMsg);
-
-        Handle_Err_Msg(errorMsg);
+        ID3DBlob* compiledShader = compileBlob(ShaderFileName, "VS_MAIN", "vs_5_0");
 
         if(compiledShader == NULL) return NULL;
 
