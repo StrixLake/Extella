@@ -3,10 +3,10 @@
 #include <mesh.h>
 #include <watch.h>
 #include <shader.h>
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 #include <resources.h>
 #include <query.h>
-using std::unordered_map;
+using boost::unordered_map;
 
 class State
 {

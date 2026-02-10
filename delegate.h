@@ -2,8 +2,8 @@
 #include <DirectXMath.h>
 #include <array>
 #include <string>
-#include <unordered_map>
-using std::unordered_map;
+#include <boost/unordered_map.hpp>
+using boost::unordered_map;
 using std::wstring;
 using std::array;
 using DirectX::XMMATRIX;

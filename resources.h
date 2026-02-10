@@ -1,9 +1,9 @@
 #pragma once
 #include <d3d11.h>
 #include <string>
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 using std::string;
-using std::unordered_map;
+using boost::unordered_map;
 
 // this class is for managing the lifetimes of constant
 // buffers and other shader resoures that exist for the

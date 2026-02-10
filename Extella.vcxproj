@@ -39,20 +39,24 @@
 
   	<ItemDefinitionGroup>
     	<ClCompile>
-      	<EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
-      	<AdditionalIncludeDirectories>$(ProjectDir);C:\Users\yasha\Documents\Repositories\tinyobjloader;C:\Users\yasha\Documents\Repositories\stb</AdditionalIncludeDirectories>
-      	<LanguageStandard>stdcpp17</LanguageStandard>
-      	<WarningLevel>Level4</WarningLevel>
-      	<DisableSpecificWarnings>4267;4244;4305;4100</DisableSpecificWarnings>
+      		<EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      		<AdditionalIncludeDirectories>
+				$(ProjectDir);C:\Users\yasha\Documents\Repositories\tinyobjloader;C:\Users\yasha\Documents\Repositories\stb;C:\Users\yasha\Documents\Repositories\Boost\include\boost-1_90
+			</AdditionalIncludeDirectories>
+      		<LanguageStandard>stdcpp17</LanguageStandard>
+      		<WarningLevel>Level4</WarningLevel>
+      		<DisableSpecificWarnings>4267;4244;4305;4100</DisableSpecificWarnings>
     	</ClCompile>
 
     	<Link>
-      	<AdditionalDependencies>
+			 <AdditionalLibraryDirectories>C:\Users\yasha\Documents\Repositories\Boost\lib</AdditionalLibraryDirectories>
+      		<AdditionalDependencies>
                 	d3d9.lib;d3d11.lib;dxgi.lib;d3dcompiler.lib;kernel32.lib;user32.lib;oleaut32.lib;ole32.lib
-            	</AdditionalDependencies>
-      	<GenerateDebugInformation>true</GenerateDebugInformation>
-      	<ProgramDatabaseFile>$(OutDir)main.pdb</ProgramDatabaseFile>
-      	<SubSystem>Windows</SubSystem>
+        	</AdditionalDependencies>
+
+      		<GenerateDebugInformation>true</GenerateDebugInformation>
+      		<ProgramDatabaseFile>$(OutDir)main.pdb</ProgramDatabaseFile>
+      		<SubSystem>Windows</SubSystem>
     	</Link>
 		
     	<FxCompile>

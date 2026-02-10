@@ -139,6 +139,10 @@ ID3DBlob* Shader::getVertexShaderBlob(wstring ShaderFileName){
     return vertexShaderBlob[ShaderFileName].get();
 }
 
+// iterate all the shader objects in the map
+// and compile the shader of the filename
+// if compilation is successfull (returned shader != null)
+// then erase that key value pair from the map
 template<typename T>
 void hotReload(unordered_map<wstring, T>& TShader, const char entryPoint[], const char target[])
 {

@@ -1,11 +1,11 @@
 #pragma once
 #include <d3d11.h>
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 #include <vector>
 #include <string>
 #include <memory>
 using std::vector;
-using std::unordered_map;
+using boost::unordered_map;
 using std::wstring;
 using std::unique_ptr;
 

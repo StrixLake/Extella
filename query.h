@@ -1,9 +1,9 @@
 #pragma once
 #include <d3d11.h>
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 #include <string>
 using std::wstring;
-using std::unordered_map;
+using boost::unordered_map;
 
 class Query
 {
