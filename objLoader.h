@@ -3,9 +3,10 @@
 #include <vectors.h>
 #include <vector>
 #include <fstream>
-#include <string>
+#include <string> // IWYU pragma: keep
+#include <boost/container/string.hpp>
 using std::ifstream;
-using std::string;
+using string = boost::container::basic_string<char>;
 using std::vector;
 
 

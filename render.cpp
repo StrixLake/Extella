@@ -44,7 +44,6 @@ void renderer(State* state){
     }
     
     state->query->end(state->variables);
-    //state->pDevice->pContext->Flush();
     
     return;
 }

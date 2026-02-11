@@ -1,8 +1,8 @@
 #pragma once
 #include <d3d11.h>
-#include <string>
 #include <boost/unordered_map.hpp>
-using std::string;
+#include <boost/container/string.hpp>
+using string = boost::container::basic_string<char>;
 using boost::unordered_map;
 
 // this class is for managing the lifetimes of constant

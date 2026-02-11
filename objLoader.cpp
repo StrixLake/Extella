@@ -132,7 +132,7 @@ void generateNormals(vector<Float3> &vertices, vector<int32_t> &index, vector<Fl
 
 
 void load_obj(vector<Float3> &vertex, vector<int32_t> &index, vector<Float3> &normals, vector<Float2> &TexCoords, const char* filename){
-    string inputFile(filename);
+    std::string inputFile(filename);
     tinyobj::ObjReaderConfig config;
     config.vertex_color = false;
 

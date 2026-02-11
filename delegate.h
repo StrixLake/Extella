@@ -1,10 +1,10 @@
 #pragma once
 #include <DirectXMath.h>
 #include <array>
-#include <string>
 #include <boost/unordered_map.hpp>
+#include <boost/container/string.hpp>
 using boost::unordered_map;
-using std::wstring;
+using wstring = boost::container::basic_string<wchar_t>;
 using std::array;
 using DirectX::XMMATRIX;
 using std::vector;

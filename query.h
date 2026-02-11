@@ -1,8 +1,8 @@
 #pragma once
 #include <d3d11.h>
 #include <boost/unordered_map.hpp>
-#include <string>
-using std::wstring;
+#include <boost/container/string.hpp>
+using wstring = boost::container::basic_string<wchar_t>;
 using boost::unordered_map;
 
 class Query

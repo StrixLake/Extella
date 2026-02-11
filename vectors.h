@@ -16,10 +16,11 @@ struct Float3{
     }
 
     Float3 operator/(int other){
-        this->x /= other;
-        this->y /= other;
-        this->z /= other;
-        return *this;
+        Float3 out = *this;
+        out.x /= other;
+        out.y /= other;
+        out.z /= other;
+        return out;
     }
 
     Float3 operator+(const Float3 &other){

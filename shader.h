@@ -2,11 +2,11 @@
 #include <d3d11.h>
 #include <boost/unordered_map.hpp>
 #include <vector>
-#include <string>
 #include <memory>
+#include <boost/container/string.hpp>
 using std::vector;
 using boost::unordered_map;
-using std::wstring;
+using wstring = boost::container::basic_string<wchar_t>;
 using std::unique_ptr;
 
 template<typename T>
