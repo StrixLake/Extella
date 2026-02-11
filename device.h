@@ -3,7 +3,6 @@
 #include <dxgi1_2.h>
 #include <windows.h>
 #include <config.h>
-#include <d3d9.h>
 #include <array>
 #include <DirectXMath.h>
 #include <boost/unordered_map.hpp>

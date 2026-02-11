@@ -14,13 +14,12 @@
 	<PropertyGroup>
 		<!-- Default config-->
 		<Configuration>Release</Configuration>
-    	<ConfigurationType>DynamicLibrary</ConfigurationType>
     	<!-- MSVC toolset-->
     	<PlatformToolset>v143</PlatformToolset>
     	<Platform>x64</Platform>
-    	<TargetName>Extella</TargetName>
-    	<OutDir>.\x64\$(Configuration)\bin\Extella\</OutDir>
-    	<IntDir>.\x64\$(Configuration)\obj\Extella\</IntDir>
+    	<TargetName>main</TargetName>
+    	<OutDir>.\x64\$(Configuration)\bin\Viewport\</OutDir>
+    	<IntDir>.\x64\$(Configuration)\obj\Viewport\</IntDir>
     	<BuildInParallel>true</BuildInParallel>
 	</PropertyGroup>
 	<PropertyGroup Condition="$(Configuration) == 'Debug'">
@@ -28,9 +27,6 @@
 	</PropertyGroup>
 	<PropertyGroup Condition="$(Configuration) == 'Release'">
 		<UseDebugLibraries>false</UseDebugLibraries>
-	</PropertyGroup>
-	<PropertyGroup Label="Globals">
-		<ProjectGuid>{78330846-DA7F-26E8-AFEF-61C7FA51BFE8}</ProjectGuid>
 	</PropertyGroup>
 	
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -59,10 +55,6 @@
       		<SubSystem>Windows</SubSystem>
     	</Link>
 		
-    	<FxCompile>
-      		<ShaderModel>5.0</ShaderModel>
-			<ObjectFileOutput>$(OutDir)shaders/%(Filename).cso</ObjectFileOutput>
-    	</FxCompile>
   	</ItemDefinitionGroup>
   	<ItemDefinitionGroup Condition="$(Configuration) == 'Debug'">
     	<ClCompile>
@@ -75,36 +67,13 @@
     	</ClCompile>
   	</ItemDefinitionGroup>
   	<ItemGroup>
-		<ClInclude Include="*.h"/>
-
-    	<ClCompile Include="extella.cpp" />
-    	<ClCompile Include="device.cpp" />
-    	<ClCompile Include="mesh.cpp" />
-    	<ClCompile Include="objLoader.cpp" />
-    	<ClCompile Include="render.cpp" />
-    	<ClCompile Include="shader.cpp" />
-    	<ClCompile Include="watch.cpp" />
-		<ClCompile Include="resources.cpp"/>
-		<ClCompile Include="delegate.cpp"/>
-		<ClCompile Include="query.cpp"/>
-		<ClCompile Include="extension/vShader.cpp"/>
-		<ClCompile Include="extension/tShader.cpp"/>
-		<ClCompile Include="extension/gShader.cpp"/>
-		<ClCompile Include="extension/pShader.cpp"/>
-		<ClCompile Include="extension/uShader.cpp"/>
-		<ClCompile Include="extension/configuration.cpp"/>
-
-    	<Shaders Include="shaders\*" />
-	
-    	<Mesh Include="mesh\*" />
+        <ProjectReference Include="Extella.vcxproj"/>
+        
+		<ClInclude Include="config.h"/>
+		<ClInclude Include="extella.h"/>
+		
+    	<ClCompile Include="main.cpp" />
 
   	</ItemGroup>
   	
-	<Target Name="Copy Mesh" AfterTargets="Build">
-    	<Copy SkipUnchangedFiles="true" SourceFiles="@(Mesh)" DestinationFolder="$(OutDir)mesh" />
-  	</Target>
-
-  	<Target Name="Copy Shaders" AfterTargets="Build">
-    	<Copy SkipUnchangedFiles="true" SourceFiles="@(Shaders)" DestinationFolder="$(OutDir)shaders" />
-  	</Target>
 </Project>

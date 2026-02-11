@@ -1,121 +1,143 @@
-#define EXPORT extern "C" __declspec(dllexport)
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-#include <Windows.h>
-#include <device.h>
-#include <mesh.h>
-#include <shader.h>
-#include <watch.h>
-#include <state.h>
-#include <resources.h>
-#include <extension.h>
-#include <query.h>
+#include <config.h>
+#include <extella.h>
+#include <windows.h>
+#include <d3d11.h>
+#define UNICODE
 
-State* state;
-
-BaseWorker* createTransformation(Mesh* mesh, ShaderResources* resource);
-BaseWorker* createTessellation(Mesh* mesh, ShaderResources* resource);
-
-
-EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice){
+IDXGISwapChain* CreateSwap(HWND hwnd, ID3D11Device* pDevice){
     
+    DXGI_MODE_DESC desc;
+    desc.Height = HEIGHT;
+    desc.Width = WIDTH;
+    desc.RefreshRate = {60, 1};
+    desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+    desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 
-    DXDevice *device = new DXDevice();
-    //device->CreateSwap(0);
-    device->CreateViews();
-    device->SetTargets();
+    DXGI_SWAP_CHAIN_DESC sd;
+    sd.BufferDesc = desc;
+    sd.BufferCount = 1;
+    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    sd.Flags = 0;
+    sd.SampleDesc = {1, 0};
+    sd.Windowed = true;
+    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    sd.OutputWindow = hwnd;
 
-    Query* query = new Query(device->pDevice, device->pContext);
+    IDXGIDevice* dxgiDevice = 0;
+    pDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice);
 
-    Shader *shaders = new Shader(device->pDevice);
+    IDXGIAdapter* dxgiAdapter = 0;
+    dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter);
 
-    ShaderResources* resource = new ShaderResources(device->pDevice);
+    IDXGIFactory* dxgiFactory = 0;
+    dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory);
+
+    DXGI_ADAPTER_DESC ddc;
+    dxgiAdapter->GetDesc(&ddc);
+    OutputDebugString("Device in use: \n");
+    OutputDebugStringW(ddc.Description);
+    OutputDebugString("\n");
     
-    //Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
-    //Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, resource, L"mesh/spot_.png");
-    Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, resource, L"mesh/normals.png");
-    grass->instanceCount = 100000;
-    
-    //grid->insertNextNode(grass);
-    //grid->insertNextNode(spot);
-    
-    resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
-    resource->createConstantBuffer("grassVariables", sizeof(float)*4);
-    
-    //grid->extension += createTransformation(grid, resource);
-    //grid->extension += createVertex(grid, resource, L"GridShader");
-    //grid->extension += createPixel(grid, resource, L"GridShader");
-    //grid->extension += disableBackCulling(grid);
-    
-    //spot->extension += createTransformation(spot, resource);
-    //spot->extension += createVertex(spot, resource, L"spot");
-    //spot->extension += createPixel(spot, resource, L"spot");
-    
-    grass->extension += createTransformation(grass, resource);
-    grass->extension += createUnifiedShader(grass, L"grass", "vp");
-    grass->extension += disableBackCulling(grass);
-    grass->constBuffers = {"transformMatrix", "grassVariables"};
+    IDXGISwapChain* pSwapChain = NULL;
 
-    Watch* stopwatch = new Watch();
+    dxgiFactory->CreateSwapChain(pDevice, &sd, &pSwapChain);
     
-    state = new State();
-    state->pDevice = device;
-    state->mesh = grass;
-    state->stopwatch = stopwatch;
-    state->resources = resource;
-    state->shaders = shaders;
-    state->query = query;
-
-    device->pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
-    device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);
-
-    state->variables[L"Distance"] = 100;
-
-    return;
+    dxgiFactory->Release();
+    dxgiAdapter->Release();
+    dxgiDevice->Release();
+    
+    return pSwapChain;
 }
 
-
-void renderer(State* state);
-
-EXPORT void render(){
-    renderer(state);
-}
-
-EXPORT void release() {
-    delete state;
-}
-
-EXPORT SAFEARRAY* getGlobalVariables(){
-    int elements = 6;
-    
-    const wchar_t* x[] = {L"Distance", L"Position X",
-                          L"Position Y", L"Position Z",
-                          L"in-tes", L"Instances"};
-
-    SAFEARRAY* ar = SafeArrayCreateVector(VT_BSTR, 0, elements);
-    
-    for(long i = 0; i < elements; ++i)
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
     {
-        BSTR data = SysAllocString(x[i]);
-        SafeArrayPutElement(ar, &i, data);
-        SysFreeString(data);
+    case WM_CLOSE:
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        return 0;
     }
 
-    return ar;
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-EXPORT void setVariable(BSTR variable, float value){
-    // since BSTR is wchar_t*
-    // we can use it directly as the key
-    if(state != NULL) state->variables[variable] = value;
-}
-
-EXPORT float getVariable(BSTR variable)
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
-    return state->variables[variable];
-}
+    SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+    
+    IDXGIDevice2* dxgiDevice = NULL;
+    IDXGISurface2* dxgiSurface = NULL;
+    InitializeRenderer(&dxgiSurface, &dxgiDevice);
+    
+    ID3D11DeviceContext* pContext = NULL;
+    ID3D11Device* pDevice = NULL;
+    ID3D11Texture2D* renderTexture = NULL;
+    dxgiDevice->QueryInterface(__uuidof(ID3D11Device), (void**)&pDevice);
+    dxgiSurface->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&renderTexture);
+    dxgiDevice->Release();
+    dxgiSurface->Release();
+    pDevice->GetImmediateContext(&pContext);
+    
+    // Register the window class.
+    const char CLASS_NAME[]  = "Extella";
+    
+    WNDCLASS wc = { };
 
-EXPORT void hotReload()
-{
-    state->shaders->HotReload();
+    
+    wc.lpfnWndProc   = WindowProc;
+    wc.hInstance     = hInstance;
+    wc.lpszClassName = CLASS_NAME;
+
+    RegisterClass(&wc);
+
+    // Create the window.
+
+    HWND hwnd = CreateWindowEx(
+        0,                              // Optional window styles.
+        CLASS_NAME,                     // Window class
+        "Viewport",    // Window text
+        WS_OVERLAPPEDWINDOW,            // Window style
+
+        // Size and position
+        0, 0, WIDTH, HEIGHT,
+
+        NULL,       // Parent window    
+        NULL,       // Menu
+        hInstance,  // Instance handle
+        NULL        // Additional application data
+        );
+
+    IDXGISwapChain* swapchain = CreateSwap(hwnd, pDevice);
+    ID3D11Texture2D* backTexture = NULL;
+    swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backTexture);
+
+    ShowWindow(hwnd, nCmdShow);
+
+    // Run the message loop.
+
+    MSG msg = { };
+    while (true)
+    {
+        if(PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_QUIT) break;
+
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+        render();
+        pContext->CopyResource(backTexture, renderTexture);
+        swapchain->Present(1,0);
+    }
+
+    pDevice->Release();
+    pContext->Release();
+    backTexture->Release();
+    renderTexture->Release();
+    swapchain->Release();
+    release();
+
+    return 0;
 }
