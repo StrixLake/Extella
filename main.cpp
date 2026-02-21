@@ -16,12 +16,12 @@ IDXGISwapChain* CreateSwap(HWND hwnd, ID3D11Device* pDevice){
 
     DXGI_SWAP_CHAIN_DESC sd;
     sd.BufferDesc = desc;
-    sd.BufferCount = 1;
+    sd.BufferCount = 2;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     sd.Flags = 0;
     sd.SampleDesc = {1, 0};
     sd.Windowed = true;
-    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     sd.OutputWindow = hwnd;
 
     IDXGIDevice* dxgiDevice = 0;
@@ -129,7 +129,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         }
         render();
         pContext->CopyResource(backTexture, renderTexture);
-        swapchain->Present(1,0);
+        swapchain->Present(2,0);
     }
 
     pDevice->Release();

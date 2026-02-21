@@ -32,8 +32,6 @@ void renderer(State* state){
 
     state->pDevice->pContext->ClearDepthStencilView(state->pDevice->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
     state->pDevice->pContext->ClearRenderTargetView(state->pDevice->pRenderView, color);
-    
-    state->mesh->instanceCount = state->variables[L"Instances"]*100;
 
     state->query->begin();
     

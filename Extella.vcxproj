@@ -55,7 +55,7 @@
         	</AdditionalDependencies>
 
       		<GenerateDebugInformation>true</GenerateDebugInformation>
-      		<ProgramDatabaseFile>$(OutDir)main.pdb</ProgramDatabaseFile>
+      		<ProgramDatabaseFile>$(OutDir)Extella.pdb</ProgramDatabaseFile>
       		<SubSystem>Windows</SubSystem>
     	</Link>
 		

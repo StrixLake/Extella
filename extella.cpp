@@ -31,21 +31,21 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     ShaderResources* resource = new ShaderResources(device->pDevice);
     
-    //Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
+    Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
     //Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, resource, L"mesh/spot_.png");
     Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, resource, L"mesh/normals.png");
     grass->instanceCount = 100000;
     
-    //grid->insertNextNode(grass);
+    grid->insertNextNode(grass);
     //grid->insertNextNode(spot);
     
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
     resource->createConstantBuffer("grassVariables", sizeof(float)*4);
     
-    //grid->extension += createTransformation(grid, resource);
-    //grid->extension += createVertex(grid, resource, L"GridShader");
-    //grid->extension += createPixel(grid, resource, L"GridShader");
-    //grid->extension += disableBackCulling(grid);
+    grid->extension += createTransformation(grid, resource);
+    grid->extension += createVertex(grid, resource, L"GridShader");
+    grid->extension += createPixel(grid, resource, L"GridShader");
+    grid->extension += disableBackCulling(grid);
     
     //spot->extension += createTransformation(spot, resource);
     //spot->extension += createVertex(spot, resource, L"spot");
@@ -54,13 +54,14 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     grass->extension += createTransformation(grass, resource);
     grass->extension += createUnifiedShader(grass, L"grass", "vp");
     grass->extension += disableBackCulling(grass);
+    grass->extension += createBlendState(grass);
     grass->constBuffers = {"transformMatrix", "grassVariables"};
 
     Watch* stopwatch = new Watch();
     
     state = new State();
     state->pDevice = device;
-    state->mesh = grass;
+    state->mesh = grid;
     state->stopwatch = stopwatch;
     state->resources = resource;
     state->shaders = shaders;
