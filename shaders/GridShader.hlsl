@@ -41,6 +41,6 @@ float4 PS_MAIN(VS_OUTPUT input) : SV_Target
     float2 duv = fwidth(uv);
     uv = abs(frac(uv / 2) - 0.5) / duv;
     uv = smoothstep(0, 1 , 1 - uv);
-
-    return max(uv.x,uv.y)/ sqrt(length(input.p.xz));
+    float3 color = max(uv.x,uv.y)/ sqrt(length(input.p.xz));
+    return float4(color, 0.4);
 }

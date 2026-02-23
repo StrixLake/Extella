@@ -34,9 +34,12 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
     //Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, resource, L"mesh/spot_.png");
     Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, resource, L"mesh/normals.png");
-    grass->instanceCount = 100000;
+    grass->instanceCount = 1;
     
-    grid->insertNextNode(grass);
+    Mesh* camera = new Mesh("mesh/frustum.obj", shaders, device->pContext, resource, L"mesh/white.png");
+
+    camera->insertNextNode(grass);
+    camera->insertNextNode(grid);
     //grid->insertNextNode(spot);
     
     resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
@@ -57,11 +60,15 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     grass->extension += createBlendState(grass);
     grass->constBuffers = {"transformMatrix", "grassVariables"};
 
+    camera->extension += createTransformation(camera, resource);
+    camera->extension += createUnifiedShader(camera, L"frustum", "vp");
+    camera->constBuffers = {"transformMatrix"};
+
     Watch* stopwatch = new Watch();
     
     state = new State();
     state->pDevice = device;
-    state->mesh = grid;
+    state->mesh = camera;
     state->stopwatch = stopwatch;
     state->resources = resource;
     state->shaders = shaders;
