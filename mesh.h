@@ -33,7 +33,7 @@ public:
     ID3D11Texture2D *pTexture = NULL;
     ID3D11ShaderResourceView *pTextureView = NULL;
     
-    static ShaderResources* cbuffers;
+    inline static ShaderResources* cbuffers = NULL;
 
     Shader* shaders;
     ID3D11Device* pDevice;

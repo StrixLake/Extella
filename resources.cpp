@@ -26,7 +26,7 @@ void ShaderResources::createConstantBuffer(size_t size)
     cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     pDevice->CreateBuffer(&cBuffer, NULL, &buffer);
 
-    constantSizedBuffers[size/16] = buffer;
+    constantSizedBuffers[size] = buffer;
 }
 
 ID3D11Buffer** ShaderResources::getConstBuffer(string name)
@@ -40,11 +40,13 @@ ID3D11Buffer** ShaderResources::getConstBuffer(string name)
 
 ID3D11Buffer** ShaderResources::getConstBuffer(size_t size)
 {
+    // if size if not multiple of 16, return NULL
+    if (size % 16 != 0) return NULL;
 
-    // if that buffer doesn't exist, return null
+    // if that buffer doesn't exist, create the buffer
     if(constantSizedBuffers.find(size) == constantSizedBuffers.end())
     {
-        createConstantBuffer(size*16);
+        createConstantBuffer(size);
     }
 
     return &constantSizedBuffers[size];
@@ -53,6 +55,9 @@ ID3D11Buffer** ShaderResources::getConstBuffer(size_t size)
 ShaderResources::~ShaderResources()
 {
     for (auto buffers : constantBuffers){
+        buffers.second->Release();
+    }
+    for (auto buffers : constantSizedBuffers){
         buffers.second->Release();
     }
 }

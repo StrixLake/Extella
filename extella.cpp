@@ -56,7 +56,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     //spot->extension += createPixel(spot, resource, L"spot");
     
     grass->extension += createTransformation(grass, resource);
-    grass->extension += createUnifiedShader(grass, L"grass", "vp", {"time"});
+    grass->extension += createUnifiedShader(grass, L"grass", "vp", {L"time"});
     grass->extension += rasterMode(grass, D3D11_FILL_SOLID, D3D11_CULL_NONE);
     grass->extension += createBlendState(grass);
 

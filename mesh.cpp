@@ -152,11 +152,10 @@ void objMeshFactory2(Mesh* mesh, const char* filename){
         return;
  }
 
-Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, ShaderResources* resource, const wchar_t* textureFile){
+Mesh::Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, const wchar_t* textureFile){
     this->shaders = shader;
     this->pDevice = shader->pDevice;
     this->pContext = context;
-    this->cbuffers = resource;
 
     objMeshFactory2(this, filename);
     

@@ -4,10 +4,10 @@
 
 class UnifiedShader : public BaseWorker
 {
-    friend BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<string> constVariables, vector<string> constBuffers);
+    friend BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<wstring> constVariables, vector<string> constBuffers);
 
     Mesh* mesh;
-    vector<string> constVariables;
+    vector<wstring> constVariables;
     vector<string> constBuffers;
     ShaderResources* cbuffers;
     wstring unifiedShader;
@@ -87,6 +87,33 @@ public:
         mesh->pContext->DSSetConstantBuffers(0, buffers.size(), buffers.data());
         mesh->pContext->GSSetConstantBuffers(0, buffers.size(), buffers.data());
         mesh->pContext->PSSetConstantBuffers(0, buffers.size(), buffers.data());
+        
+        if (constVariables.size() == 0) return;
+        // if constVariables is non empty
+        // in the next const buffer slot, set the const buffer for variables
+        int nextSlot = buffers.size();
+        // check the size in bytes of the variables vector
+        size_t size = constVariables.size()*sizeof(float); // since all variables are floats
+        // get the nearest multiple of 16
+        size = ((size + 15) / 16)*16;
+        // get the const buffer of that size
+        ID3D11Buffer* vBuffer = *cbuffers->getConstBuffer(size);
+        // load the variables in a vector
+        vector<float> constVars;
+        constVars.reserve(size/sizeof(float));
+        for(wstring var : constVariables)
+        {
+            constVars.push_back(variables[var]);
+        }
+        // update the vBuffer for all those variables
+        mesh->pContext->UpdateSubresource(vBuffer, 0, NULL, constVars.data(), 0, 0);
+        // bind to the next slot
+        mesh->pContext->VSSetConstantBuffers(nextSlot, 1, &vBuffer);
+        mesh->pContext->HSSetConstantBuffers(nextSlot, 1, &vBuffer);
+        mesh->pContext->DSSetConstantBuffers(nextSlot, 1, &vBuffer);
+        mesh->pContext->GSSetConstantBuffers(nextSlot, 1, &vBuffer);
+        mesh->pContext->PSSetConstantBuffers(nextSlot, 1, &vBuffer);
+
     }
 
     void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){}
@@ -98,7 +125,7 @@ public:
 };
 
 
-BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<string> constVariables, vector<string> constBuffers)
+BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<wstring> constVariables, vector<string> constBuffers)
 {
     UnifiedShader* out = new UnifiedShader();
     out->unifiedShader = ushader;

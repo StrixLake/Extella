@@ -16,6 +16,6 @@ BaseWorker* rasterMode(Mesh* mesh, D3D11_FILL_MODE fill_mode, D3D11_CULL_MODE cu
 
 BaseWorker* createVertexInstanced(Mesh* mesh, ShaderResources* resources, wstring vertexShader);
 
-BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<string> constVariables = {}, vector<string> constBuffers = {"transformMatrix"});
+BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<wstring> constVariables = {}, vector<string> constBuffers = {"transformMatrix"});
 
 BaseWorker* createBlendState(Mesh* mesh);
