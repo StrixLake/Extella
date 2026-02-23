@@ -12,10 +12,10 @@ BaseWorker* createGeometry(Mesh* mesh, ShaderResources* resources, wstring geome
 
 BaseWorker* createPixel(Mesh* mesh, ShaderResources* resources, wstring pixelShader);
 
-BaseWorker* disableBackCulling(Mesh* mesh);
+BaseWorker* rasterMode(Mesh* mesh, D3D11_FILL_MODE fill_mode, D3D11_CULL_MODE cull_mode);
 
 BaseWorker* createVertexInstanced(Mesh* mesh, ShaderResources* resources, wstring vertexShader);
 
-BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages);
+BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<string> constVariables = {}, vector<string> constBuffers = {"transformMatrix"});
 
 BaseWorker* createBlendState(Mesh* mesh);

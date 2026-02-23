@@ -30,13 +30,14 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     Shader *shaders = new Shader(device->pDevice);
 
     ShaderResources* resource = new ShaderResources(device->pDevice);
+    Mesh::cbuffers = resource;
     
-    Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, resource, L"mesh/default_.png");
+    Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, L"mesh/default_.png");
     //Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, resource, L"mesh/spot_.png");
-    Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, resource, L"mesh/normals.png");
+    Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, L"mesh/normals.png");
     grass->instanceCount = 1;
     
-    Mesh* camera = new Mesh("mesh/frustum.obj", shaders, device->pContext, resource, L"mesh/white.png");
+    Mesh* camera = new Mesh("mesh/frustum.obj", shaders, device->pContext, L"mesh/white.png");
 
     camera->insertNextNode(grass);
     camera->insertNextNode(grid);
@@ -48,21 +49,19 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     grid->extension += createTransformation(grid, resource);
     grid->extension += createVertex(grid, resource, L"GridShader");
     grid->extension += createPixel(grid, resource, L"GridShader");
-    grid->extension += disableBackCulling(grid);
+    grid->extension += rasterMode(grid, D3D11_FILL_SOLID, D3D11_CULL_NONE);
     
     //spot->extension += createTransformation(spot, resource);
     //spot->extension += createVertex(spot, resource, L"spot");
     //spot->extension += createPixel(spot, resource, L"spot");
     
     grass->extension += createTransformation(grass, resource);
-    grass->extension += createUnifiedShader(grass, L"grass", "vp");
-    grass->extension += disableBackCulling(grass);
+    grass->extension += createUnifiedShader(grass, L"grass", "vp", {"time"});
+    grass->extension += rasterMode(grass, D3D11_FILL_SOLID, D3D11_CULL_NONE);
     grass->extension += createBlendState(grass);
-    grass->constBuffers = {"transformMatrix", "grassVariables"};
 
     camera->extension += createTransformation(camera, resource);
     camera->extension += createUnifiedShader(camera, L"frustum", "vp");
-    camera->constBuffers = {"transformMatrix"};
 
     Watch* stopwatch = new Watch();
     

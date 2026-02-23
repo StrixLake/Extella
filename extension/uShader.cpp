@@ -4,13 +4,17 @@
 
 class UnifiedShader : public BaseWorker
 {
-public:
+    friend BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<string> constVariables, vector<string> constBuffers);
+
     Mesh* mesh;
+    vector<string> constVariables;
+    vector<string> constBuffers;
     ShaderResources* cbuffers;
     wstring unifiedShader;
     ID3D11InputLayout* pLayout = NULL;
-
     string stages = "vp";
+
+public:
 
     void postConstruction()
     {
@@ -73,7 +77,7 @@ public:
 
         vector<ID3D11Buffer*> buffers;
 
-        for(string cbuffer : mesh->constBuffers)
+        for(string cbuffer : constBuffers)
         {
             buffers.push_back(*cbuffers->getConstBuffer(cbuffer));
         }
@@ -94,13 +98,15 @@ public:
 };
 
 
-BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages)
+BaseWorker* createUnifiedShader(Mesh* mesh, wstring ushader, string stages, vector<string> constVariables, vector<string> constBuffers)
 {
     UnifiedShader* out = new UnifiedShader();
     out->unifiedShader = ushader;
     out->mesh = mesh;
     out->cbuffers = mesh->cbuffers;
     out->stages = stages;
+    out->constBuffers = constBuffers;
+    out->constVariables = constVariables;
 
     return out;
 }

@@ -11,7 +11,7 @@ using DirectX::XMMATRIX;
 class Mesh{
 public:
     Mesh() = delete;
-    Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, ShaderResources* resource, const wchar_t* textureFile);
+    Mesh(const char* filename, Shader* shader, ID3D11DeviceContext* context, const wchar_t* textureFile);
 
     void Draw(array<XMMATRIX,3> camera, unordered_map<wstring, float> &variables);
 
@@ -33,8 +33,7 @@ public:
     ID3D11Texture2D *pTexture = NULL;
     ID3D11ShaderResourceView *pTextureView = NULL;
     
-    ShaderResources* cbuffers;
-    vector<string> constBuffers = {"transformMatrix"};
+    static ShaderResources* cbuffers;
 
     Shader* shaders;
     ID3D11Device* pDevice;
