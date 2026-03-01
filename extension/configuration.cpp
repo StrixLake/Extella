@@ -13,11 +13,7 @@ public:
 
     Mesh* mesh;
 
-    void postConstruction(){}
-
-    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){}
-
-    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) override
     {
         mesh->pContext->RSSetState(pRasterState);
     }
@@ -61,17 +57,15 @@ public:
 
     ID3D11BlendState* pBlendState = NULL;
 
-    void postConstruction()
+    void postConstruction() override
     {
         mesh->pDevice->CreateBlendState(&blendDesc, &pBlendState);
     }
 
-    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) override
     {
         mesh->pContext->OMSetBlendState(pBlendState, NULL, 0xFFFFFFFF);
     }
-
-    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){}
 
     ~BlendStateT0()
     {

@@ -5,6 +5,11 @@ cbuffer Transformation : register(b0)
     matrix Projection;
 }
 
+cbuffer vars : register(b1)
+{
+    float aspect_ratio;
+    float a, b, c;
+}
 
 Texture2D image : register(t0);
 SamplerState samLinear : register( s0 );
@@ -22,9 +27,10 @@ VS_OUTPUT VS_MAIN(float4 pos : POSITION, float2 tex : TEXCOORD0, float3 norm : N
     output.position = pos;
     output.color = pos;
 
+    output.position.x *= aspect_ratio;
     if(output.position.z != 0)
     {
-        output.position.xy *= 10;
+        output.position.xy *= 20;
     }
 
 

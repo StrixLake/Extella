@@ -9,9 +9,7 @@ public:
     ShaderResources* cbuffers;
     wstring pixelShader;
 
-    void postConstruction(){}
-
-    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) override
     {
         mesh->pContext->PSSetShader(mesh->shaders->getPixelShader(pixelShader), NULL, 0);
 
@@ -20,7 +18,6 @@ public:
         mesh->pContext->PSSetConstantBuffers(1, 1, cbuffers->getConstBuffer("grassVariables"));
     }
 
-    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){}
 };
 
 

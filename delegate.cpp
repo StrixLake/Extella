@@ -22,6 +22,14 @@ void Delegate::postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstri
     }
 }
 
+void Delegate::postDraw(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+{
+    for(BaseWorker* subscriber : invocationList)
+    {
+        subscriber->postDraw(camera, variables);
+    }
+}
+
 Delegate::~Delegate()
 {
     for(BaseWorker* subscriber : invocationList)

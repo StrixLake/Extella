@@ -3,9 +3,8 @@
 class TransformationExtenstion : public BaseWorker{
 
 public:
-    void postConstruction(){};
 
-    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) override
     {
         float xoffset = variables[L"Position X"] /20;
         float yoffset = variables[L"Position Y"] /20;
@@ -16,7 +15,6 @@ public:
 
     };
 
-    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){};
 };
 
 BaseWorker* createTransformation(Mesh* mesh, ShaderResources* resources)
@@ -33,7 +31,7 @@ public:
     wstring vertexShader;
     ID3D11InputLayout* pLayout = NULL;
 
-    void postConstruction()
+    void postConstruction() override
     {
         D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                             0, 0, 
@@ -48,7 +46,7 @@ public:
                                                    mesh->shaders->getVertexShaderBlob(vertexShader)->GetBufferSize(), &pLayout);
     }
 
-    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) override
     {
         mesh->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -68,7 +66,6 @@ public:
 
     }
 
-    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){};
 
     ~VertexShader()
     {
@@ -96,7 +93,7 @@ public:
     ID3D11InputLayout* pLayout = NULL;
     int hr;
 
-    void postConstruction()
+    void postConstruction() override
     {
         D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                             0, 0, 
@@ -115,7 +112,7 @@ public:
                                                    mesh->shaders->getVertexShaderBlob(vertexShader)->GetBufferSize(), &pLayout);
     }
 
-    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) override
     {
         mesh->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -136,8 +133,6 @@ public:
         mesh->pContext->VSSetConstantBuffers(0, 1, cbuffers->getConstBuffer("transformMatrix"));
     }
 
-    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
-    {}
 
     ~VertexInstanced()
     {

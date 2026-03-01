@@ -9,15 +9,12 @@ public:
     ShaderResources* cbuffers;
     wstring geometryShader;
 
-    void postConstruction(){}
-
-    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) override
     {
         mesh->pContext->GSSetConstantBuffers(0, 1, cbuffers->getConstBuffer("transformMatrix"));
         mesh->pContext->GSSetShader(mesh->shaders->getGeometryShader(geometryShader), NULL, 0);
     }
 
-    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){}
 };
 
 BaseWorker* createGeometry(Mesh* mesh, ShaderResources* resources, wstring geometryShader)

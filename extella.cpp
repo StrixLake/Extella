@@ -61,7 +61,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     grass->extension += createBlendState(grass);
 
     camera->extension += createTransformation(camera, resource);
-    camera->extension += createUnifiedShader(camera, L"frustum", "vp");
+    camera->extension += createUnifiedShader(camera, L"frustum", "vp", {L"aspect ratio"});
 
     Watch* stopwatch = new Watch();
     
@@ -76,8 +76,8 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     device->pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
     device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);
 
-    state->variables[L"Distance"] = 1000;
-    state->variables[L"Instances"] = 100;
+    state->variables[L"Distance"] = 100;
+    state->variables[L"aspect ratio"] = (float)WIDTH/HEIGHT;
     
     return;
 }

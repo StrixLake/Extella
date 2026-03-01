@@ -16,7 +16,7 @@ class UnifiedShader : public BaseWorker
 
 public:
 
-    void postConstruction()
+    void postConstruction() override
     {
         D3D11_INPUT_ELEMENT_DESC layout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
                                             0, 0, 
@@ -31,7 +31,7 @@ public:
                                                    mesh->shaders->getVertexShaderBlob(unifiedShader)->GetBufferSize(), &pLayout);
     }
 
-    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables)
+    void prePipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables) override
     {
 
         mesh->pContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -115,8 +115,6 @@ public:
         mesh->pContext->PSSetConstantBuffers(nextSlot, 1, &vBuffer);
 
     }
-
-    void postPipelineSetup(array<XMMATRIX, 3> &camera, unordered_map<wstring, float> &variables){}
 
     ~UnifiedShader()
     {
