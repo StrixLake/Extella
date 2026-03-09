@@ -143,7 +143,21 @@ void load_obj(vector<Float3> &vertex, vector<int32_t> &index, vector<Float3> &no
     // which contains the vertex, normal & texCord
     // index of each triangle
     vector<tinyobj::shape_t> shapes = reader.GetShapes();
-    tinyobj::mesh_t mesh = shapes[0].mesh;
+    // shapes vector may contain multiple shape_t
+    // and therefore contain multiple meshes
+    // since all those meshes contain the index buffer
+    // that reference the data in the attribute
+    // we append all the shapes[].mesh
+    // mesh_t is just a struct containing multiple vectors
+    tinyobj::mesh_t mesh;// = shapes[0].mesh;
+    for(tinyobj::shape_t& shape : shapes)
+    {
+        tinyobj::mesh_t& subMesh = shape.mesh;
+        for(tinyobj::index_t& index : subMesh.indices)
+        {
+            mesh.indices.push_back(index);
+        }
+    }
 
     // attribute object contains 3 vectors, each for
     // vector, normal and texCord which are indexed
