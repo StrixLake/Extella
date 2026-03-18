@@ -6,9 +6,14 @@
 #include <array>
 #include <DirectXMath.h>
 #include <boost/unordered_map.hpp>
-#include <boost/container/string.hpp>
 using boost::unordered_map;
+#ifdef BOOST
+#include <boost/container/string.hpp>
 using wstring = boost::container::basic_string<wchar_t>;
+#else
+#include <string>
+using wstring = std::wstring;
+#endif
 using DirectX::XMMATRIX;
 using std::array;
 

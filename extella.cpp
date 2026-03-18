@@ -35,7 +35,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     Mesh::cbuffers = resource;
     
     Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, L"mesh/default_.png");
-    Mesh *spot = new Mesh("mesh/j20.obj", shaders, device->pContext, L"mesh/spot_.png");
+    Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, L"mesh/spot_.png");
     //Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, L"mesh/normals.png");
     //grass->instanceCount = 1;
     
@@ -84,29 +84,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     // testing something unrelated
     ID3DBlob* vShader = shaders->getVertexShaderBlob(L"spot");
-    ID3D11ShaderReflection* pReflect = NULL;
-    D3DReflect(vShader->GetBufferPointer(), vShader->GetBufferSize(), __uuidof(ID3D11ShaderReflection), (void**)&pReflect);
-    D3D11_SHADER_DESC desc = {};
-    pReflect->GetDesc(&desc);
-
-    for(unsigned int i = 0; i < desc.ConstantBuffers; i++)
-    {
-        ID3D11ShaderReflectionConstantBuffer* cbuf = pReflect->GetConstantBufferByIndex(i);
-        D3D11_SHADER_BUFFER_DESC cdesc = {};
-        cbuf->GetDesc(&cdesc);
-        for(unsigned int j = 0; j < cdesc.Variables; ++j)
-        {
-            ID3D11ShaderReflectionVariable* var = cbuf->GetVariableByIndex(j);
-            D3D11_SHADER_VARIABLE_DESC vdesc = {};
-            var->GetDesc(&vdesc);
-        }
-    }
-    
-    for(unsigned int i = 0; i < desc.BoundResources; ++i)
-    {
-        D3D11_SHADER_INPUT_BIND_DESC bdesc = {};
-        pReflect->GetResourceBindingDesc(i, &bdesc);
-    }
+    volatile Shader_Reflection_Desc desc = shaders->reflect(vShader);
 
     return;
 }

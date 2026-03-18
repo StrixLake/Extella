@@ -1,8 +1,13 @@
 #include <vectors.h>
 #include <tiny_obj_loader.h>
 #include <boost/unordered_map.hpp>
+#ifdef BOOST
 #include <boost/container/string.hpp>
 using string = boost::container::basic_string<char>;
+#else
+#include <string>
+using string = std::string;
+#endif
 using boost::unordered_map;
 
 class Material
