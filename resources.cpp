@@ -60,4 +60,21 @@ ShaderResources::~ShaderResources()
     for (auto buffers : constantSizedBuffers){
         buffers.second->Release();
     }
+    for (auto texture : textures){
+        texture.second->Release();
+    }
+}
+
+void ShaderResources::createTexture2D(string name, D3D11_TEXTURE2D_DESC description)
+{
+    ID3D11Texture2D* pTexture = NULL;
+    pDevice->CreateTexture2D(&description, NULL, &pTexture);
+    textures[name] = pTexture;
+}
+
+ID3D11Texture2D* ShaderResources::getTexture2D(string name)
+{
+    if(textures.find(name) == textures.end()) return NULL;
+    
+    return textures[name];
 }

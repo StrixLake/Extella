@@ -17,6 +17,7 @@ class ShaderResources{
 
     unordered_map<string, ID3D11Buffer*> constantBuffers;
     unordered_map<size_t, ID3D11Buffer*> constantSizedBuffers;
+    unordered_map<string, ID3D11Texture2D*> textures;
     ID3D11Device* pDevice = NULL;
 public:
     ShaderResources() = delete;
@@ -28,6 +29,10 @@ public:
     ID3D11Buffer** getConstBuffer(string name);
 
     ID3D11Buffer** getConstBuffer(size_t size);
+
+    void createTexture2D(string name, D3D11_TEXTURE2D_DESC description);
+
+    ID3D11Texture2D* getTexture2D(string name);
 
     ~ShaderResources();
 };
