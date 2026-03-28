@@ -28,4 +28,4 @@ public:
 
 
 // create a material from tinyobj::material_t
-Material* material_factory(tinyobj::material_t &material);
+Material material_factory(tinyobj::material_t &material);

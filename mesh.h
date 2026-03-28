@@ -45,3 +45,22 @@ public:
 
     ~Mesh();
 };
+
+class Mesh1
+{
+public:
+    string name;
+    // the prefered material name from the obj file
+    string material;
+
+    struct Semantic_Buffer
+    {
+        unique_ptr<ID3D11Buffer, Deleter<ID3D11Buffer*>>* buffer;
+        string semantic;
+        size_t stride;
+        DXGI_FORMAT format;
+        unsigned int step_rate = 0; // for instanced data
+    };
+
+    vector<Semantic_Buffer> mesh_data;
+};
