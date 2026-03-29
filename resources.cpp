@@ -1,80 +1,75 @@
 #include <resources.h>
+#include <stb_image.h>
 
-ShaderResources::ShaderResources(ID3D11Device* device) : pDevice(device){}
+template<class T>
+using uniq_com_ptr = std::unique_ptr<T, Deleter<T*>>;
 
-void ShaderResources::createConstantBuffer(string name, size_t size)
+ResourceManager::ResourceManager(ID3D11Device* device)
 {
-    // don't create that buffer if another buffer of the same already exists
-    if (constantBuffers.find(name) != constantBuffers.end()) return;
+    pDevice = device;
 
-    ID3D11Buffer* buffer;
-    D3D11_BUFFER_DESC cBuffer = {};
-    cBuffer.Usage = D3D11_USAGE_DEFAULT;
-    cBuffer.ByteWidth = size;
-    cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    pDevice->CreateBuffer(&cBuffer, NULL, &buffer);
+    D3D11_BUFFER_DESC desc = {};
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.ByteWidth = 128;
+    desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 
-    constantBuffers[name] = buffer;
-}
-
-void ShaderResources::createConstantBuffer(size_t size)
-{
-    ID3D11Buffer* buffer;
-    D3D11_BUFFER_DESC cBuffer = {};
-    cBuffer.Usage = D3D11_USAGE_DEFAULT;
-    cBuffer.ByteWidth = size;
-    cBuffer.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    pDevice->CreateBuffer(&cBuffer, NULL, &buffer);
-
-    constantSizedBuffers[size] = buffer;
-}
-
-ID3D11Buffer** ShaderResources::getConstBuffer(string name)
-{
-
-    // if that buffer doesn't exist, return null
-    if(constantBuffers.find(name) == constantBuffers.end()) return NULL;
-
-    return &constantBuffers[name];
-}
-
-ID3D11Buffer** ShaderResources::getConstBuffer(size_t size)
-{
-    // if size if not multiple of 16, return NULL
-    if (size % 16 != 0) return NULL;
-
-    // if that buffer doesn't exist, create the buffer
-    if(constantSizedBuffers.find(size) == constantSizedBuffers.end())
+    for(int i = 0; i < 100; ++i)
     {
-        createConstantBuffer(size);
+        ID3D11Buffer* ptr;
+        pDevice->CreateBuffer(&desc, NULL, &ptr);
+        constantBufferRing.push_back(uniq_com_ptr<ID3D11Buffer>(ptr));
     }
 
-    return &constantSizedBuffers[size];
 }
 
-ShaderResources::~ShaderResources()
+
+void ResourceManager::createTexture2D(D3D11_TEXTURE2D_DESC desc, string name)
 {
-    for (auto buffers : constantBuffers){
-        buffers.second->Release();
-    }
-    for (auto buffers : constantSizedBuffers){
-        buffers.second->Release();
-    }
-    for (auto texture : textures){
-        texture.second->Release();
-    }
+    ID3D11Texture2D* texture;
+    pDevice->CreateTexture2D(&desc, NULL, &texture);
+    textures[name] = uniq_com_ptr<ID3D11Texture2D>(texture);
 }
 
-void ShaderResources::createTexture2D(string name, D3D11_TEXTURE2D_DESC description)
+void ResourceManager::createTexture2DfromImage(string filename)
 {
-    ID3D11Texture2D* pTexture = NULL;
-    pDevice->CreateTexture2D(&description, NULL, &pTexture);
-    textures[name] = pTexture;
+    stbi_set_flip_vertically_on_load(true);
+    int width, height, channel;
+    uint8_t* image = stbi_load(filename.data(), &width, &height, &channel, 4);
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.SampleDesc = {1,0};
+
+    D3D11_SUBRESOURCE_DATA initial_data = {};
+    initial_data.SysMemPitch = width*4;
+    initial_data.pSysMem = image;
+
+    ID3D11Texture2D* texture;
+    pDevice->CreateTexture2D(&desc, &initial_data, &texture);
+    textures[filename] = uniq_com_ptr<ID3D11Texture2D>(texture);
 }
 
-ID3D11Texture2D* ShaderResources::getTexture2D(string name)
+
+ID3D11Texture2D* ResourceManager::getTexture2D(string texture)
 {
-    if(textures.find(name) == textures.end()) return NULL;
-    
-    return textures[name];
+    return textures[texture].get();
+}
+
+ID3D11Buffer* ResourceManager::getConstBuffer()
+{
+    // move the first buffer in a unique pointer
+    uniq_com_ptr<ID3D11Buffer> unique_out = std::move(constantBufferRing.front());
+    // remove the null unique pointer from the ring
+    constantBufferRing.pop_front();
+    // get the raw pointer to return
+    ID3D11Buffer* out = unique_out.get();
+    // move that unique pointer back in the ring
+    constantBufferRing.push_back(unique_out);
+    return out;
 }

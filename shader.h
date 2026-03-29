@@ -1,5 +1,6 @@
 #pragma once
 #include <d3d11.h>
+#include <config.h>
 #include <boost/unordered_map.hpp>
 #include <vector>
 #include <memory>
@@ -16,15 +17,6 @@ using string = std::string;
 #endif
 using std::unique_ptr;
 using std::pair;
-
-template<typename T>
-struct Deleter
-{
-    void operator()(T& comPointer) noexcept
-    {
-        comPointer->Release();
-    }
-};
 
 enum class HLSLTypes{
     FLOAT, FLOAT2, FLOAT3, FLOAT4, MATRIX

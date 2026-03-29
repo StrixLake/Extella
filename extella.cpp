@@ -16,8 +16,6 @@
 
 State* state;
 
-BaseWorker* createTransformation(Mesh* mesh, ShaderResources* resource);
-BaseWorker* createTessellation(Mesh* mesh, ShaderResources* resource);
 
 
 EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice){
@@ -30,43 +28,6 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     Query* query = new Query(device->pDevice, device->pContext);
 
     Shader *shaders = new Shader(device->pDevice);
-
-    ShaderResources* resource = new ShaderResources(device->pDevice);
-    Mesh::cbuffers = resource;
-    
-    Mesh *grid = new Mesh("mesh/triangle.obj", shaders, device->pContext, L"mesh/default_.png");
-    Mesh *spot = new Mesh("mesh/spot_.obj", shaders, device->pContext, L"mesh/spot_.png");
-    //Mesh *grass = new Mesh("mesh/grass.obj", shaders, device->pContext, L"mesh/normals.png");
-    //grass->instanceCount = 1;
-    
-    //Mesh* camera = new Mesh("mesh/frustum.obj", shaders, device->pContext, L"mesh/white.png");
-
-    //camera->insertNextNode(grass);
-    //camera->insertNextNode(grid);
-    grid->insertNextNode(spot);
-    
-    resource->createConstantBuffer("transformMatrix", sizeof(XMMATRIX)*3);
-    resource->createConstantBuffer("grassVariables", sizeof(float)*4);
-    
-    grid->extension += createTransformation(grid, resource);
-    grid->extension += createVertex(grid, resource, L"GridShader");
-    grid->extension += createPixel(grid, resource, L"GridShader");
-    grid->extension += rasterMode(grid, D3D11_FILL_SOLID, D3D11_CULL_NONE);
-    
-    spot->extension += createTransformation(spot, resource);
-    spot->extension += createVertex(spot, resource, L"spot");
-    spot->extension += createPixel(spot, resource, L"spot");
-    spot->extension += rasterMode(spot, D3D11_FILL_SOLID, D3D11_CULL_NONE);
-    
-    //grass->extension += createTransformation(grass, resource);
-    //grass->extension += createUnifiedShader(grass, L"grass", "vp", {L"time"});
-    //grass->extension += rasterMode(grass, D3D11_FILL_SOLID, D3D11_CULL_NONE);
-    //grass->extension += createBlendState(grass);
-
-    //camera->extension += createTransformation(camera, resource);
-    //camera->extension += createUnifiedShader(camera, L"frustum", "vp", {L"aspect ratio"});
-
-    Watch* stopwatch = new Watch();
     
     state = new State();
     state->pDevice = device;
