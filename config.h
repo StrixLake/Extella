@@ -12,3 +12,8 @@ struct Deleter
         comPointer->Release();
     }
 };
+
+#include <memory>
+
+template<class T>
+using uniq_com_ptr = std::unique_ptr<T, Deleter<T*>>;
