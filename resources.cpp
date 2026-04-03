@@ -1,9 +1,6 @@
 #include <resources.h>
 #include <stb_image.h>
 
-template<class T>
-using uniq_com_ptr = std::unique_ptr<T, Deleter<T*>>;
-
 ResourceManager::ResourceManager(ID3D11Device* device)
 {
     pDevice = device;

@@ -17,11 +17,11 @@ class ResourceManager
 {
     ID3D11Device* pDevice;
 
-    unordered_map<string, std::unique_ptr<ID3D11Texture2D, Deleter<ID3D11Texture2D*>>> textures;
+    unordered_map<string, uniq_com_ptr<ID3D11Texture2D>> textures;
 
     // each const buffer will always be 128 bytes
     // contains 100 buffers
-    std::deque<std::unique_ptr<ID3D11Buffer, Deleter<ID3D11Buffer*>>> constantBufferRing;
+    std::deque<uniq_com_ptr<ID3D11Buffer>> constantBufferRing;
 
 public: 
     ResourceManager(ID3D11Device* pDevice);
