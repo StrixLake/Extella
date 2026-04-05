@@ -157,6 +157,7 @@ GPUMesh convert_mesh(Mesh& mesh, ID3D11Device* pDevice)
 
     out_mesh.index_buffer = uniq_com_ptr<ID3D11Buffer>(index_buffer);
 
+    // init each of the vertex buffers
     for(auto &buffer : mesh.buffers)
     {
         ID3D11Buffer* vertBuffer = create_buffer(buffer.buffer);

@@ -70,3 +70,14 @@ ID3D11Buffer* ResourceManager::getConstBuffer()
     constantBufferRing.push_back(unique_out);
     return out;
 }
+
+// the material must only contain texture map names
+void ResourceManager::createTexturesFromMaterial(Material& material)
+{
+    for(auto texture : material.material_textures)
+    {
+        string texture_path = texture.second;
+        if(texture_path != "") createTexture2DfromImage(texture_path);
+    }
+
+}

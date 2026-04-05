@@ -1,6 +1,7 @@
 #include <d3d11.h>
 #include <config.h>
 #include <deque>
+#include <materials.h>
 #include <boost/unordered_map.hpp>
 using boost::unordered_map;
 #ifdef BOOST
@@ -28,6 +29,7 @@ public:
 
     void createTexture2D(D3D11_TEXTURE2D_DESC desc, string name);
     void createTexture2DfromImage(string filename);
+    void createTexturesFromMaterial(Material& material);
 
     ID3D11Texture2D* getTexture2D(string texture);
 
