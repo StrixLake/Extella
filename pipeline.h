@@ -105,7 +105,7 @@ class PipeLine
     ID3D11DepthStencilState* pDepthStencilState = NULL;
 
 public:
-    friend unique_ptr<PipeLine> createPipeline(Pipeline_Desc descriptuon, Shader* shader, ShaderResources* resources, ID3D11Device* pDevice);
+    friend unique_ptr<PipeLine> createPipeline(Pipeline_Desc descriptuon, Shader* shader, ResourceManager* resources, ID3D11Device* pDevice);
 
     void setPipelineState(ID3D11DeviceContext* pContext) const;
 
@@ -113,4 +113,4 @@ public:
 
 };
 
-unique_ptr<PipeLine> createPipeline(Pipeline_Desc description, Shader* shader, ShaderResources* resources, ID3D11Device* pDevice);
+unique_ptr<PipeLine> createPipeline(Pipeline_Desc description, Shader* shader, ResourceManager* resources, ID3D11Device* pDevice);
