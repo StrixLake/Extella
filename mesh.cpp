@@ -119,3 +119,50 @@ std::pair<vector<Mesh>, vector<Material>> load_obj(string filename)
     return {std::move(out_mesh), std::move(out_material)};
 
 }
+
+
+GPUMesh convert_mesh(Mesh& mesh, ID3D11Device* pDevice)
+{
+    GPUMesh out_mesh;
+    out_mesh.name = mesh.name;
+    out_mesh.triangle_count = mesh.index_buffer.size()/3;
+    out_mesh.prefered_material = mesh.prefered_material;
+
+    auto create_buffer = [pDevice](vector<float> &cpuBuffer) -> ID3D11Buffer*
+    {
+        D3D11_BUFFER_DESC desc = {};
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        desc.ByteWidth = cpuBuffer.size()*sizeof(float);
+
+        D3D11_SUBRESOURCE_DATA init = {};
+        init.pSysMem = cpuBuffer.data();
+
+        ID3D11Buffer* out;
+        pDevice->CreateBuffer(&desc, &init, &out);
+        return out;
+    };
+
+    // init index buffer
+    D3D11_BUFFER_DESC indexDesc = {};
+    indexDesc.Usage = D3D11_USAGE_DEFAULT;
+    indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    indexDesc.ByteWidth = mesh.index_buffer.size()*sizeof(unsigned int);
+
+    D3D11_SUBRESOURCE_DATA indexData = {};
+    indexData.pSysMem = mesh.index_buffer.data();
+
+    ID3D11Buffer* index_buffer;
+    pDevice->CreateBuffer(&indexDesc, &indexData, &index_buffer);
+
+    out_mesh.index_buffer = uniq_com_ptr<ID3D11Buffer>(index_buffer);
+
+    for(auto &buffer : mesh.buffers)
+    {
+        ID3D11Buffer* vertBuffer = create_buffer(buffer.buffer);
+        out_mesh.vertex_buffers.push_back({buffer.semantic, uniq_com_ptr<ID3D11Buffer>(vertBuffer),
+                                                buffer.stride, buffer.format});
+    }
+
+    return out_mesh;
+}

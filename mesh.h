@@ -41,8 +41,8 @@ public:
     int triangle_count;
     struct VertexBuffers
     {
-        uniq_com_ptr<ID3D11Buffer> vertex_buffer;
         string semantic;
+        uniq_com_ptr<ID3D11Buffer> vertex_buffer;
         unsigned int stride;
         DXGI_FORMAT format;
     };
@@ -54,4 +54,4 @@ public:
 
 std::pair<vector<Mesh>, vector<Material>> load_obj(string filename);
 
-GPUMesh convert_mesh(Mesh mesh);
+GPUMesh convert_mesh(Mesh& mesh, ID3D11Device* pDevice);
