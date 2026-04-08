@@ -105,6 +105,9 @@ class PipeLine
     ID3D11DepthStencilState* pDepthStencilState = NULL;
 
 public:
+    // we store the filename of the vertex shader so the render pass can use it to get
+    // the shader blob to build the input assembler layout
+    wstring vertexShader;
     friend unique_ptr<PipeLine> createPipeline(Pipeline_Desc descriptuon, Shader* shader, ResourceManager* resources, ID3D11Device* pDevice);
 
     void setPipelineState(ID3D11DeviceContext* pContext) const;

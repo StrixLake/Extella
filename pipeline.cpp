@@ -6,6 +6,7 @@ unique_ptr<PipeLine> createPipeline(Pipeline_Desc desciption, Shader* shader, Re
 
     pipeline->topology = desciption.topology;
     
+    pipeline->vertexShader = desciption.vertex_shader;
     pipeline->pVertexShader = shader->getVertexShader(desciption.vertex_shader);
     pipeline->pHullShader = shader->getHullShader(desciption.hull_shader);
     pipeline->pDomainShader = shader->getDomainShader(desciption.domain_shader);
