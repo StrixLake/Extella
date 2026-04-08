@@ -42,11 +42,10 @@ ID3D11VertexShader* Shader::getVertexShader(wstring ShaderFileName){
         ID3D11VertexShader* vshader;
         pDevice->CreateVertexShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &vshader);
 
-        vertexShaders[ShaderFileName] = unique_ptr<ID3D11VertexShader, Deleter<ID3D11VertexShader*>>(vshader);
-        compiledShader->Release();
+        vertexShaders[ShaderFileName] = {uniq_com_ptr<ID3D11VertexShader>(vshader), uniq_com_ptr<ID3DBlob>(compiledShader)};
     }
 
-    return vertexShaders[ShaderFileName].get();
+    return vertexShaders[ShaderFileName].first.get();
 }
 
 ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
@@ -59,11 +58,10 @@ ID3D11PixelShader* Shader::getPixelShader(wstring ShaderFileName){
         ID3D11PixelShader* pshader;
         pDevice->CreatePixelShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &pshader);
 
-        pixelShaders[ShaderFileName] = unique_ptr<ID3D11PixelShader, Deleter<ID3D11PixelShader*>>(pshader);
-        compiledShader->Release();
+        pixelShaders[ShaderFileName] = {uniq_com_ptr<ID3D11PixelShader>(pshader), uniq_com_ptr<ID3DBlob>(compiledShader)};
     }
 
-    return pixelShaders[ShaderFileName].get();
+    return pixelShaders[ShaderFileName].first.get();
 }
 
 ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
@@ -78,11 +76,10 @@ ID3D11HullShader* Shader::getHullShader(wstring ShaderFileName){
         ID3D11HullShader* hshader;
         pDevice->CreateHullShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &hshader);
 
-        hullShaders[ShaderFileName] = unique_ptr<ID3D11HullShader, Deleter<ID3D11HullShader*>>(hshader);
-        compiledShader->Release();
+        hullShaders[ShaderFileName] = {uniq_com_ptr<ID3D11HullShader>(hshader), uniq_com_ptr<ID3DBlob>(compiledShader)};
     }
 
-    return hullShaders[ShaderFileName].get();   
+    return hullShaders[ShaderFileName].first.get();   
 }
 
 ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
@@ -98,11 +95,10 @@ ID3D11DomainShader* Shader::getDomainShader(wstring ShaderFileName){
         ID3D11DomainShader* dshader;
         pDevice->CreateDomainShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &dshader);
 
-        domainShaders[ShaderFileName] = unique_ptr<ID3D11DomainShader, Deleter<ID3D11DomainShader*>>(dshader);
-        compiledShader->Release();
+        domainShaders[ShaderFileName] = {uniq_com_ptr<ID3D11DomainShader>(dshader), uniq_com_ptr<ID3DBlob>(compiledShader)};
     }
 
-    return domainShaders[ShaderFileName].get();   
+    return domainShaders[ShaderFileName].first.get();   
 }
 
 ID3D11GeometryShader* Shader::getGeometryShader(wstring ShaderFileName){
@@ -118,25 +114,39 @@ ID3D11GeometryShader* Shader::getGeometryShader(wstring ShaderFileName){
         ID3D11GeometryShader* gshader;
         pDevice->CreateGeometryShader(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), NULL, &gshader);
 
-        geometryShaders[ShaderFileName] = unique_ptr<ID3D11GeometryShader, Deleter<ID3D11GeometryShader*>>(gshader);
-        compiledShader->Release();
+        geometryShaders[ShaderFileName] = {uniq_com_ptr<ID3D11GeometryShader>(gshader), uniq_com_ptr<ID3DBlob>(compiledShader)};
     }
 
-    return geometryShaders[ShaderFileName].get();   
+    return geometryShaders[ShaderFileName].first.get();   
 }
 
-ID3DBlob* Shader::getVertexShaderBlob(wstring ShaderFileName){
+ID3DBlob* Shader::getVertexShaderBlob(wstring vertexShader){
 
-    if(vertexShaderBlob.find(ShaderFileName) == vertexShaderBlob.end())
+    assert(vertexShaders.find(vertexShader) != vertexShaders.end());
+
+    return vertexShaders[vertexShader].second.get();
+}
+
+Shader_Reflection_Desc Shader::getShaderReflection(pair<wstring, string> shader)
+{
+    if(reflections.find(shader) == reflections.end())
     {
-        ID3DBlob* compiledShader = compileBlob(ShaderFileName, "VS_MAIN", "vs_5_0");
+        ID3DBlob* shader_blob = NULL;
+        if(shader.second == "vertex") shader_blob = vertexShaders[shader.first].second.get();
+        else if(shader.second == "pixel") shader_blob = pixelShaders[shader.first].second.get();
+        else if(shader.second == "hull") shader_blob = hullShaders[shader.first].second.get();
+        else if(shader.second == "domain") shader_blob = domainShaders[shader.first].second.get();
+        else if(shader.second == "geometry") shader_blob = geometryShaders[shader.first].second.get();
 
-        if(compiledShader == NULL) return NULL;
+        assert(shader_blob != NULL);
 
-        vertexShaderBlob[ShaderFileName] = unique_ptr<ID3DBlob, Deleter<ID3DBlob*>>(compiledShader);
+        Shader_Reflection_Desc out_desc = reflect(shader_blob);
+        out_desc.shader_stage = shader.second;
+
+        reflections[shader] = out_desc;
     }
 
-    return vertexShaderBlob[ShaderFileName].get();
+    return reflections[shader];
 }
 
 // iterate all the shader objects in the map
@@ -161,10 +171,5 @@ void hotReload(unordered_map<wstring, T>& TShader, const char entryPoint[], cons
 
 void Shader::HotReload()
 {
-    hotReload(vertexShaders, "VS_MAIN", "vs_5_0");
-    hotReload(pixelShaders, "PS_MAIN", "ps_5_0");
-    hotReload(hullShaders, "HS_MAIN", "hs_5_0");
-    hotReload(domainShaders, "DS_MAIN", "ds_5_0");
-    hotReload(geometryShaders, "GS_MAIN", "gs_5_0");
-    hotReload(vertexShaderBlob, "VS_MAIN", "vs_5_0");
+    
 }

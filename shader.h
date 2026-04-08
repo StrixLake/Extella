@@ -60,13 +60,12 @@ struct Shader_Reflection_Desc
 
 class Shader{
 
-    unordered_map<wstring, unique_ptr<ID3D11VertexShader, Deleter<ID3D11VertexShader*>>> vertexShaders;
-    unordered_map<wstring, unique_ptr<ID3D11PixelShader, Deleter<ID3D11PixelShader*>>> pixelShaders;
-    unordered_map<wstring, unique_ptr<ID3D11HullShader, Deleter<ID3D11HullShader*>>> hullShaders;
-    unordered_map<wstring, unique_ptr<ID3D11DomainShader, Deleter<ID3D11DomainShader*>>> domainShaders;
-    unordered_map<wstring, unique_ptr<ID3D11GeometryShader, Deleter<ID3D11GeometryShader*>>> geometryShaders;
-    unordered_map<wstring, unique_ptr<ID3DBlob, Deleter<ID3DBlob*>>> vertexShaderBlob;
-    unordered_map<ID3DBlob*, Shader_Reflection_Desc> reflections;
+    unordered_map<wstring, pair<uniq_com_ptr<ID3D11VertexShader>, uniq_com_ptr<ID3DBlob>>> vertexShaders;
+    unordered_map<wstring, pair<uniq_com_ptr<ID3D11PixelShader>, uniq_com_ptr<ID3DBlob>>> pixelShaders;
+    unordered_map<wstring, pair<uniq_com_ptr<ID3D11HullShader>, uniq_com_ptr<ID3DBlob>>> hullShaders;
+    unordered_map<wstring, pair<uniq_com_ptr<ID3D11DomainShader>, uniq_com_ptr<ID3DBlob>>> domainShaders;
+    unordered_map<wstring, pair<uniq_com_ptr<ID3D11GeometryShader>, uniq_com_ptr<ID3DBlob>>> geometryShaders;
+    unordered_map<pair<wstring, string>, Shader_Reflection_Desc> reflections;
 
     
     public:
@@ -78,7 +77,9 @@ class Shader{
     ID3D11HullShader* getHullShader(wstring ShaderFileName);
     ID3D11DomainShader* getDomainShader(wstring ShaderFileName);
     ID3D11GeometryShader* getGeometryShader(wstring ShaderFileName);
-    ID3DBlob* getVertexShaderBlob(wstring ShaderFileName);
+    ID3DBlob* getVertexShaderBlob(wstring vertexShader);
+    // pair<filename, stage> shader
+    Shader_Reflection_Desc getShaderReflection(pair<wstring, string> shader);
 
     void HotReload();
 
