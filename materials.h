@@ -1,3 +1,4 @@
+#pragma once
 #include <vectors.h>
 #include <tiny_obj_loader.h>
 #include <boost/unordered_map.hpp>
