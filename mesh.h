@@ -3,6 +3,7 @@
 #include <vector>
 #include <config.h>
 #include <materials.h>
+#include <DirectXMath.h>
 #include <boost/unordered_map.hpp>
 using boost::unordered_map;
 #ifdef BOOST
@@ -37,6 +38,7 @@ class GPUMesh
 public:
 
     string name;
+    DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
     uniq_com_ptr<ID3D11Buffer> index_buffer;
     int triangle_count;
     struct VertexBuffers
