@@ -4,44 +4,52 @@
 #include <shader.h>
 #include <resources.h>
 
+[[maybe_unused]]
 constexpr D3D11_RASTERIZER_DESC Default_Raster_State = {D3D11_FILL_SOLID, D3D11_CULL_BACK,
                                                         false, 0, 0.f,
                                                         0.f, true, false,
                                                         false, false};
 
+[[maybe_unused]]
 constexpr D3D11_BLEND_DESC Default_Blend_State = {false, false,
                                                 {{false,D3D11_BLEND_ONE,
                                                 D3D11_BLEND_ZERO, D3D11_BLEND_OP_ADD,
                                                 D3D11_BLEND_ONE, D3D11_BLEND_ZERO,
                                                 D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL}}};
 
+[[maybe_unused]]
 constexpr D3D11_RASTERIZER_DESC Wireframe_Raster_State = {D3D11_FILL_WIREFRAME, D3D11_CULL_NONE,
                                                         false, 0, 0.f,
                                                         0.f, true, false,
                                                         false, true};
 
+[[maybe_unused]]
 constexpr D3D11_RASTERIZER_DESC Wireframe_Raster_State1 = {D3D11_FILL_WIREFRAME, D3D11_CULL_BACK,
                                                         false, 0, 0.f,
                                                         0.f, true, false,
                                                         false, true};
 
+[[maybe_unused]]
 constexpr D3D11_RASTERIZER_DESC NoCull_Raster_State = {D3D11_FILL_SOLID, D3D11_CULL_NONE,
                                                         false, 0, 0.f,
                                                         0.f, true, false,
                                                         false, false};
 
+[[maybe_unused]]
 constexpr D3D11_BLEND_DESC Transparent_Blend_State = {false, false,
                                                     {{true,D3D11_BLEND_SRC_ALPHA,
                                                     D3D11_BLEND_INV_SRC_ALPHA, D3D11_BLEND_OP_ADD,
                                                     D3D11_BLEND_ONE, D3D11_BLEND_INV_SRC_ALPHA,
                                                     D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL}}};
 
+[[maybe_unused]]
 constexpr D3D11_BLEND_DESC Additive_Blend_State = {false, false,
                                                     {{true,D3D11_BLEND_ONE,
                                                     D3D11_BLEND_ONE, D3D11_BLEND_OP_ADD,
                                                     D3D11_BLEND_ONE, D3D11_BLEND_ONE,
                                                     D3D11_BLEND_OP_ADD, D3D11_COLOR_WRITE_ENABLE_ALL}}};
 
+[[maybe_unused]]
 constexpr D3D11_DEPTH_STENCIL_DESC Default_Depth_Stencil = {true, D3D11_DEPTH_WRITE_MASK_ALL,
                                                             D3D11_COMPARISON_LESS, false,
                                                             D3D11_DEFAULT_STENCIL_READ_MASK, D3D11_DEFAULT_STENCIL_WRITE_MASK,
@@ -50,6 +58,7 @@ constexpr D3D11_DEPTH_STENCIL_DESC Default_Depth_Stencil = {true, D3D11_DEPTH_WR
                                                             {D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP,
                                                             D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS}};
 
+[[maybe_unused]]
 constexpr D3D11_DEPTH_STENCIL_DESC NoWrite_Depth_Stencil = {true, D3D11_DEPTH_WRITE_MASK_ZERO,
                                                             D3D11_COMPARISON_LESS, false,
                                                             D3D11_DEFAULT_STENCIL_READ_MASK, D3D11_DEFAULT_STENCIL_WRITE_MASK,
@@ -58,6 +67,7 @@ constexpr D3D11_DEPTH_STENCIL_DESC NoWrite_Depth_Stencil = {true, D3D11_DEPTH_WR
                                                             {D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP,
                                                             D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS}};
 
+[[maybe_unused]]
 constexpr D3D11_DEPTH_STENCIL_DESC NoTest_Depth_Stencil = {false, D3D11_DEPTH_WRITE_MASK_ZERO,
                                                             D3D11_COMPARISON_LESS, false,
                                                             D3D11_DEFAULT_STENCIL_READ_MASK, D3D11_DEFAULT_STENCIL_WRITE_MASK,
