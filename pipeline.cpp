@@ -5,8 +5,15 @@ unique_ptr<PipeLine> createPipeline(Pipeline_Desc desciption, Shader* shader, Re
     unique_ptr<PipeLine> pipeline = std::make_unique<PipeLine>();
 
     pipeline->topology = desciption.topology;
-    
+
+    // store the name of each shader
     pipeline->vertexShader = desciption.vertex_shader;
+    pipeline->hullShader = desciption.hull_shader;
+    pipeline->domainShader = desciption.domain_shader;
+    pipeline->geometryShader = desciption.geometry_shader;
+    pipeline->pixelShader = desciption.pixel_shader;
+
+    // store the shader objects
     pipeline->pVertexShader = shader->getVertexShader(desciption.vertex_shader);
     pipeline->pHullShader = shader->getHullShader(desciption.hull_shader);
     pipeline->pDomainShader = shader->getDomainShader(desciption.domain_shader);
