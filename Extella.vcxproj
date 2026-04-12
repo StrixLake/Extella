@@ -89,13 +89,8 @@
 		<ClCompile Include="query.cpp"/>
 		<ClCompile Include="reflection.cpp"/>
 		<ClCompile Include="pipeline.cpp"/>
-		<ClCompile Include="vertexLoader.cpp"/>
-		<ClCompile Include="extension/vShader.cpp"/>
-		<ClCompile Include="extension/tShader.cpp"/>
-		<ClCompile Include="extension/gShader.cpp"/>
-		<ClCompile Include="extension/pShader.cpp"/>
-		<ClCompile Include="extension/uShader.cpp"/>
-		<ClCompile Include="extension/configuration.cpp"/>
+		<ClCompile Include="renderpass.cpp"/>
+		<ClCompile Include="materials.cpp"/>
 
     	<Shaders Include="shaders\*" />
 	

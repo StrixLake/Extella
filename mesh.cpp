@@ -161,8 +161,8 @@ GPUMesh convert_mesh(Mesh& mesh, ID3D11Device* pDevice)
     for(auto &buffer : mesh.buffers)
     {
         ID3D11Buffer* vertBuffer = create_buffer(buffer.buffer);
-        out_mesh.vertex_buffers.push_back({buffer.semantic, uniq_com_ptr<ID3D11Buffer>(vertBuffer),
-                                                buffer.stride, buffer.format});
+        out_mesh.vertex_buffers[buffer.semantic] = {buffer.semantic, uniq_com_ptr<ID3D11Buffer>(vertBuffer),
+                                                buffer.stride, buffer.format};
     }
 
     return out_mesh;

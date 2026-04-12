@@ -51,7 +51,7 @@ public:
 
     string prefered_material;
 
-    vector<VertexBuffers> vertex_buffers;
+    unordered_map<string, VertexBuffers> vertex_buffers;
 };
 
 std::pair<vector<Mesh>, vector<Material>> load_obj(string filename);
