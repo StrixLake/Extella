@@ -27,10 +27,14 @@ class RenderPass
 
     // slot is always 0 for all stages
     ID3D11Buffer* transformationBuffer;
-
+    
+    // the pointers needed for input layout
     uniq_com_ptr<ID3D11InputLayout> pInputLayout;
     vector<ID3D11Buffer*> vertex_buffers;
     vector<unsigned int> stride;
+
+    // store a reference to world rotation from unordered_map
+    const float &rotationX, &rotationY;
 
 public:
     RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, ResourceManager* manager, Shader* shaderManager, const unordered_map<wstring, float>& global_variables, ID3D11Device* pDevice);

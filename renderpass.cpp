@@ -1,7 +1,8 @@
 #include <renderpass.h>
 
 RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, ResourceManager* manager, Shader* shaderManager, const unordered_map<wstring, float>& global_variables, ID3D11Device* pDevice)
-    : material(material), mesh(mesh), pipeline(pipeline)
+    : material(material), mesh(mesh), pipeline(pipeline),
+      rotationX(global_variables.at(L"rotationX")), rotationY(global_variables.at(L"rotationY"))
 {
     assert(mesh != NULL);
     assert(pipeline != NULL);
@@ -104,8 +105,8 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
                                             0, classification,
                                             instance_step};
         ++i;
-        vertex_buffers.push_back(mesh->vertex_buffers[semantic.first].vertex_buffer.get());
-        stride.push_back(mesh->vertex_buffers[semantic.first].stride);
+        vertex_buffers.push_back(mesh->vertex_buffers.at(semantic.first).vertex_buffer.get());
+        stride.push_back(mesh->vertex_buffers.at(semantic.first).stride);
         input_layout.push_back(layout);
     }
 
@@ -118,3 +119,80 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
     
 }
 
+void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceContext* pContext)
+{
+    pipeline->setPipelineState(pContext);
+
+    // set the SRVs
+    for(auto &srv : vertexTextures)
+    {
+        ID3D11ShaderResourceView* pSrv = srv.second.get();
+        pContext->VSSetShaderResources(srv.first, 1, &pSrv);
+    }
+    for(auto &srv : hullTextures)
+    {
+        ID3D11ShaderResourceView* pSrv = srv.second.get();
+        pContext->HSSetShaderResources(srv.first, 1, &pSrv);
+    }
+    for(auto &srv : domainTextures)
+    {
+        ID3D11ShaderResourceView* pSrv = srv.second.get();
+        pContext->DSSetShaderResources(srv.first, 1, &pSrv);
+    }
+    for(auto &srv : geometryTextures)
+    {
+        ID3D11ShaderResourceView* pSrv = srv.second.get();
+        pContext->GSSetShaderResources(srv.first, 1, &pSrv);
+    }
+    for(auto &srv : pixelTextures)
+    {
+        ID3D11ShaderResourceView* pSrv = srv.second.get();
+        pContext->PSSetShaderResources(srv.first, 1, &pSrv);
+    }
+
+
+    // update and set the Transform const buffer for all stages
+    DirectX::XMMATRIX transform = mesh->worldMatrix 
+                                * DirectX::XMMatrixRotationY(rotationX/100)
+                                * DirectX::XMMatrixRotationX(rotationY/100)
+                                * ViewProjMatrix;
+
+    DirectX::XMMATRIX transformArray[2] = {DirectX::XMMatrixTranspose(transform)};
+
+    pContext->UpdateSubresource(transformationBuffer, 0, NULL, transformArray, 0, 0);
+
+    pContext->VSSetConstantBuffers(0, 1, &transformationBuffer);
+    pContext->HSSetConstantBuffers(0, 1, &transformationBuffer);
+    pContext->DSSetConstantBuffers(0, 1, &transformationBuffer);
+    pContext->GSSetConstantBuffers(0, 1, &transformationBuffer);
+    pContext->PSSetConstantBuffers(0, 1, &transformationBuffer);
+
+    // update and set the host variable const buffer for all stages
+    auto updateHostVarArray = [pContext](const pair<ID3D11Buffer*, vector<const float*>> &hostVar)
+    {
+        vector<float> variableArray;
+        for(const float* i : hostVar.second) variableArray.push_back(*i);
+        variableArray.resize(128/sizeof(float));
+        pContext->UpdateSubresource(hostVar.first, 0, NULL, variableArray.data(), 0, 0);
+    };
+
+    updateHostVarArray(vertexHostVar);
+    updateHostVarArray(hullHostVar);
+    updateHostVarArray(domainHostVar);
+    updateHostVarArray(geometryHostVar);
+    updateHostVarArray(pixelHostVar);
+
+    pContext->VSSetConstantBuffers(1, 1, &vertexHostVar.first);
+    pContext->HSSetConstantBuffers(1, 1, &hullHostVar.first);
+    pContext->DSSetConstantBuffers(1, 1, &domainHostVar.first);
+    pContext->GSSetConstantBuffers(1, 1, &geometryHostVar.first);
+    pContext->PSSetConstantBuffers(1, 1, &pixelHostVar.first);
+
+    // setup the input assembler
+    // set the input layout and the vertex buffers
+    pContext->IASetInputLayout(pInputLayout.get());
+    pContext->IASetIndexBuffer(mesh->index_buffer.get(), DXGI_FORMAT_R32_UINT, 0);
+    pContext->IASetVertexBuffers(0, vertex_buffers.size(), vertex_buffers.data(), stride.data(), NULL);
+
+    pContext->DrawIndexedInstanced(mesh->triangle_count*3, mesh->instance_count, 0, 0, 0);
+}
