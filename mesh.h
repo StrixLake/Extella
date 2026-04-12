@@ -41,6 +41,7 @@ public:
     DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixIdentity();
     uniq_com_ptr<ID3D11Buffer> index_buffer;
     int triangle_count;
+    int instance_count = 1;
     struct VertexBuffers
     {
         string semantic;

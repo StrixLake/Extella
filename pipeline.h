@@ -105,7 +105,7 @@ class PipeLine
     ID3D11GeometryShader* pGeometryShader = NULL;
     ID3D11PixelShader* pPixelShader = NULL;
 
-    array<ID3D11RenderTargetView*, 8> render_target_views;
+    array<ID3D11RenderTargetView*, 8> render_target_views = {};
     ID3D11DepthStencilView* pDepth_stencil_view = NULL;
 
     D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
