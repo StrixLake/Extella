@@ -7,7 +7,6 @@
 #include <shader.h>
 #include <state.h>
 #include <resources.h>
-#include <extension.h>
 #include <query.h>
 #include <extella.h>
 #include <d3d11shader.h>
@@ -28,7 +27,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
 
     Shader *shaders = new Shader(device->pDevice);
 
-    ResourceManager* manager = new ResourceManager(device->pDevice);
+    ResourceManager* manager = new ResourceManager(device->pDevice, device->pContext);
 
     // create the depth buffer
     D3D11_TEXTURE2D_DESC render_desc = {};
@@ -47,10 +46,12 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     render_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
     render_desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
     manager->createTexture2D(render_desc, "render frame");
+
+    manager->createTexture2DfromImage("spot_.png");
     
     state = new State();
     state->pDevice = device;
-    state->resources = resource;
+    state->resources = manager;
     state->shaders = shaders;
     state->query = query;
 
@@ -59,11 +60,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);
 
     state->variables[L"Distance"] = 100;
-    state->variables[L"aspect ratio"] = (float)WIDTH/HEIGHT;
-
-    // testing something unrelated
-    ID3DBlob* vShader = shaders->getVertexShaderBlob(L"spot");
-    volatile Shader_Reflection_Desc desc = shaders->reflect(vShader);
+    state->variables[L"aspect ratio"] = (float)WIDTH/HEIGHT;    
 
     return;
 }

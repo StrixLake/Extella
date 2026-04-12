@@ -1,7 +1,7 @@
 #include <mesh.h>
 #include <vectors.h>
+#define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
-
 
 // unlike last time where i parsed all 4 cases of
 // normals and texcoord being present or not

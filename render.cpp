@@ -1,6 +1,5 @@
 #include <device.h>
 #include <mesh.h>
-#include <watch.h>
 #include <state.h>
 #include <DirectXMath.h>
 #include <DirectXColors.h>
@@ -21,25 +20,18 @@ void renderer(State* state){
                                       DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, 
                                                                           (float)WIDTH/HEIGHT, 0.01, 1000.)}; // perspective matrix
 
-    
-    
-    state->stopwatch->lap();
-    
-    state->variables[L"time"] = state->stopwatch->getTotalTime(); // in seconds
-
-    float var[4] = {state->variables[L"time"], 0, 0, 0};
-    state->pDevice->pContext->UpdateSubresource(*state->resources->getConstBuffer("grassVariables"), 0, NULL, var, 0,0);
+    DirectX::XMMATRIX ViewProjMatrix = transform[1] * transform[2];
 
     state->pDevice->pContext->ClearDepthStencilView(state->pDevice->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
     state->pDevice->pContext->ClearRenderTargetView(state->pDevice->pRenderView, color);
 
     state->query->begin();
-    
-    Mesh* nmesh = state->mesh;
-    while(nmesh != NULL){
-        nmesh->Draw(transform, state->variables);
-        nmesh = nmesh->next;
+
+    for(RenderPass& renderpass : state->renderpasses)
+    {
+        renderpass.execute(ViewProjMatrix, state->pDevice->pContext);
     }
+
     
     state->query->end(state->variables);
     

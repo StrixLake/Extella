@@ -80,12 +80,9 @@
     	<ClCompile Include="extella.cpp" />
     	<ClCompile Include="device.cpp" />
     	<ClCompile Include="mesh.cpp" />
-    	<ClCompile Include="objLoader.cpp" />
     	<ClCompile Include="render.cpp" />
     	<ClCompile Include="shader.cpp" />
-    	<ClCompile Include="watch.cpp" />
 		<ClCompile Include="resources.cpp"/>
-		<ClCompile Include="delegate.cpp"/>
 		<ClCompile Include="query.cpp"/>
 		<ClCompile Include="reflection.cpp"/>
 		<ClCompile Include="pipeline.cpp"/>

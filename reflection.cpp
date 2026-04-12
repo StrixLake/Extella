@@ -24,7 +24,7 @@ Shader_Reflection_Desc Shader::reflect(ID3DBlob* shaderBlob)
     {
         D3D11_SIGNATURE_PARAMETER_DESC signature_desc = {};
         pReflection->GetInputParameterDesc(i, &signature_desc);
-        semantics.push_back({string(signature_desc.SemanticName), signature_desc.SemanticIndex});
+        if(signature_desc.SemanticName[0] != 'S') semantics.push_back({string(signature_desc.SemanticName), signature_desc.SemanticIndex});
     }
 
     out_description.input_semantics = semantics;

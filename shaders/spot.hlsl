@@ -16,7 +16,7 @@ struct VS_OUTPUT
     float4 light : POSITION1;
 };
 
-VS_OUTPUT VS_MAIN( float4 pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORMAL)
+VS_OUTPUT VS_MAIN( float4 pos : POSITION, float2 tex : TEXCOORD, float3 norm : NORMAL, uint ins : SV_InstanceID)
 {
     VS_OUTPUT output;
 

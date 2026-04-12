@@ -99,6 +99,8 @@ struct Pipeline_Desc
 
 class PipeLine
 {
+    PipeLine() = default;
+
     ID3D11VertexShader* pVertexShader = NULL;
     ID3D11HullShader* pHullShader = NULL;
     ID3D11DomainShader* pDomainShader = NULL;
