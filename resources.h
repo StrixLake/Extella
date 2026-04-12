@@ -1,3 +1,4 @@
+#pragma once
 #include <d3d11.h>
 #include <config.h>
 #include <deque>
@@ -24,8 +25,12 @@ class ResourceManager
     // contains 100 buffers
     std::deque<uniq_com_ptr<ID3D11Buffer>> constantBufferRing;
 
+    // set up 1 default samplers and set them to the
+    // first slots of all shader stages
+    uniq_com_ptr<ID3D11SamplerState> samplers;
+
 public: 
-    ResourceManager(ID3D11Device* pDevice);
+    ResourceManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 
     void createTexture2D(D3D11_TEXTURE2D_DESC desc, string name);
     void createTexture2DfromImage(string filename);
