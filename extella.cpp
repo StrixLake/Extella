@@ -14,21 +14,18 @@
 
 State* state;
 
-
+void initRender();
 
 EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice){
 
     DXDevice *device = new DXDevice();
-    //device->CreateSwap(0);
-    device->CreateViews();
-    device->SetTargets();
-
+    
     Query* query = new Query(device->pDevice, device->pContext);
-
+    
     Shader *shaders = new Shader(device->pDevice);
-
+    
     ResourceManager* manager = new ResourceManager(device->pDevice, device->pContext);
-
+    
     // create the depth buffer
     D3D11_TEXTURE2D_DESC render_desc = {};
     render_desc.Width = WIDTH;
@@ -40,27 +37,36 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     render_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
     render_desc.SampleDesc = {1,0};
     manager->createTexture2D(render_desc, "depth buffer");
-
+    
     // create the frame render target
     render_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     render_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
     render_desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
     manager->createTexture2D(render_desc, "render frame");
-
-    manager->createTexture2DfromImage("spot_.png");
+    
     
     state = new State();
     state->pDevice = device;
     state->resources = manager;
     state->shaders = shaders;
     state->query = query;
-
+    
     ID3D11Texture2D* pRender = manager->getTexture2D("render frame");
+    ID3D11Texture2D* pDepthBuffer = manager->getTexture2D("depth buffer");
+
+    device->pRender = pRender;
+    device->pDepthBuffer = pDepthBuffer;
+    device->CreateViews();
+    device->SetTargets();
     pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
     device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);
 
     state->variables[L"Distance"] = 100;
-    state->variables[L"aspect ratio"] = (float)WIDTH/HEIGHT;    
+    state->variables[L"aspect ratio"] = (float)WIDTH/HEIGHT;
+    state->variables[L"rotationY"] = 0;
+    state->variables[L"rotationX"] = 0;
+
+    initRender();
 
     return;
 }
@@ -109,4 +115,48 @@ EXPORT float getVariable(BSTR variable)
 EXPORT void hotReload()
 {
     state->shaders->HotReload();
+}
+
+
+void initRender()
+{
+    // create a pipeline
+    D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+    rtvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+    rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+    Pipeline_Desc default_pipeline = {};
+    default_pipeline.depth_stencil_view = "depth buffer";
+    default_pipeline.vertex_shader = L"spot";
+    default_pipeline.pixel_shader = L"spot";
+    default_pipeline.renderTargets[0] = "render frame";
+    default_pipeline.rtv_desc[0] = rtvDesc;
+
+    unique_ptr<PipeLine> pipeline = createPipeline(default_pipeline, state->shaders, state->resources, state->pDevice->pDevice);
+
+    state->pipelines.push_back(std::move(pipeline));
+
+    // create the gpumesh and material
+    pair<vector<Mesh>, vector<Material>> mesh_material = load_obj("mesh/spot_.obj");
+
+    for(Mesh mesh : mesh_material.first)
+    {
+        state->meshes.push_back(convert_mesh(mesh, state->pDevice->pDevice));
+    }
+    for(Material material : mesh_material.second)
+    {
+        state->materials[material.material_name] = std::move(material);
+    }
+
+    state->resources->createTexture2DfromImage("C:/Users/yasha/Documents/Projects/StayNight/Native/mesh/spot_.png");
+    state->resources->createTexture2DfromImage("mesh/default_.png");
+
+    // create a render pass for all the gpu meshes in the vector
+    for(GPUMesh& gpumesh : state->meshes)
+    {
+        state->renderpasses.push_back(RenderPass(&gpumesh, state->pipelines[0].get(), &state->materials.at(gpumesh.prefered_material),
+                                        state->resources, state->shaders, state->variables, state->pDevice->pDevice));
+    }
+
+    // hopefully that should be all
 }
