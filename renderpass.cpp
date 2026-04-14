@@ -32,7 +32,7 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
             if(material->material_textures.find(texture.first) == material->material_textures.end())
             {
                 // material not found, use the default texture from manager
-                ptxtr = manager->getTexture2D("default");
+                ptxtr = manager->getTexture2D("mesh/default_.png");
             }
             else
             {
@@ -91,7 +91,7 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
     vector<D3D11_INPUT_ELEMENT_DESC> input_layout;
     
     unsigned int i = 0;
-    for(auto semantic : vertexReflection.input_semantics)
+    for(auto& semantic : vertexReflection.input_semantics)
     {
         D3D11_INPUT_CLASSIFICATION classification = D3D11_INPUT_PER_VERTEX_DATA;
         unsigned int instance_step = 0;
@@ -170,6 +170,7 @@ void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceCo
     // update and set the host variable const buffer for all stages
     auto updateHostVarArray = [pContext](const pair<ID3D11Buffer*, vector<const float*>> &hostVar)
     {
+        if(hostVar.first == NULL) return;
         vector<float> variableArray;
         for(const float* i : hostVar.second) variableArray.push_back(*i);
         variableArray.resize(128/sizeof(float));
@@ -190,9 +191,10 @@ void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceCo
 
     // setup the input assembler
     // set the input layout and the vertex buffers
+    vector<unsigned int> offsets( vertex_buffers.size(), 0);
     pContext->IASetInputLayout(pInputLayout.get());
     pContext->IASetIndexBuffer(mesh->index_buffer.get(), DXGI_FORMAT_R32_UINT, 0);
-    pContext->IASetVertexBuffers(0, vertex_buffers.size(), vertex_buffers.data(), stride.data(), NULL);
+    pContext->IASetVertexBuffers(0, vertex_buffers.size(), vertex_buffers.data(), stride.data(), offsets.data());
 
     pContext->DrawIndexedInstanced(mesh->triangle_count*3, mesh->instance_count, 0, 0, 0);
 }
