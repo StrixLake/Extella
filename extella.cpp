@@ -19,6 +19,7 @@ void initRender();
 EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice){
 
     DXDevice *device = new DXDevice();
+    device->SetTargets();
     
     Query* query = new Query(device->pDevice, device->pContext);
     
@@ -52,12 +53,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     state->query = query;
     
     ID3D11Texture2D* pRender = manager->getTexture2D("render frame");
-    ID3D11Texture2D* pDepthBuffer = manager->getTexture2D("depth buffer");
 
-    device->pRender = pRender;
-    device->pDepthBuffer = pDepthBuffer;
-    device->CreateViews();
-    device->SetTargets();
     pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
     device->pDevice->QueryInterface(__uuidof(IDXGIDevice2), (void**)pDevice);
 
@@ -137,18 +133,18 @@ void initRender()
     state->pipelines.push_back(std::move(pipeline));
 
     // create the gpumesh and material
-    pair<vector<Mesh>, vector<Material>> mesh_material = load_obj("mesh/spot_.obj");
+    pair<vector<Mesh>, vector<Material>> mesh_material = load_obj("mesh/296.obj");
 
-    for(Mesh mesh : mesh_material.first)
+    for(Mesh& mesh : mesh_material.first)
     {
         state->meshes.push_back(convert_mesh(mesh, state->pDevice->pDevice));
     }
-    for(Material material : mesh_material.second)
+    for(Material& material : mesh_material.second)
     {
+        state->resources->createTexturesFromMaterial(material);
         state->materials[material.material_name] = std::move(material);
     }
 
-    state->resources->createTexture2DfromImage("C:/Users/yasha/Documents/Projects/StayNight/Native/mesh/spot_.png");
     state->resources->createTexture2DfromImage("mesh/default_.png");
 
     // create a render pass for all the gpu meshes in the vector
