@@ -129,6 +129,7 @@ ID3DBlob* Shader::getVertexShaderBlob(wstring vertexShader){
 
 Shader_Reflection_Desc Shader::getShaderReflection(pair<wstring, string> shader)
 {
+    if(shader.first == L"") return Shader_Reflection_Desc();
     if(reflections.find(shader) == reflections.end())
     {
         ID3DBlob* shader_blob = NULL;
