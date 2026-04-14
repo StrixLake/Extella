@@ -37,20 +37,27 @@ Material material_factory(tinyobj::material_t &material)
                                                     material.transmittance[1],
                                                     material.transmittance[2]};
 
+    auto loadTexture = [&out](string name, string& texname)
+    {
+        if(texname != "")
+        {
+            out.material_textures[name] = texname.data();
+        }
+    };
 
-    out.material_textures["ambient"] = material.ambient_texname.data();
-    out.material_textures["diffuse"] = material.diffuse_texname.data();
-    out.material_textures["specular"] = material.specular_texname.data();
-    out.material_textures["specular_highlight"] = material.specular_highlight_texname.data();
-    out.material_textures["bump"] = material.bump_texname.data();
-    out.material_textures["displacement"] = material.displacement_texname.data();
-    out.material_textures["alpha"] = material.alpha_texname.data();
-    out.material_textures["reflection"] = material.reflection_texname.data();
-    out.material_textures["roughness"] = material.roughness_texname.data();
-    out.material_textures["metallic"] = material.metallic_texname.data();
-    out.material_textures["sheen"] = material.sheen_texname.data();
-    out.material_textures["emissive"] = material.emissive_texname.data();
-    out.material_textures["normal"] = material.normal_texname.data();
+    loadTexture("ambient", material.ambient_texname);
+    loadTexture("diffuse", material.diffuse_texname);
+    loadTexture("specular", material.specular_texname);
+    loadTexture("specular_highlight", material.specular_highlight_texname);
+    loadTexture("bump", material.bump_texname);
+    loadTexture("displacement", material.displacement_texname);
+    loadTexture("alpha", material.alpha_texname);
+    loadTexture("reflection", material.reflection_texname);
+    loadTexture("roughness", material.roughness_texname);
+    loadTexture("metallic", material.metallic_texname);
+    loadTexture("sheen", material.sheen_texname);
+    loadTexture("emissive", material.emissive_texname);
+    loadTexture("normal", material.normal_texname);
 
     return out;
 }
