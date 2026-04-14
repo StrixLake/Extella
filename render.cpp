@@ -9,8 +9,6 @@ using DirectX::XMVectorSet;
 
 void renderer(State* state){
 
-    auto color = DirectX::Colors::Black;
-
     float distance = state->variables[L"Distance"] / 10;
     
     array<XMMATRIX, 3> transform = {DirectX::XMMatrixIdentity(), // world transform
@@ -22,8 +20,7 @@ void renderer(State* state){
 
     DirectX::XMMATRIX ViewProjMatrix = transform[1] * transform[2];
 
-    state->pDevice->pContext->ClearDepthStencilView(state->pDevice->pDepthView, D3D11_CLEAR_DEPTH, 1.f, 0);
-    state->pDevice->pContext->ClearRenderTargetView(state->pDevice->pRenderView, color);
+    state->resources->clearRTV(state->pDevice->pContext);
 
     state->query->begin();
 

@@ -20,6 +20,8 @@ class ResourceManager
     ID3D11Device* pDevice;
 
     unordered_map<string, uniq_com_ptr<ID3D11Texture2D>> textures;
+    std::vector<uniq_com_ptr<ID3D11RenderTargetView>> rtvs;
+    uniq_com_ptr<ID3D11DepthStencilView> depthView;
 
     // each const buffer will always be 128 bytes
     // contains 100 buffers
@@ -29,8 +31,10 @@ class ResourceManager
     // first slots of all shader stages
     uniq_com_ptr<ID3D11SamplerState> samplers;
 
-public: 
+public:
+    ResourceManager() = delete;
     ResourceManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+    void clearRTV(ID3D11DeviceContext* pContext) const;
 
     void createTexture2D(D3D11_TEXTURE2D_DESC desc, string name);
     void createTexture2DfromImage(string filename);
