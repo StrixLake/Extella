@@ -2,7 +2,7 @@
 
 unique_ptr<PipeLine> createPipeline(Pipeline_Desc desciption, Shader* shader, ResourceManager* resources, ID3D11Device* pDevice)
 {
-    unique_ptr<PipeLine> pipeline = std::make_unique<PipeLine>();
+    unique_ptr<PipeLine> pipeline = unique_ptr<PipeLine>(new PipeLine());
 
     pipeline->topology = desciption.topology;
 
