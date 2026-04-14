@@ -17,6 +17,9 @@ public:
     ResourceManager* resources;
     Query* query;
     unordered_map<wstring, float> variables;
+    vector<GPUMesh> meshes;
+    unordered_map<string, Material> materials;
+    vector<unique_ptr<PipeLine>> pipelines;
 
     ~State()
     {
