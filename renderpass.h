@@ -27,7 +27,10 @@ class RenderPass
 
     // slot is always 0 for all stages
     ID3D11Buffer* transformationBuffer;
-    
+
+    // slot is always 7 for pixel shader
+    ID3D11Buffer* materialBuffer = NULL;
+
     // the pointers needed for input layout
     uniq_com_ptr<ID3D11InputLayout> pInputLayout;
     vector<ID3D11Buffer*> vertex_buffers;

@@ -32,7 +32,7 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
             if(material->material_textures.find(texture.first) == material->material_textures.end())
             {
                 // material not found, use the default texture from manager
-                ptxtr = manager->getTexture2D("mesh/default_.png");
+                ptxtr = manager->getTexture2D("mesh/white.png");
             }
             else
             {
@@ -54,7 +54,7 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
     // similar to textureArrayInit, intialise the const buffer
     // array for all shader stages
     // implementation 
-    auto constBufferInit = [&global_variables, manager](const Shader_Reflection_Desc& reflectionDesc, pair<ID3D11Buffer*, vector<const float*>>& HostVar)
+    auto constBufferInit = [&global_variables, manager, this](const Shader_Reflection_Desc& reflectionDesc, pair<ID3D11Buffer*, vector<const float*>>& HostVar)
     {
         for(auto& constBuffer : reflectionDesc.constBuffers)
         {
@@ -71,8 +71,7 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
             }
             if(constBuffer.name == "Material")
             {
-                // implementation not complete. I am tired.
-                // I just want to render a frame first   
+                materialBuffer = manager->getConstBuffer();
             }
         }
     };
@@ -182,6 +181,13 @@ void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceCo
     updateHostVarArray(domainHostVar);
     updateHostVarArray(geometryHostVar);
     updateHostVarArray(pixelHostVar);
+
+    // update the material constant buffer
+    if(materialBuffer != NULL)
+    {
+        pContext->UpdateSubresource(materialBuffer, 0, NULL, &material->constMaterial, 0, 0);
+        pContext->PSSetConstantBuffers(7, 1, &materialBuffer);
+    }
 
     pContext->VSSetConstantBuffers(1, 1, &vertexHostVar.first);
     pContext->HSSetConstantBuffers(1, 1, &hullHostVar.first);

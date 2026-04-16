@@ -61,6 +61,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     state->variables[L"aspect ratio"] = (float)WIDTH/HEIGHT;
     state->variables[L"rotationY"] = 0;
     state->variables[L"rotationX"] = 0;
+    state->variables[L"time"] = 0;
 
     initRender();
 
@@ -146,6 +147,7 @@ void initRender()
     }
 
     state->resources->createTexture2DfromImage("mesh/default_.png");
+    state->resources->createTexture2DfromImage("mesh/white.png");
 
     // create a render pass for all the gpu meshes in the vector
     for(GPUMesh& gpumesh : state->meshes)
