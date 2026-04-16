@@ -54,18 +54,19 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
     // similar to textureArrayInit, intialise the const buffer
     // array for all shader stages
     // implementation 
-    auto constBufferInit = [&global_variables, manager, this](const Shader_Reflection_Desc& reflectionDesc, pair<ID3D11Buffer*, vector<const float*>>& HostVar)
+    auto constBufferInit = [&global_variables, manager, this](const Shader_Reflection_Desc& reflectionDesc, tuple<int, ID3D11Buffer*, vector<const float*>>& HostVar)
     {
         for(auto& constBuffer : reflectionDesc.constBuffers)
         {
             if(constBuffer.name == "HostVariable")
             {
-                HostVar.first = manager->getConstBuffer();
+                get<0>(HostVar) = constBuffer.slot;
+                get<1>(HostVar) = manager->getConstBuffer();
                 
                 for(auto& variable : constBuffer.variables)
                 {
                     wstring hostVariable = wstring(variable.name.begin(), variable.name.end());
-                    HostVar.second.push_back(&global_variables.at(hostVariable));
+                    get<2>(HostVar).push_back(&global_variables.at(hostVariable));
                     
                 }
             }
@@ -167,13 +168,13 @@ void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceCo
     pContext->PSSetConstantBuffers(0, 1, &transformationBuffer);
 
     // update and set the host variable const buffer for all stages
-    auto updateHostVarArray = [pContext](const pair<ID3D11Buffer*, vector<const float*>> &hostVar)
+    auto updateHostVarArray = [pContext](const tuple<int, ID3D11Buffer*, vector<const float*>> &hostVar)
     {
-        if(hostVar.first == NULL) return;
+        if(get<1>(hostVar) == NULL) return;
         vector<float> variableArray;
-        for(const float* i : hostVar.second) variableArray.push_back(*i);
+        for(const float* i : get<2>(hostVar)) variableArray.push_back(*i);
         variableArray.resize(128/sizeof(float));
-        pContext->UpdateSubresource(hostVar.first, 0, NULL, variableArray.data(), 0, 0);
+        pContext->UpdateSubresource(get<1>(hostVar), 0, NULL, variableArray.data(), 0, 0);
     };
 
     updateHostVarArray(vertexHostVar);
@@ -189,11 +190,11 @@ void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceCo
         pContext->PSSetConstantBuffers(7, 1, &materialBuffer);
     }
 
-    pContext->VSSetConstantBuffers(1, 1, &vertexHostVar.first);
-    pContext->HSSetConstantBuffers(1, 1, &hullHostVar.first);
-    pContext->DSSetConstantBuffers(1, 1, &domainHostVar.first);
-    pContext->GSSetConstantBuffers(1, 1, &geometryHostVar.first);
-    pContext->PSSetConstantBuffers(1, 1, &pixelHostVar.first);
+    if(get<1>(vertexHostVar) != NULL) pContext->VSSetConstantBuffers(get<0>(vertexHostVar), 1, &get<1>(vertexHostVar));
+    if(get<1>(hullHostVar) != NULL) pContext->HSSetConstantBuffers(get<0>(hullHostVar), 1, &get<1>(hullHostVar));
+    if(get<1>(domainHostVar) != NULL) pContext->DSSetConstantBuffers(get<0>(domainHostVar), 1, &get<1>(domainHostVar));
+    if(get<1>(geometryHostVar) != NULL) pContext->GSSetConstantBuffers(get<0>(geometryHostVar), 1, &get<1>(geometryHostVar));
+    if(get<1>(pixelHostVar) != NULL) pContext->PSSetConstantBuffers(get<0>(pixelHostVar), 1, &get<1>(pixelHostVar));
 
     // setup the input assembler
     // set the input layout and the vertex buffers

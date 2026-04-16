@@ -3,7 +3,8 @@
 #include <materials.h>
 #include <mesh.h>
 #include <pipeline.h>
-
+using std::tuple;
+using std::get;
 
 class RenderPass
 {
@@ -18,12 +19,12 @@ class RenderPass
     vector<pair<int, uniq_com_ptr<ID3D11ShaderResourceView>>> geometryTextures;
     vector<pair<int, uniq_com_ptr<ID3D11ShaderResourceView>>> pixelTextures;
 
-    // <const buffer to use, array of pointer to float in global variables>, slot is always 1
-    pair<ID3D11Buffer*, vector<const float*>> vertexHostVar;
-    pair<ID3D11Buffer*, vector<const float*>> hullHostVar;
-    pair<ID3D11Buffer*, vector<const float*>> domainHostVar;
-    pair<ID3D11Buffer*, vector<const float*>> geometryHostVar;
-    pair<ID3D11Buffer*, vector<const float*>> pixelHostVar;
+    // <slot, const buffer to use, array of pointer to float in global variables>
+    tuple<int, ID3D11Buffer*, vector<const float*>> vertexHostVar;
+    tuple<int, ID3D11Buffer*, vector<const float*>> hullHostVar;
+    tuple<int, ID3D11Buffer*, vector<const float*>> domainHostVar;
+    tuple<int, ID3D11Buffer*, vector<const float*>> geometryHostVar;
+    tuple<int, ID3D11Buffer*, vector<const float*>> pixelHostVar;
 
     // slot is always 0 for all stages
     ID3D11Buffer* transformationBuffer;
@@ -44,4 +45,7 @@ public:
     
     void execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceContext* pContext);
 
+    typedef std::function<void(ID3D11Buffer*, const unordered_map<wstring, float>&)> cbufStructs;
+    
+    cbufStructs getCBufferStruct(string bufferName);
 };
