@@ -88,6 +88,7 @@
 		<ClCompile Include="pipeline.cpp"/>
 		<ClCompile Include="renderpass.cpp"/>
 		<ClCompile Include="materials.cpp"/>
+		<ClCompile Include="cbuffers.cpp"/>
 
     	<Shaders Include="shaders\*" />
 	

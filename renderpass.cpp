@@ -54,7 +54,8 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
     // similar to textureArrayInit, intialise the const buffer
     // array for all shader stages
     // implementation 
-    auto constBufferInit = [&global_variables, manager, this](const Shader_Reflection_Desc& reflectionDesc, tuple<int, ID3D11Buffer*, vector<const float*>>& HostVar)
+    auto constBufferInit = [&global_variables, manager, this](const Shader_Reflection_Desc& reflectionDesc, tuple<int, ID3D11Buffer*, vector<const float*>>& HostVar,
+                                                                        vector<tuple<int, ID3D11Buffer*, cbufLambda>>& stageConstBuffers)
     {
         for(auto& constBuffer : reflectionDesc.constBuffers)
         {
@@ -70,20 +71,22 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
                     
                 }
             }
-            if(constBuffer.name == "Material")
+            else
             {
-                materialBuffer = manager->getConstBuffer();
+                tuple<int, ID3D11Buffer*, cbufLambda> out;
+                get<0>(out) = constBuffer.slot;
+                get<1>(out) = manager->getConstBuffer();
+                get<2>(out) = getCBufferStruct(constBuffer.name, global_variables);
+                stageConstBuffers.push_back(out);
             }
         }
     };
     
-    constBufferInit(vertexReflection, vertexHostVar);
-    constBufferInit(hullReflection, hullHostVar);
-    constBufferInit(domainReflection, domainHostVar);
-    constBufferInit(geometryReflection, geometryHostVar);
-    constBufferInit(pixelReflection, pixelHostVar);
-    
-    transformationBuffer = manager->getConstBuffer();
+    constBufferInit(vertexReflection, vertexHostVar, vertexConstBuffers);
+    constBufferInit(hullReflection, hullHostVar, hullConstBuffers);
+    constBufferInit(domainReflection, domainHostVar, domainConstBuffers);
+    constBufferInit(geometryReflection, geometryHostVar, geometryConstBuffers);
+    constBufferInit(pixelReflection, pixelHostVar, pixelConstBuffers);
 
 
     // now we need to build the input assembler layout
@@ -119,7 +122,7 @@ RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, Re
     
 }
 
-void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceContext* pContext)
+void RenderPass::execute(ID3D11DeviceContext* pContext)
 {
     pipeline->setPipelineState(pContext);
 
@@ -151,21 +154,33 @@ void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceCo
     }
 
 
-    // update and set the Transform const buffer for all stages
-    DirectX::XMMATRIX transform = mesh->worldMatrix 
-                                * DirectX::XMMatrixRotationY(rotationX/100)
-                                * DirectX::XMMatrixRotationX(rotationY/100)
-                                * ViewProjMatrix;
+    
+    for(auto& constBuffer : vertexConstBuffers)
+    {
+        get<2>(constBuffer)(get<1>(constBuffer), pContext);
+        pContext->VSSetConstantBuffers(get<0>(constBuffer), 1, &get<1>(constBuffer));
+    }
+    for(auto& constBuffer : hullConstBuffers)
+    {
+        get<2>(constBuffer)(get<1>(constBuffer), pContext);
+        pContext->HSSetConstantBuffers(get<0>(constBuffer), 1, &get<1>(constBuffer));
+    }
+    for(auto& constBuffer : domainConstBuffers)
+    {
+        get<2>(constBuffer)(get<1>(constBuffer), pContext);
+        pContext->DSSetConstantBuffers(get<0>(constBuffer), 1, &get<1>(constBuffer));
+    }
+    for(auto& constBuffer : geometryConstBuffers)
+    {
+        get<2>(constBuffer)(get<1>(constBuffer), pContext);
+        pContext->GSSetConstantBuffers(get<0>(constBuffer), 1, &get<1>(constBuffer));
+    }
+    for(auto& constBuffer : pixelConstBuffers)
+    {
+        get<2>(constBuffer)(get<1>(constBuffer), pContext);
+        pContext->PSSetConstantBuffers(get<0>(constBuffer), 1, &get<1>(constBuffer));
+    }
 
-    DirectX::XMMATRIX transformArray[2] = {DirectX::XMMatrixTranspose(transform)};
-
-    pContext->UpdateSubresource(transformationBuffer, 0, NULL, transformArray, 0, 0);
-
-    pContext->VSSetConstantBuffers(0, 1, &transformationBuffer);
-    pContext->HSSetConstantBuffers(0, 1, &transformationBuffer);
-    pContext->DSSetConstantBuffers(0, 1, &transformationBuffer);
-    pContext->GSSetConstantBuffers(0, 1, &transformationBuffer);
-    pContext->PSSetConstantBuffers(0, 1, &transformationBuffer);
 
     // update and set the host variable const buffer for all stages
     auto updateHostVarArray = [pContext](const tuple<int, ID3D11Buffer*, vector<const float*>> &hostVar)
@@ -182,13 +197,6 @@ void RenderPass::execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceCo
     updateHostVarArray(domainHostVar);
     updateHostVarArray(geometryHostVar);
     updateHostVarArray(pixelHostVar);
-
-    // update the material constant buffer
-    if(materialBuffer != NULL)
-    {
-        pContext->UpdateSubresource(materialBuffer, 0, NULL, &material->constMaterial, 0, 0);
-        pContext->PSSetConstantBuffers(7, 1, &materialBuffer);
-    }
 
     if(get<1>(vertexHostVar) != NULL) pContext->VSSetConstantBuffers(get<0>(vertexHostVar), 1, &get<1>(vertexHostVar));
     if(get<1>(hullHostVar) != NULL) pContext->HSSetConstantBuffers(get<0>(hullHostVar), 1, &get<1>(hullHostVar));

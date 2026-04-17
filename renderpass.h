@@ -5,6 +5,7 @@
 #include <pipeline.h>
 using std::tuple;
 using std::get;
+typedef std::function<void(ID3D11Buffer*, ID3D11DeviceContext*)> cbufLambda;
 
 class RenderPass
 {
@@ -26,11 +27,13 @@ class RenderPass
     tuple<int, ID3D11Buffer*, vector<const float*>> geometryHostVar;
     tuple<int, ID3D11Buffer*, vector<const float*>> pixelHostVar;
 
-    // slot is always 0 for all stages
-    ID3D11Buffer* transformationBuffer;
-
-    // slot is always 7 for pixel shader
-    ID3D11Buffer* materialBuffer = NULL;
+    // general purpose constant buffers other than host variables
+    // <slot, buffer pointer, lambda to setup the buffer>
+    vector<tuple<int, ID3D11Buffer*, cbufLambda>> vertexConstBuffers;
+    vector<tuple<int, ID3D11Buffer*, cbufLambda>> hullConstBuffers;
+    vector<tuple<int, ID3D11Buffer*, cbufLambda>> domainConstBuffers;
+    vector<tuple<int, ID3D11Buffer*, cbufLambda>> geometryConstBuffers;
+    vector<tuple<int, ID3D11Buffer*, cbufLambda>> pixelConstBuffers;
 
     // the pointers needed for input layout
     uniq_com_ptr<ID3D11InputLayout> pInputLayout;
@@ -43,9 +46,7 @@ class RenderPass
 public:
     RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, ResourceManager* manager, Shader* shaderManager, const unordered_map<wstring, float>& global_variables, ID3D11Device* pDevice);
     
-    void execute(const DirectX::XMMATRIX& ViewProjMatrix, ID3D11DeviceContext* pContext);
-
-    typedef std::function<void(ID3D11Buffer*, const unordered_map<wstring, float>&)> cbufStructs;
+    void execute(ID3D11DeviceContext* pContext);
     
-    cbufStructs getCBufferStruct(string bufferName);
+    cbufLambda getCBufferStruct(string bufferName, const unordered_map<wstring, float>& global_variables);
 };
