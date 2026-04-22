@@ -130,14 +130,27 @@ void initRender()
     default_pipeline.rtv_desc[0] = rtvDesc;
 
     unique_ptr<PipeLine> pipeline = createPipeline(default_pipeline, state->shaders, state->resources, state->pDevice->pDevice);
+    
+    Pipeline_Desc alpha_pipeline = {};
+    alpha_pipeline.blend_state = Additive_Blend_State;
+    alpha_pipeline.depth_stencil_state = NoWrite_Depth_Stencil;
+    alpha_pipeline.depth_stencil_view = "depth buffer";
+    alpha_pipeline.vertex_shader = L"flame";
+    alpha_pipeline.pixel_shader = L"flame";
+    alpha_pipeline.renderTargets[0] = "render frame";
+    alpha_pipeline.rtv_desc[0] = rtvDesc;
+
+    unique_ptr<PipeLine> alphaPipeline = createPipeline(alpha_pipeline, state->shaders, state->resources, state->pDevice->pDevice);
 
     state->pipelines.push_back(std::move(pipeline));
+    state->pipelines.push_back(std::move(alphaPipeline));
 
     // create the gpumesh and material
-    pair<vector<Mesh>, vector<Material>> mesh_material = load_obj("mesh/296.obj");
+    pair<vector<Mesh>, vector<Material>> mesh_material = load_obj("mesh/j20flame.obj");
 
     for(Mesh& mesh : mesh_material.first)
     {
+        if(mesh.name == "Cylinder.008") mesh.prefered_material = "flame";
         state->meshes.push_back(convert_mesh(mesh, state->pDevice->pDevice));
     }
     for(Material& material : mesh_material.second)
@@ -146,15 +159,33 @@ void initRender()
         state->materials[material.material_name] = std::move(material);
     }
 
+    Material flameMaterial;
+    flameMaterial.material_name = "flame";
+    flameMaterial.isTransparent = true;
+    flameMaterial.material_textures["alphaEmit"] = "mesh/alpha.png";
+    state->materials["flame"] = std::move(flameMaterial);
+
     state->resources->createTexture2DfromImage("mesh/default_.png");
     state->resources->createTexture2DfromImage("mesh/white.png");
+    state->resources->createTexture2DfromImage("mesh/alpha.png");
 
     // create a render pass for all the gpu meshes in the vector
     for(GPUMesh& gpumesh : state->meshes)
     {
-        state->renderpasses.push_back(RenderPass(&gpumesh, state->pipelines[0].get(), &state->materials.at(gpumesh.prefered_material),
+        if(gpumesh.name != "Cylinder.008"){
+            state->renderpasses.push_back(RenderPass(&gpumesh, state->pipelines[0].get(), &state->materials.at(gpumesh.prefered_material),
                                         state->resources, state->shaders, state->variables, state->pDevice->pDevice));
+        }
+        else{
+            state->renderpasses.push_back(RenderPass(&gpumesh, state->pipelines[1].get(), &state->materials.at(gpumesh.prefered_material),
+                                        state->resources, state->shaders, state->variables, state->pDevice->pDevice));
+        }
     }
+
+    std::sort(state->renderpasses.begin(), state->renderpasses.end(), [](const RenderPass& a, const RenderPass& b)
+    {
+        return a.isTransparent() < b.isTransparent();
+    });
 
     // hopefully that should be all
 }

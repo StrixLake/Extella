@@ -16,7 +16,7 @@ cbufLambda RenderPass::getCBufferStruct(string bufferName, const unordered_map<w
         struct CameraBuffer
         {
             DirectX::XMVECTOR cameraPosition;
-            char pad[110];
+            char pad[112];
         };
         // because the world is rotated, the camera is rotated in the inverse direction to match
         // the position it should be in the non rotated world

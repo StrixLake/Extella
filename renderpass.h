@@ -39,14 +39,14 @@ class RenderPass
     uniq_com_ptr<ID3D11InputLayout> pInputLayout;
     vector<ID3D11Buffer*> vertex_buffers;
     vector<unsigned int> stride;
-
-    // store a reference to world rotation from unordered_map
-    const float &rotationX, &rotationY;
+    
+    cbufLambda getCBufferStruct(string bufferName, const unordered_map<wstring, float>& global_variables);
 
 public:
     RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, ResourceManager* manager, Shader* shaderManager, const unordered_map<wstring, float>& global_variables, ID3D11Device* pDevice);
     
+    RenderPass(RenderPass&& mv) = default;
+    RenderPass& operator=(RenderPass&& mv) = default;
+    bool isTransparent() const noexcept;
     void execute(ID3D11DeviceContext* pContext);
-    
-    cbufLambda getCBufferStruct(string bufferName, const unordered_map<wstring, float>& global_variables);
 };

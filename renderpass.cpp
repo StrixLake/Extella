@@ -1,8 +1,7 @@
 #include <renderpass.h>
 
 RenderPass::RenderPass(GPUMesh* mesh, PipeLine* pipeline, Material* material, ResourceManager* manager, Shader* shaderManager, const unordered_map<wstring, float>& global_variables, ID3D11Device* pDevice)
-    : material(material), mesh(mesh), pipeline(pipeline),
-      rotationX(global_variables.at(L"rotationX")), rotationY(global_variables.at(L"rotationY"))
+    : material(material), mesh(mesh), pipeline(pipeline)
 {
     assert(mesh != NULL);
     assert(pipeline != NULL);
@@ -212,4 +211,9 @@ void RenderPass::execute(ID3D11DeviceContext* pContext)
     pContext->IASetVertexBuffers(0, vertex_buffers.size(), vertex_buffers.data(), stride.data(), offsets.data());
 
     pContext->DrawIndexedInstanced(mesh->triangle_count*3, mesh->instance_count, 0, 0, 0);
+}
+
+bool RenderPass::isTransparent() const noexcept
+{
+    return material->isTransparent;
 }

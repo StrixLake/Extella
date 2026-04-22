@@ -22,7 +22,7 @@ std::pair<vector<Mesh>, vector<Material>> load_obj(string filename)
     vector<tinyobj::material_t> materials = reader.GetMaterials();
     
     // sort shapes by material
-    std::sort(shapes.begin(), shapes.end(), [](tinyobj::shape_t& a, tinyobj::shape_t& b)
+    std::sort(shapes.begin(), shapes.end(), [](const tinyobj::shape_t& a, const tinyobj::shape_t& b)
     {
         return a.mesh.material_ids[0] < b.mesh.material_ids[0];
     });
