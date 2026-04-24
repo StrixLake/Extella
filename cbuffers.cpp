@@ -40,7 +40,7 @@ cbufLambda RenderPass::getCBufferStruct(string bufferName, const unordered_map<w
         struct Transformation
         {
             DirectX::XMMATRIX transform;
-            DirectX::XMMATRIX pad;
+            DirectX::XMMATRIX proj;
         };
 
         Transformation transformation = {worldTransform, {}};
@@ -56,6 +56,11 @@ cbufLambda RenderPass::getCBufferStruct(string bufferName, const unordered_map<w
                                     * ViewProj;
 
         transformation.transform = DirectX::XMMatrixTranspose(transformation.transform);
+        transformation.proj = DirectX::XMMatrixTranspose(DirectX::XMMatrixRotationY(rotationX/100)
+                                                         * DirectX::XMMatrixRotationX(rotationY/100)
+                                                         *DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4,
+                                                                                             (float)WIDTH/HEIGHT,
+                                                                                             0.01, 1000.));
 
         pContext->UpdateSubresource(cBuffer, 0, NULL, &transformation, 0, 0);
     };

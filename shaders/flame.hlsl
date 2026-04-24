@@ -23,7 +23,7 @@ SamplerState samLinear : register(s0);
 
 float4 PS_MAIN(VS_OUT input) : SV_Target0
 {
-    float4 cyan = {0, 1, 1, 1};
+    float4 cyan = {0, 1.5, 1.5, 1};
     float alpha = alphaEmit.Sample(samLinear, input.uv).x;
     return cyan*alpha;
 }
