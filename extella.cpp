@@ -117,6 +117,11 @@ EXPORT void hotReload()
 
 void initRender()
 {
+    state->resources->createTexture2DfromImage("mesh/default_.png");
+    state->resources->createTexture2DfromImage("mesh/white.png");
+    state->resources->createTexture2DfromImage("mesh/alpha.png");
+    state->resources->createTexture2DfromImage("mesh/skybox.png");
+
     // create a pipeline
     D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
     rtvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
@@ -132,38 +137,31 @@ void initRender()
 
     unique_ptr<PipeLine> pipeline = createPipeline(default_pipeline, state->shaders, state->resources, state->pDevice->pDevice);
     
-    state->pipelines.push_back(std::move(pipeline));
+    state->pipelines["defaultPipeline"] = std::move(pipeline);
     
     // create the gpumesh and material
     pair<vector<Mesh>, vector<Material>> mesh_material = load_obj("mesh/sphere.obj");
 
     for(Mesh& mesh : mesh_material.first)
     {
-        if(mesh.name == "Sphere") mesh.prefered_material = "skybox";
-        state->meshes.push_back(convert_mesh(mesh, state->pDevice->pDevice));
+        state->meshes[mesh.name] = convert_mesh(mesh, state->pDevice->pDevice);
     }
     for(Material& material : mesh_material.second)
     {
         state->resources->createTexturesFromMaterial(material);
         state->materials[material.material_name] = std::move(material);
     }
-    
-    state->resources->createTexture2DfromImage("mesh/default_.png");
-    state->resources->createTexture2DfromImage("mesh/white.png");
-    state->resources->createTexture2DfromImage("mesh/alpha.png");
-    state->resources->createTexture2DfromImage("mesh/skybox.png");
+
+    state->meshes.at("Sphere").prefered_material = "skybox";
 
     Material skybox;
     skybox.material_name = "skybox";
     skybox.material_textures["skybox"] = "mesh/skybox.png";
     state->materials[skybox.material_name] = std::move(skybox);
 
-    // create a render pass for all the gpu meshes in the vector
-    for(GPUMesh& gpumesh : state->meshes)
-    {
-        state->renderpasses.push_back(RenderPass(&gpumesh, state->pipelines[0].get(), &state->materials.at(gpumesh.prefered_material),
-                                        state->resources, state->shaders, state->variables, state->pDevice->pDevice));   
-    }
+    state->renderpasses.push_back(RenderPass(&state->meshes.at("Sphere"), state->pipelines.at("defaultPipeline").get(), &state->materials.at("skybox"),
+                                            state->resources, state->shaders, state->variables, state->pDevice->pDevice));
+
 
     std::sort(state->renderpasses.begin(), state->renderpasses.end(), [](const RenderPass& a, const RenderPass& b)
     {

@@ -12,14 +12,14 @@ class State
 {
 public:
     DXDevice* pDevice;
-    vector<RenderPass> renderpasses;
     Shader* shaders;
     ResourceManager* resources;
     Query* query;
     unordered_map<wstring, float> variables;
-    vector<GPUMesh> meshes;
+    unordered_map<string, GPUMesh> meshes;
     unordered_map<string, Material> materials;
-    vector<unique_ptr<PipeLine>> pipelines;
+    unordered_map<string, unique_ptr<PipeLine>> pipelines;
+    vector<RenderPass> renderpasses;
 
     ~State()
     {
