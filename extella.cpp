@@ -9,10 +9,9 @@
 #include <resources.h>
 #include <query.h>
 #include <extella.h>
-#include <d3d11shader.h>
-#include <d3dcompiler.h>
 
 State* state;
+std::mutex PipeLine::pipelineMutex;
 
 void initRender();
 
@@ -51,7 +50,7 @@ EXPORT void InitializeRenderer(IDXGISurface2** pSurface, IDXGIDevice2** pDevice)
     state->resources = manager;
     state->shaders = shaders;
     state->query = query;
-    
+
     ID3D11Texture2D* pRender = manager->getTexture2D("render frame");
 
     pRender->QueryInterface(__uuidof(IDXGISurface2), (void**)pSurface);
@@ -111,7 +110,15 @@ EXPORT float getVariable(BSTR variable)
 
 EXPORT void hotReload()
 {
+    PipeLine::pipelineMutex.lock();
+
     state->shaders->HotReload();
+    for(auto& pipeline : state->pipelines)
+    {
+        pipeline.second->hotReload(state->shaders);
+    }
+    
+    PipeLine::pipelineMutex.unlock();
 }
 
 
@@ -127,29 +134,25 @@ void initRender()
     rtvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
     rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
-    Pipeline_Desc default_pipeline = {};
-    default_pipeline.raster_state = NoCull_Raster_State;
-    default_pipeline.depth_stencil_view = "depth buffer";
-    default_pipeline.vertex_shader = L"skybox";
-    default_pipeline.pixel_shader = L"skybox";
-    default_pipeline.renderTargets[0] = "render frame";
-    default_pipeline.rtv_desc[0] = rtvDesc;
+    Pipeline_Desc skybox_pipeline = {};
+    skybox_pipeline.raster_state = NoCull_Raster_State;
+    skybox_pipeline.depth_stencil_state = NoWrite_Depth_Stencil;
+    skybox_pipeline.depth_stencil_view = "depth buffer";
+    skybox_pipeline.vertex_shader = L"skybox";
+    skybox_pipeline.pixel_shader = L"skybox";
+    skybox_pipeline.renderTargets[0] = "render frame";
+    skybox_pipeline.rtv_desc[0] = rtvDesc;
 
-    unique_ptr<PipeLine> pipeline = createPipeline(default_pipeline, state->shaders, state->resources, state->pDevice->pDevice);
+    unique_ptr<PipeLine> skyboxPipeline = createPipeline(skybox_pipeline, state->shaders, state->resources, state->pDevice->pDevice);
     
-    state->pipelines["defaultPipeline"] = std::move(pipeline);
+    state->pipelines["skyboxPipeline"] = std::move(skyboxPipeline);
     
     // create the gpumesh and material
-    pair<vector<Mesh>, vector<Material>> mesh_material = load_obj("mesh/sphere.obj");
+    pair<vector<Mesh>, vector<Material>> sphere = load_obj("mesh/sphere.obj");
 
-    for(Mesh& mesh : mesh_material.first)
+    for(Mesh& mesh : sphere.first)
     {
         state->meshes[mesh.name] = convert_mesh(mesh, state->pDevice->pDevice);
-    }
-    for(Material& material : mesh_material.second)
-    {
-        state->resources->createTexturesFromMaterial(material);
-        state->materials[material.material_name] = std::move(material);
     }
 
     state->meshes.at("Sphere").prefered_material = "skybox";
@@ -159,9 +162,42 @@ void initRender()
     skybox.material_textures["skybox"] = "mesh/skybox.png";
     state->materials[skybox.material_name] = std::move(skybox);
 
-    state->renderpasses.push_back(RenderPass(&state->meshes.at("Sphere"), state->pipelines.at("defaultPipeline").get(), &state->materials.at("skybox"),
+    state->renderpasses.push_back(RenderPass(&state->meshes.at("Sphere"), state->pipelines.at("skyboxPipeline").get(), &state->materials.at("skybox"),
                                             state->resources, state->shaders, state->variables, state->pDevice->pDevice));
 
+
+
+    // create the renderpass for grid
+
+    Pipeline_Desc grid_pipeline = {};
+    grid_pipeline.blend_state = Transparent_Blend_State;
+    grid_pipeline.raster_state = NoCull_Raster_State;
+    grid_pipeline.rtv_desc[0] = rtvDesc;
+    grid_pipeline.vertex_shader = L"GridShader";
+    grid_pipeline.pixel_shader = L"GridShader";
+    grid_pipeline.renderTargets[0] = "render frame";
+    grid_pipeline.depth_stencil_view = "depth buffer";
+
+    unique_ptr<PipeLine> gridPipeline = createPipeline(grid_pipeline, state->shaders, state->resources, state->pDevice->pDevice);
+
+    state->pipelines["gridPipeline"] = std::move(gridPipeline);
+
+    pair<vector<Mesh>, vector<Material>> grid = load_obj("mesh/floor.obj");
+
+    for(Mesh& mesh : grid.first)
+    {
+        state->meshes[mesh.name] = convert_mesh(mesh, state->pDevice->pDevice);
+    }
+    
+    state->meshes.at("Plane.512").prefered_material = "grid";
+
+    Material gridMaterial = {};
+    gridMaterial.material_name = "grid";
+    gridMaterial.isTransparent = true;
+    state->materials[gridMaterial.material_name] = gridMaterial;
+
+    state->renderpasses.push_back(RenderPass(&state->meshes.at("Plane.512"), state->pipelines.at("gridPipeline").get(), &state->materials.at("grid"),
+                                            state->resources, state->shaders, state->variables, state->pDevice->pDevice));
 
     std::sort(state->renderpasses.begin(), state->renderpasses.end(), [](const RenderPass& a, const RenderPass& b)
     {

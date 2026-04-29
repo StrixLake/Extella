@@ -163,6 +163,7 @@ void hotReload(unordered_map<wstring, T>& TShader, const char entryPoint[], cons
         if(compiledShader != NULL)
         {
             shader = TShader.erase(shader);
+            compiledShader->Release();
         }
         else {
             ++shader;
@@ -172,5 +173,9 @@ void hotReload(unordered_map<wstring, T>& TShader, const char entryPoint[], cons
 
 void Shader::HotReload()
 {
-    
+    hotReload(vertexShaders, "VS_MAIN", "vs_5_0");
+    hotReload(pixelShaders, "PS_MAIN", "ps_5_0");
+    hotReload(hullShaders, "HS_MAIN", "hs_5_0");
+    hotReload(domainShaders, "DS_MAIN", "ds_5_0");
+    hotReload(geometryShaders, "GS_MAIN", "gs_5_0");
 }

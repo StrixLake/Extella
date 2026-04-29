@@ -1,7 +1,6 @@
-cbuffer ConstantBuffer : register( b0 )
+cbuffer Transformation : register( b0 )
 {
     matrix World;
-    matrix View;
     matrix Projection;
 }
 
@@ -22,13 +21,9 @@ VS_OUTPUT VS_MAIN( float4 Pos : POSITION, float2 tex : TEXCOORD, float3 norm : N
     ou.uv = tex;
     ou.norm = norm;
 
-    ou.Pos.x *= 5;
-    ou.Pos.z *= 5;
     ou.p = ou.Pos;
 
     ou.Pos = mul(ou.Pos, World);
-    ou.Pos = mul(ou.Pos, View);
-    ou.Pos = mul(ou.Pos, Projection);
 
     return ou;
 }

@@ -22,7 +22,7 @@ cbufLambda RenderPass::getCBufferStruct(string bufferName, const unordered_map<w
         // the position it should be in the non rotated world
         // as if the camera was rotated instead of the world
 
-        CameraBuffer camera  = {DirectX::XMVectorSet(0., distance/10, -distance/10, 0.), {}};
+        CameraBuffer camera  = {DirectX::XMVectorSet(0., 0, -distance/10, 0.), {}};
         
         DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationY(rotationX/100) * DirectX::XMMatrixRotationX(rotationY/100);
         camera.cameraPosition = DirectX::XMVector4Transform(camera.cameraPosition, DirectX::XMMatrixInverse(NULL, rotation));
@@ -44,7 +44,7 @@ cbufLambda RenderPass::getCBufferStruct(string bufferName, const unordered_map<w
         };
 
         Transformation transformation = {worldTransform, {}};
-        DirectX::XMMATRIX ViewProj = DirectX::XMMatrixLookAtLH(DirectX::XMVectorSet(0., distance/10, -distance/10, 0.),
+        DirectX::XMMATRIX ViewProj = DirectX::XMMatrixLookAtLH(DirectX::XMVectorSet(0., 0, -distance/10, 0.),
                                                                     DirectX::XMVectorSet( 0.0f, 0.0f, 0.0f, 0.0f ),
                                                                     DirectX::XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f )) // camera matrix
                                                                     * DirectX::XMMatrixPerspectiveFovLH(DirectX::XM_PIDIV4, 

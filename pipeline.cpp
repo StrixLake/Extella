@@ -53,6 +53,8 @@ unique_ptr<PipeLine> createPipeline(Pipeline_Desc desciption, Shader* shader, Re
 
 void PipeLine::setPipelineState(ID3D11DeviceContext* pContext) const
 {
+    PipeLine::pipelineMutex.lock();
+
     pContext->IASetPrimitiveTopology( topology);
 
     pContext->OMSetBlendState(pBlendState, NULL, 0xffffffff);
@@ -67,7 +69,19 @@ void PipeLine::setPipelineState(ID3D11DeviceContext* pContext) const
 
     pContext->OMSetRenderTargets(8, render_target_views.data(), pDepth_stencil_view);
 
+    PipeLine::pipelineMutex.unlock();
+
     return;
+}
+
+
+void PipeLine::hotReload(Shader* shader)
+{
+    pVertexShader = shader->getVertexShader(vertexShader);
+    pHullShader = shader->getHullShader(hullShader);
+    pDomainShader = shader->getDomainShader(domainShader);
+    pGeometryShader = shader->getGeometryShader(geometryShader);
+    pPixelShader = shader->getPixelShader(pixelShader);
 }
 
 

@@ -121,11 +121,15 @@ public:
     // the shader blob to build the input assembler layout
     // we also need the names of all the other shader stages
     // so render pass can get the shader reflection description
+    // and for hot reload
     wstring vertexShader, hullShader, domainShader, geometryShader, pixelShader;
+    static std::mutex pipelineMutex;
 
     friend unique_ptr<PipeLine> createPipeline(Pipeline_Desc descriptuon, Shader* shader, ResourceManager* resources, ID3D11Device* pDevice);
 
     void setPipelineState(ID3D11DeviceContext* pContext) const;
+
+    void hotReload(Shader* shader);
 
     ~PipeLine();
 
